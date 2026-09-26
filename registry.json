@@ -309,6 +309,34 @@
       ]
     },
     {
+      "name": "button-group",
+      "type": "registry:ui",
+      "title": "Button group",
+      "description": "Joins related buttons into one named group with shared borders, horizontal or vertical, with separators and text segments.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/separator"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/button-group/button-group.tsx",
+          "type": "registry:ui",
+          "target": "@ui/button-group/button-group.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/button-group/button-group.module.css",
+          "type": "registry:file",
+          "target": "@ui/button-group/button-group.module.css"
+        }
+      ],
+      "categories": [
+        "actions"
+      ]
+    },
+    {
       "name": "card",
       "type": "registry:ui",
       "title": "Card",
@@ -491,6 +519,34 @@
       ],
       "categories": [
         "theming"
+      ]
+    },
+    {
+      "name": "combobox",
+      "type": "registry:ui",
+      "title": "Combobox",
+      "description": "Filterable select for long option lists: single or multiple (chips), groups, empty state and a clear button; works inside Field.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/combobox/combobox.tsx",
+          "type": "registry:ui",
+          "target": "@ui/combobox/combobox.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/combobox/combobox.module.css",
+          "type": "registry:file",
+          "target": "@ui/combobox/combobox.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
       ]
     },
     {
@@ -852,6 +908,60 @@
           "path": "registry/bitop/ui/input/input.module.css",
           "type": "registry:file",
           "target": "@ui/input/input.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
+      "name": "input-group",
+      "type": "registry:ui",
+      "title": "Input group",
+      "description": "An Input or Textarea with leading and trailing addons (icons, text, buttons, key hints) inside one control boundary; works inside Field.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/input"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/input-group/input-group.tsx",
+          "type": "registry:ui",
+          "target": "@ui/input-group/input-group.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/input-group/input-group.module.css",
+          "type": "registry:file",
+          "target": "@ui/input-group/input-group.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
+      "name": "input-otp",
+      "type": "registry:ui",
+      "title": "Input OTP",
+      "description": "One-time-code field with one slot per character, grouping, numeric or alphanumeric validation and paste support; works inside Field.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/input-otp/input-otp.tsx",
+          "type": "registry:ui",
+          "target": "@ui/input-otp/input-otp.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/input-otp/input-otp.module.css",
+          "type": "registry:file",
+          "target": "@ui/input-otp/input-otp.module.css"
         }
       ],
       "categories": [
@@ -1393,6 +1503,33 @@
       ]
     },
     {
+      "name": "slider",
+      "type": "registry:ui",
+      "title": "Slider",
+      "description": "Single or range slider with min/max/step, orientation, a required accessible name and an optional value readout.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/slider/slider.tsx",
+          "type": "registry:ui",
+          "target": "@ui/slider/slider.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/slider/slider.module.css",
+          "type": "registry:file",
+          "target": "@ui/slider/slider.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
       "name": "snippet",
       "type": "registry:ui",
       "title": "Snippet",
@@ -1710,6 +1847,61 @@
       ],
       "categories": [
         "feedback"
+      ]
+    },
+    {
+      "name": "toggle",
+      "type": "registry:ui",
+      "title": "Toggle",
+      "description": "A two-state (pressed) button with Button sizes; icon-only toggles require a label.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/toggle/toggle.tsx",
+          "type": "registry:ui",
+          "target": "@ui/toggle/toggle.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/toggle/toggle.module.css",
+          "type": "registry:file",
+          "target": "@ui/toggle/toggle.module.css"
+        }
+      ],
+      "categories": [
+        "actions"
+      ]
+    },
+    {
+      "name": "toggle-group",
+      "type": "registry:ui",
+      "title": "Toggle group",
+      "description": "A named group of toggles with single or multiple selection, arrow-key navigation, orientation and an optional joined style.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/toggle"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/toggle-group/toggle-group.tsx",
+          "type": "registry:ui",
+          "target": "@ui/toggle-group/toggle-group.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/toggle-group/toggle-group.module.css",
+          "type": "registry:file",
+          "target": "@ui/toggle-group/toggle-group.module.css"
+        }
+      ],
+      "categories": [
+        "actions"
       ]
     },
     {
