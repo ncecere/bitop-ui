@@ -309,6 +309,35 @@
       ]
     },
     {
+      "name": "calendar",
+      "type": "registry:ui",
+      "title": "Calendar",
+      "description": "Dependency-free month grid with single, multiple and range selection, Intl month/weekday names, min/max and disabled dates, and APG date-grid keyboard support.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/calendar/calendar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/calendar/calendar.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/calendar/calendar.module.css",
+          "type": "registry:file",
+          "target": "@ui/calendar/calendar.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
       "name": "card",
       "type": "registry:ui",
       "title": "Card",
@@ -661,6 +690,35 @@
       ],
       "categories": [
         "display"
+      ]
+    },
+    {
+      "name": "date-picker",
+      "type": "registry:ui",
+      "title": "Date picker",
+      "description": "A trigger button that opens a Calendar in a popover; single or range, Intl-formatted value, works inside Field.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/calendar"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/date-picker/date-picker.tsx",
+          "type": "registry:ui",
+          "target": "@ui/date-picker/date-picker.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/date-picker/date-picker.module.css",
+          "type": "registry:file",
+          "target": "@ui/date-picker/date-picker.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
       ]
     },
     {
@@ -1156,6 +1214,65 @@
       ],
       "categories": [
         "ai"
+      ]
+    },
+    {
+      "name": "question",
+      "type": "registry:ui",
+      "title": "Question",
+      "description": "A question the agent asks the user: single choice, multiple choice or freeform, with an optional Other answer and submit/skip callbacks.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/checkbox",
+        "@bitop/field",
+        "@bitop/input",
+        "@bitop/radio-group"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/question/question.tsx",
+          "type": "registry:ui",
+          "target": "@ui/question/question.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/question/question.module.css",
+          "type": "registry:file",
+          "target": "@ui/question/question.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "questionnaire",
+      "type": "registry:ui",
+      "title": "Questionnaire",
+      "description": "A multi-step flow over questions with progress, back/next/skip, a review step and a submit callback; focus moves to each step heading.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/progress",
+        "@bitop/question"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/questionnaire/questionnaire.tsx",
+          "type": "registry:ui",
+          "target": "@ui/questionnaire/questionnaire.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/questionnaire/questionnaire.module.css",
+          "type": "registry:file",
+          "target": "@ui/questionnaire/questionnaire.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
       ]
     },
     {
