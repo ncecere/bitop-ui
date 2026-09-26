@@ -144,12 +144,13 @@
       "name": "alert",
       "type": "registry:ui",
       "title": "Alert",
-      "description": "Inline message with tone, title, actions and dismiss; ErrorAlert renders unknown errors.",
+      "description": "Inline message with tone, title, actions and dismiss; ErrorAlert renders unknown errors with status-aware titles and an optional retry button.",
       "dependencies": [
         "lucide-react@^1.48.0"
       ],
       "registryDependencies": [
-        "@bitop/core"
+        "@bitop/core",
+        "@bitop/button"
       ],
       "files": [
         {
@@ -1257,6 +1258,25 @@
       ]
     },
     {
+      "name": "format",
+      "type": "registry:lib",
+      "title": "Format",
+      "description": "Locale-aware, never-throwing Intl helpers: formatDate, formatNumber, formatBytes, formatRelativeTime and plural.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/lib/bitop-format.ts",
+          "type": "registry:lib",
+          "target": "@lib/bitop-format.ts"
+        }
+      ],
+      "categories": [
+        "foundation"
+      ]
+    },
+    {
       "name": "hover-card",
       "type": "registry:ui",
       "title": "Hover card",
@@ -1971,6 +1991,33 @@
       ],
       "categories": [
         "ai"
+      ]
+    },
+    {
+      "name": "query-state",
+      "type": "registry:ui",
+      "title": "Query state",
+      "description": "Switches between loading, error (with retry), empty and content; accepts a TanStack-Query-like result without depending on it.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/alert",
+        "@bitop/empty-state",
+        "@bitop/spinner"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/query-state/query-state.tsx",
+          "type": "registry:ui",
+          "target": "@ui/query-state/query-state.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/query-state/query-state.module.css",
+          "type": "registry:file",
+          "target": "@ui/query-state/query-state.module.css"
+        }
+      ],
+      "categories": [
+        "feedback"
       ]
     },
     {
@@ -2871,6 +2918,31 @@
       ],
       "categories": [
         "actions"
+      ]
+    },
+    {
+      "name": "time",
+      "type": "registry:ui",
+      "title": "Time",
+      "description": "A semantic <time> element with locale-formatted dates or a self-updating relative time.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/format"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/time/time.tsx",
+          "type": "registry:ui",
+          "target": "@ui/time/time.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/time/time.module.css",
+          "type": "registry:file",
+          "target": "@ui/time/time.module.css"
+        }
+      ],
+      "categories": [
+        "display"
       ]
     },
     {

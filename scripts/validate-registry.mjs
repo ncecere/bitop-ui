@@ -140,7 +140,11 @@ for (const item of registry.items) {
           const dep = ui[1] === "styles" || ui[1] === "themes" ? "core" : ui[1];
           if (dep !== item.name) usedReg.add(dep);
         } else if (spec.startsWith("@/registry/bitop/lib/")) {
-          if (item.name !== "core") usedReg.add("core");
+          // A lib import depends on the item that ships the file (bitop-utils is core's).
+          const base = spec.replace(/^@\//, "").replace(/\.tsx?$/, "");
+          const owner = shipped.get(`${base}.ts`) ?? shipped.get(`${base}.tsx`);
+          if (!owner) fail(`${file.path}: ${spec} is not shipped by any item`);
+          else if (owner !== item.name) usedReg.add(owner);
         } else fail(`${file.path}: unexpected registry import ${spec}`);
       } else if (spec.startsWith(".")) {
         const resolved = path.normalize(path.join(path.dirname(file.path), spec)).split(path.sep).join("/");
