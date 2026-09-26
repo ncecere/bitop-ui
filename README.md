@@ -104,7 +104,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for adding a component (registry entry,
 
 ## License
 
-TODO: the owner hasn't chosen a license yet. Until a `LICENSE` file is added, all rights are reserved.
+MIT, see [LICENSE](./LICENSE). The AI elements' design credit to Vercel's AI Elements (Apache-2.0) is in [NOTICE](./NOTICE).
 
 ## Origin
 

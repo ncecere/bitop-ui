@@ -1,5 +1,5 @@
 bitop-ui
-Copyright the bitop-ui authors.
+Copyright (c) 2026 Nicholas Cecere. Licensed under the MIT License (see LICENSE).
 
 The AI components (registry/bitop/ui/{conversation, message, response,
 reasoning, tool, sources, inline-citation, prompt-input, suggestion, shimmer,
