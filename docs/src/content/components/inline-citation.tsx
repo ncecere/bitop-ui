@@ -42,7 +42,7 @@ const doc: ComponentDoc = {
     "Built on Base UI Popover with openOnHover: it opens on hover and on click, Enter or Space.",
     "Opening it by keyboard or click moves focus into the card, so the source link and previous/next buttons are reachable with Tab; Esc closes it and returns focus to the chip.",
     "The chip is named after the source (“Source 1: Parental leave policy (2025)”), so screen-reader users hear what's cited without opening the card.",
-    "The page position “2 of 3” is announced politely when paging.",
+    "The page position “2 of 3” is announced politely when paging, and stays in range if the sources list shrinks while the card is open.",
   ],
 };
 

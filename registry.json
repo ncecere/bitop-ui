@@ -1120,7 +1120,7 @@
       "name": "drop-zone",
       "type": "registry:ui",
       "title": "Drop zone",
-      "description": "Keyboard-operable file picker with drag and drop as an enhancement.",
+      "description": "Keyboard-operable file picker with drag and drop as an enhancement; filters files by type and size and announces rejections.",
       "dependencies": [
         "lucide-react@^1.48.0"
       ],
@@ -2151,7 +2151,7 @@
       "name": "response",
       "type": "registry:ui",
       "title": "Response",
-      "description": "Streaming-safe Markdown for assistant answers: GFM, code blocks, safe links, citation markers, no raw HTML; LazyResponse code-splits the Markdown engine.",
+      "description": "Streaming-safe Markdown for assistant answers: GFM, code blocks, safe links, citation markers, no raw HTML, cross-origin images load only on request; LazyResponse code-splits the Markdown engine.",
       "dependencies": [
         "react-markdown@^10.1.0",
         "remark-gfm@^4.0.1"

@@ -9,7 +9,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
+  useRef,
   useState,
 } from "react";
 import { Avatar, type AvatarProps } from "@/registry/bitop/ui/avatar/avatar";
@@ -183,11 +185,16 @@ export type MessageBranchProps = {
   children: ReactNode;
 };
 
-/** Holds alternative versions of a response (e.g. after "Regenerate"). */
+/**
+ * Holds alternative versions of a response (e.g. after "Regenerate").
+ * If the versions shrink below the current index, the last one is shown and
+ * the clamped index is reported once through onBranchChange.
+ */
 export function MessageBranch({ branch, defaultBranch = 0, onBranchChange, children }: MessageBranchProps) {
   const [internal, setInternal] = useState(defaultBranch);
   const [count, setCount] = useState(0);
-  const index = branch ?? internal;
+  const requested = branch ?? internal;
+  const index = count > 0 ? Math.min(Math.max(requested, 0), count - 1) : requested;
   const setIndex = useCallback(
     (i: number) => {
       if (branch === undefined) setInternal(i);
@@ -195,6 +202,12 @@ export function MessageBranch({ branch, defaultBranch = 0, onBranchChange, child
     },
     [branch, onBranchChange],
   );
+  const setIndexRef = useRef(setIndex);
+  setIndexRef.current = setIndex;
+  // Report a clamp once per out-of-range (index, count) pair, not on every render.
+  useEffect(() => {
+    if (count > 0 && requested !== index) setIndexRef.current(index);
+  }, [requested, index, count]);
   return <MessageBranchContext.Provider value={{ index, count, setIndex, setCount }}>{children}</MessageBranchContext.Provider>;
 }
 

@@ -1,7 +1,7 @@
 /*
  * Behaviour tests for the agent UI items and the smaller AI helpers.
  */
-import { act, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { axe } from "vitest-axe";
@@ -22,7 +22,15 @@ import { Context } from "@/registry/bitop/ui/context/context";
 import { Loader } from "@/registry/bitop/ui/loader/loader";
 import { ModelSelector, type ModelOption } from "@/registry/bitop/ui/model-selector/model-selector";
 import { Plan, PlanContent, PlanHeader, PlanStep } from "@/registry/bitop/ui/plan/plan";
-import { PromptInput, PromptInputAttachButton, PromptInputAttachments, PromptInputSubmit, PromptInputTextarea } from "@/registry/bitop/ui/prompt-input/prompt-input";
+import {
+  PromptInput,
+  PromptInputAttachButton,
+  PromptInputAttachments,
+  PromptInputButton,
+  PromptInputSubmit,
+  PromptInputTextarea,
+  usePromptInput,
+} from "@/registry/bitop/ui/prompt-input/prompt-input";
 import { Queue, QueueContent, QueueHeader, QueueItem } from "@/registry/bitop/ui/queue/queue";
 import { Source, Sources, SourcesContent, SourcesTrigger } from "@/registry/bitop/ui/sources/sources";
 import { Suggestion, Suggestions } from "@/registry/bitop/ui/suggestion/suggestion";
@@ -239,6 +247,103 @@ describe("Attachments", () => {
     expect(list).toHaveTextContent("next.pdf");
     expect(list).not.toHaveTextContent("sent.pdf");
     expect(box).toHaveValue("first and more");
+  });
+});
+
+describe("PromptInput attachments: object URLs and disabled", () => {
+  const png = (name: string) => new File(["x"], name, { type: "image/png" });
+  let created: string[];
+  let revoked: string[];
+  const original = { create: URL.createObjectURL, revoke: URL.revokeObjectURL };
+  beforeEach(() => {
+    created = [];
+    revoked = [];
+    let n = 0;
+    // jsdom has no object URLs: stub both and record every call.
+    URL.createObjectURL = () => {
+      const url = `blob:test/${++n}`;
+      created.push(url);
+      return url;
+    };
+    URL.revokeObjectURL = (url: string) => void revoked.push(url);
+  });
+  afterEach(() => {
+    URL.createObjectURL = original.create;
+    URL.revokeObjectURL = original.revoke;
+  });
+
+  it("creates preview URLs only for kept files and revokes them on replace, remove, submit and unmount", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    function Composer({ multiple }: { multiple: boolean }) {
+      return (
+        <PromptInput attachments multiple={multiple} onSubmit={onSubmit}>
+          <PromptInputAttachments />
+          <PromptInputTextarea />
+          <PromptInputSubmit />
+        </PromptInput>
+      );
+    }
+    const { container, unmount } = render(<Composer multiple={false} />);
+    const input = () => container.querySelector<HTMLInputElement>('input[type="file"]')!;
+    const form = container.querySelector("form")!;
+
+    // Single-file: a drop of three keeps (and previews) only the first.
+    fireEvent.drop(form, { dataTransfer: { files: [png("a.png"), png("b.png"), png("c.png")], types: ["Files"] } });
+    expect(created).toHaveLength(1);
+    // Replacing the file revokes the old preview.
+    await user.upload(input(), png("d.png"));
+    expect(created).toHaveLength(2);
+    expect(revoked).toEqual([created[0]]);
+    // Removing revokes.
+    await user.click(screen.getByRole("button", { name: "Remove d.png" }));
+    expect(revoked).toEqual(created);
+
+    unmount();
+    const second = render(<Composer multiple />);
+    const input2 = second.container.querySelector<HTMLInputElement>('input[type="file"]')!;
+    await user.upload(input2, [png("e.png"), png("f.png")]);
+    await user.click(screen.getByRole("button", { name: "Send message" }));
+    await waitFor(() => expect(screen.queryByRole("list", { name: "Attachments" })).not.toBeInTheDocument());
+    await user.upload(input2, png("g.png"));
+    second.unmount();
+    expect(created).toHaveLength(5);
+    expect([...revoked].sort()).toEqual([...created].sort());
+  });
+
+  it("disabled blocks tool buttons, removing and adding files by any path", async () => {
+    let api!: ReturnType<typeof usePromptInput>;
+    function Grab() {
+      api = usePromptInput();
+      return null;
+    }
+    function Composer({ disabled }: { disabled: boolean }) {
+      return (
+        <PromptInput attachments disabled={disabled} onSubmit={() => {}}>
+          <Grab />
+          <PromptInputAttachments />
+          <PromptInputTextarea disabled={false} />
+          <PromptInputButton label="Search the web" onClick={onTool}>
+            <span aria-hidden>S</span>
+          </PromptInputButton>
+          <PromptInputAttachButton />
+        </PromptInput>
+      );
+    }
+    const onTool = vi.fn();
+    const { rerender } = render(<Composer disabled={false} />);
+    act(() => api.addFiles([new File(["%PDF"], "a.pdf", { type: "application/pdf" })]));
+    expect(screen.getByRole("button", { name: "Remove a.pdf" })).toBeEnabled();
+
+    rerender(<Composer disabled />);
+    expect(screen.getByRole("button", { name: "Search the web" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Attach files" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Remove a.pdf" })).not.toBeInTheDocument();
+    // Paste into a (consumer-enabled) textarea and programmatic adds are ignored.
+    fireEvent.paste(screen.getByRole("textbox"), { clipboardData: { files: [new File(["x"], "b.pdf", { type: "application/pdf" })] } });
+    act(() => api.addFiles([new File(["x"], "c.pdf", { type: "application/pdf" })]));
+    expect(screen.getByRole("list", { name: "Attachments" })).not.toHaveTextContent(/b\.pdf|c\.pdf/);
+    expect(screen.getByRole("list", { name: "Attachments" })).toHaveTextContent("a.pdf");
   });
 });
 

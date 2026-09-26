@@ -3,7 +3,7 @@
 import { Upload } from "lucide-react";
 import { type DragEvent, type ReactNode, useId, useRef, useState } from "react";
 import { Button } from "@/registry/bitop/ui/button/button";
-import { cx, dataFlag } from "@/registry/bitop/lib/bitop-utils";
+import { cx, dataFlag, matchesAccept } from "@/registry/bitop/lib/bitop-utils";
 import styles from "./drop-zone.module.css";
 
 /*
@@ -11,19 +11,30 @@ import styles from "./drop-zone.module.css";
  * picker, so it works with keyboard, switch and screen-reader users (the
  * drop target itself is a pointer-only enhancement). The area is a labelled
  * group; the button is described by the hint text.
+ *
+ * Chosen and dropped files are both checked against `accept` and `maxSize`
+ * (the picker's accept is only a hint, and drops ignore it). Rejected files
+ * go to `onReject` and are announced in a polite status line under the
+ * button, e.g. "setup.exe isn't an accepted file type."
  */
 
+export type DropZoneRejection = { file: File; reason: "type" | "size" };
+
 export type DropZoneProps = {
-  /** Called with the chosen or dropped files (never empty). */
+  /** Called with the accepted chosen or dropped files (never empty). */
   onFiles: (files: File[]) => void;
+  /** Called with the files that failed `accept` ("type") or `maxSize` ("size"). */
+  onReject?: (rejections: DropZoneRejection[]) => void;
   /** Group heading, e.g. "Upload documents". */
   label?: ReactNode;
   /** Visible button text; also its accessible name. */
   buttonLabel?: string;
   /** Hint text (accepted types, limits); describes the button. */
   description?: ReactNode;
-  /** Passed to the file input, e.g. ".pdf,.docx". */
+  /** Accepted types, e.g. ".pdf,.docx" or "image/*": filters both picked and dropped files. */
   accept?: string;
+  /** Largest accepted file, in bytes. */
+  maxSize?: number;
   multiple?: boolean;
   disabled?: boolean;
   /** An upload is running: the button shows a spinner. */
@@ -33,12 +44,32 @@ export type DropZoneProps = {
   children?: ReactNode;
 };
 
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit++;
+  }
+  return `${Number(value.toFixed(1))} ${units[unit]}`;
+}
+
+function rejectionMessage({ file, reason }: DropZoneRejection, maxSize: number | undefined): string {
+  return reason === "type"
+    ? `${file.name} isn't an accepted file type.`
+    : `${file.name} is larger than ${maxSize === undefined ? "the limit" : formatSize(maxSize)}.`;
+}
+
 export function DropZone({
   onFiles,
+  onReject,
   label = "Drag and drop files here, or",
   buttonLabel = "Choose files",
   description,
   accept,
+  maxSize,
   multiple = true,
   disabled = false,
   busy = false,
@@ -49,11 +80,22 @@ export function DropZone({
   const id = useId();
   const input = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [rejected, setRejected] = useState<string>("");
   const inactive = disabled || busy;
 
   function deliver(list: FileList | null | undefined) {
     const files = [...(list ?? [])];
-    if (files.length > 0 && !inactive) onFiles(multiple ? files : files.slice(0, 1));
+    if (files.length === 0 || inactive) return;
+    const accepted: File[] = [];
+    const rejections: DropZoneRejection[] = [];
+    for (const file of files) {
+      if (!matchesAccept(file, accept)) rejections.push({ file, reason: "type" });
+      else if (maxSize !== undefined && file.size > maxSize) rejections.push({ file, reason: "size" });
+      else accepted.push(file);
+    }
+    setRejected(rejections.map((r) => rejectionMessage(r, maxSize)).join(" "));
+    if (rejections.length) onReject?.(rejections);
+    if (accepted.length) onFiles(multiple ? accepted : accepted.slice(0, 1));
   }
 
   const onDragOver = (e: DragEvent) => {
@@ -115,6 +157,10 @@ export function DropZone({
           {description}
         </p>
       )}
+      {/* Always rendered so screen readers pick up changes (a live region must exist first). */}
+      <p role="status" className={styles.rejected} data-empty={dataFlag(!rejected)}>
+        {rejected}
+      </p>
       {children}
     </div>
   );

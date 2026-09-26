@@ -61,6 +61,21 @@ export function Citations() {
   );
 }
 
+export function Images() {
+  const md = `Same-origin images load right away:
+
+![bitop-ui mark](${import.meta.env.BASE_URL}favicon.svg)
+
+Images from other sites wait until you ask:
+
+![Quarterly results chart](https://example.com/q3-chart.png)`;
+  return (
+    <div className={styles.stack}>
+      <Response>{md}</Response>
+    </div>
+  );
+}
+
 export function CodeSplit() {
   // Start fetching the Markdown chunk as soon as the chat screen mounts.
   useEffect(() => preloadResponse(), []);
@@ -87,6 +102,16 @@ import { closeMarkdown } from "@/components/ui/response/close-markdown";`,
     ["Streaming", Streaming, { title: "Streaming", description: "Half-written syntax is closed on the fly with closeMarkdown().", wide: true }],
     ["Citations", Citations, { title: "Citation markers", description: "Hover or activate a number to see its source.", wide: true }],
     [
+      "Images",
+      Images,
+      {
+        title: "Images (click to load)",
+        description:
+          'By default (images="click") only same-origin, relative, data: and blob: images load. An image from another site shows a “Load image from example.com” button with its alt text and is fetched only when pressed: model-written Markdown can point at any URL, and fetching it can tell a third party who is reading or leak data placed in the URL (for example by a prompt-injected document). Use images="show" only for trusted content, or images="alt" to never load images.',
+        wide: true,
+      },
+    ],
+    [
       "CodeSplit",
       CodeSplit,
       {
@@ -111,7 +136,13 @@ import { closeMarkdown } from "@/components/ui/response/close-markdown";`,
         { name: "headingOffset", type: "number", default: "2", description: "Levels added to Markdown headings (# → h3), so answers never compete with the page's h1/h2." },
         { name: "skipHtml", type: "boolean", default: "false", description: "Drop raw HTML instead of showing it as text." },
         { name: "remarkPlugins", type: "PluggableList", description: "Extra remark plugins after remark-gfm." },
-        { name: "images", type: '"show" | "alt"', default: '"show"', description: 'With "alt", Markdown images render as "[Image: alt]" text and are never fetched (useful when answers quote untrusted documents).' },
+        {
+          name: "images",
+          type: '"click" | "show" | "alt"',
+          default: '"click"',
+          description:
+            '"click": same-origin, relative, data: and blob: images load; cross-origin images wait behind a “Load image from <host>” button, so a model-written answer can\'t make the browser contact third-party servers (tracking, data leaks) without the reader\'s say-so. "show": load every image (trusted content only). "alt": never load; show "[Image: alt]" text.',
+        },
       ],
     },
     {
@@ -131,6 +162,7 @@ import { closeMarkdown } from "@/components/ui/response/close-markdown";`,
     "Wide tables and code blocks scroll horizontally and are keyboard-focusable.",
     "Raw HTML is shown as text (or dropped with skipHtml), and unsafe URLs such as javascript: are removed.",
     "Citation chips are named after their source (“Source 1: Parental leave policy (2025)”).",
+    "A cross-origin image's placeholder is a real button named “Load image from <host>: <alt text>”; once pressed, focus moves to the loaded image instead of being lost.",
   ],
 };
 

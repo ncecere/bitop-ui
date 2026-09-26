@@ -149,7 +149,7 @@ const doc: ComponentDoc = {
     {
       component: "MessageBranch / MessageBranchContent / MessageBranchSelector",
       rows: [
-        { name: "branch / defaultBranch / onBranchChange", type: "number / number / (index) => void", description: "Controlled or uncontrolled current version (0-based)." },
+        { name: "branch / defaultBranch / onBranchChange", type: "number / number / (index) => void", description: "Controlled or uncontrolled current version (0-based). If the versions shrink below it, the last one is shown and that index is reported once through onBranchChange." },
         { name: "noun", type: "string", default: '"response"', description: "Used in labels: “Previous response”, “Response 2 of 3”." },
       ],
     },

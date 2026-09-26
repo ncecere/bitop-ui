@@ -18,7 +18,17 @@ import {
   nextStickState,
 } from "@/registry/bitop/ui/conversation/conversation";
 import { InlineCitation } from "@/registry/bitop/ui/inline-citation/inline-citation";
-import { Message, MessageAction, MessageActions, MessageAvatar, MessageContent, MessageCopyAction } from "@/registry/bitop/ui/message/message";
+import {
+  Message,
+  MessageAction,
+  MessageActions,
+  MessageAvatar,
+  MessageBranch,
+  MessageBranchContent,
+  MessageBranchSelector,
+  MessageContent,
+  MessageCopyAction,
+} from "@/registry/bitop/ui/message/message";
 import {
   PromptInput,
   PromptInputSubmit,
@@ -337,6 +347,27 @@ describe("Reasoning", () => {
     );
     expect(screen.getByRole("button", { name: "Thought for 1 second" })).toHaveAttribute("aria-expanded", "false");
   });
+
+  it("moves focus to the trigger when it auto-closes with focus inside the panel", () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    function Focusable({ streaming }: { streaming: boolean }) {
+      return (
+        <Reasoning streaming={streaming} autoCloseDelay={500}>
+          <ReasoningTrigger />
+          <ReasoningContent>
+            <a href="#step">Step 1</a>
+          </ReasoningContent>
+        </Reasoning>
+      );
+    }
+    const { rerender } = render(<Focusable streaming />);
+    const trigger = screen.getByRole("button");
+    act(() => screen.getByRole("link", { name: "Step 1" }).focus());
+    rerender(<Focusable streaming={false} />);
+    act(() => vi.advanceTimersByTime(500));
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect(trigger).toHaveFocus();
+  });
 });
 
 /* ---------------- Response ---------------- */
@@ -403,11 +434,24 @@ describe("Response", () => {
 
 describe("Response images and LazyResponse", () => {
   it("shows images as alt text with images=\"alt\" instead of loading them", () => {
-    const { container, rerender } = render(<Response>{"![Chart of results](https://evil.example/x.png?q=secret)"}</Response>);
+    const { container, rerender } = render(<Response images="show">{"![Chart of results](https://evil.example/x.png?q=secret)"}</Response>);
     expect(container.querySelector("img")).toHaveAttribute("alt", "Chart of results");
     rerender(<Response images="alt">{"![Chart of results](https://evil.example/x.png?q=secret)"}</Response>);
     expect(container.querySelector("img")).toBeNull();
     expect(screen.getByText("[Image: Chart of results]")).toBeInTheDocument();
+  });
+
+  it("by default loads same-origin images but asks before fetching cross-origin ones", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<Response>{"![Local chart](/img/local.png)\n\n![Tracker](https://evil.example/x.png?q=secret)"}</Response>);
+    const images = () => [...container.querySelectorAll("img")];
+    expect(images().map((i) => i.getAttribute("src"))).toEqual(["/img/local.png"]);
+    const load = screen.getByRole("button", { name: /Load image from evil\.example.*Tracker/ });
+    expect(await axe(container)).toHaveNoViolations();
+    await user.click(load);
+    expect(images().map((i) => i.getAttribute("src"))).toEqual(["/img/local.png", "https://evil.example/x.png?q=secret"]);
+    expect(screen.queryByRole("button", { name: /Load image/ })).not.toBeInTheDocument();
+    expect(document.activeElement?.contains(images()[1]!)).toBe(true);
   });
 
   it("renders plain paragraphs until the Markdown engine loads, then the same output as Response", async () => {
@@ -450,6 +494,22 @@ describe("InlineCitation", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(chip).toHaveFocus();
   });
+
+  it("clamps the page counter when the sources list shrinks", async () => {
+    const user = userEvent.setup();
+    const three = [...sources, { title: "Payroll calendar", href: "https://people.example.com/payroll" }];
+    const { rerender } = render(<InlineCitation index={[1, 2, 3]} sources={three} />);
+    await user.click(screen.getByRole("button", { name: /Sources 1, 2, 3/ }));
+    const card = await screen.findByRole("dialog");
+    await user.click(within(card).getByRole("button", { name: "Next source" }));
+    await user.click(within(card).getByRole("button", { name: "Next source" }));
+    expect(within(card).getByText("3 of 3")).toBeInTheDocument();
+    rerender(<InlineCitation index={[1, 2]} sources={sources} />);
+    expect(within(card).getByText("2 of 2")).toBeInTheDocument();
+    expect(within(card).getByRole("button", { name: "Next source" })).toBeDisabled();
+    await user.click(within(card).getByRole("button", { name: "Previous source" }));
+    expect(within(card).getByText("1 of 2")).toBeInTheDocument();
+  });
 });
 
 /* ---------------- Message, tool, copy ---------------- */
@@ -481,6 +541,45 @@ describe("Message", () => {
     expect(await navigator.clipboard.readText()).toBe("Answer **md**");
     expect(screen.getByRole("status")).toHaveTextContent("Copied message to clipboard");
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("MessageBranch", () => {
+  function Branches({ count, ...props }: { count: number; branch?: number; defaultBranch?: number; onBranchChange?: (i: number) => void }) {
+    return (
+      <MessageBranch {...props}>
+        <MessageBranchContent>
+          {Array.from({ length: count }, (_, i) => (
+            <p key={i}>Version {i + 1}</p>
+          ))}
+        </MessageBranchContent>
+        <MessageBranchSelector />
+      </MessageBranch>
+    );
+  }
+
+  it("clamps the counter and reports the clamped index once when the list shrinks (uncontrolled)", () => {
+    const onBranchChange = vi.fn();
+    const { rerender } = render(<Branches count={5} defaultBranch={4} onBranchChange={onBranchChange} />);
+    expect(screen.getByText("Response 5 of 5")).toBeInTheDocument();
+    rerender(<Branches count={3} defaultBranch={4} onBranchChange={onBranchChange} />);
+    expect(screen.getByText("Response 3 of 3")).toBeInTheDocument();
+    expect(screen.getByText("Version 3")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Next response" })).toBeDisabled();
+    expect(onBranchChange).toHaveBeenCalledTimes(1);
+    expect(onBranchChange).toHaveBeenCalledWith(2);
+    rerender(<Branches count={3} defaultBranch={4} onBranchChange={onBranchChange} />);
+    expect(onBranchChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports the clamped index once when a controlled branch is out of range", () => {
+    const onBranchChange = vi.fn();
+    const { rerender } = render(<Branches count={5} branch={4} onBranchChange={onBranchChange} />);
+    rerender(<Branches count={3} branch={4} onBranchChange={onBranchChange} />);
+    expect(screen.getByText("Response 3 of 3")).toBeInTheDocument();
+    rerender(<Branches count={3} branch={4} onBranchChange={(i) => onBranchChange(i)} />);
+    expect(onBranchChange).toHaveBeenCalledTimes(1);
+    expect(onBranchChange).toHaveBeenCalledWith(2);
   });
 });
 
