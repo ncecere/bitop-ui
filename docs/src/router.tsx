@@ -2,7 +2,7 @@
  * A tiny history router for the docs (no dependency). Paths are relative to
  * Vite's BASE_URL so the site works under a GitHub Pages project path.
  */
-import { type ComponentPropsWithRef, createContext, type MouseEvent, type ReactNode, useContext, useEffect, useState } from "react";
+import { type ComponentPropsWithRef, createContext, type MouseEvent, type ReactNode, startTransition, useContext, useEffect, useState } from "react";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -40,8 +40,11 @@ export function RouterProvider({ initialPath, children }: { initialPath?: string
   useEffect(() => {
     if (initialPath !== undefined) return;
     const onPop = () => {
-      setPath(currentPath());
-      setNavigation((n) => ({ count: n.count + 1, hash: window.location.hash.slice(1) || undefined }));
+      const hash = window.location.hash.slice(1) || undefined;
+      startTransition(() => {
+        setPath(currentPath());
+        setNavigation((n) => ({ count: n.count + 1, hash }));
+      });
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
@@ -56,11 +59,16 @@ export function RouterProvider({ initialPath, children }: { initialPath?: string
     target.focus({ preventScroll: true });
   }, [navigation]);
 
+  // Navigations are transitions: while a code-split page loads, the current
+  // page stays on screen (no fallback flash), and path + focus update together
+  // once the new page has rendered, so focus lands on its heading.
   const navigate = (to: string) => {
     const [pathname, hash] = to.split("#");
     if (initialPath === undefined) window.history.pushState(null, "", toHref(pathname || "/") + (hash ? `#${hash}` : ""));
-    setPath(pathname || "/");
-    setNavigation((n) => ({ count: n.count + 1, hash: hash || undefined }));
+    startTransition(() => {
+      setPath(pathname || "/");
+      setNavigation((n) => ({ count: n.count + 1, hash: hash || undefined }));
+    });
   };
   return <RouterContext.Provider value={{ path, navigate }}>{children}</RouterContext.Provider>;
 }

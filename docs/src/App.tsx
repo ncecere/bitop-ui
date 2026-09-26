@@ -3,7 +3,7 @@
  * (AppShell, CommandPalette, Select, ColorModeToggle, Toaster…).
  */
 import { ArrowRight, BookOpen, Box, Download, Home, MessagesSquare, Moon, Palette } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type ComponentType, lazy, type LazyExoticComponent, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AppShell,
   Brand,
@@ -17,18 +17,17 @@ import {
   TopBar,
 } from "@/registry/bitop/ui/app-shell/app-shell";
 import { ColorModeToggle, setColorMode, useColorMode } from "@/registry/bitop/ui/color-mode/color-mode";
-import { CommandPalette, CommandPaletteTrigger, useCommandPaletteShortcut, type CommandGroup } from "@/registry/bitop/ui/command-palette/command-palette";
+import type { CommandGroup } from "@/registry/bitop/ui/command-palette/command-palette";
 import { Select } from "@/registry/bitop/ui/select/select";
 import { Toaster } from "@/registry/bitop/ui/toast/toast";
 import { TooltipProvider } from "@/registry/bitop/ui/tooltip/tooltip";
 import { docsByCategory, findDoc } from "./content";
-import { ComponentPage } from "./pages/ComponentPage";
-import { ChatExamplePage } from "./pages/ChatExamplePage";
+import type { DocMeta } from "./content/types";
+import { CommandPaletteTrigger, LazyCommandPalette, useCommandPaletteShortcut } from "./kit/lazy-command-palette";
 import { ComponentsIndexPage } from "./pages/ComponentsIndexPage";
 import { HomePage } from "./pages/HomePage";
-import { InstallationPage } from "./pages/InstallationPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
-import { ThemingPage } from "./pages/ThemingPage";
+import { PageLoadError, PageLoading } from "./pages/PageLoading";
 import { Link, RouterProvider, routeFocusTarget, useRouter } from "./router";
 import styles from "./App.module.css";
 
@@ -65,6 +64,60 @@ const pages = [
 /** The full chat example, listed first in the AI section. */
 const CHAT_EXAMPLE = { to: "/examples/chat", label: "Chat example" };
 
+// Code-split routes. Home and the components index stay in the entry chunk so
+// the landing page and the page list render without a round trip.
+const loadComponentPage = () => import("./pages/ComponentPage");
+const ChatExamplePage = lazy(() => import("./pages/ChatExamplePage").then((m) => ({ default: m.ChatExamplePage })));
+const InstallationPage = lazy(() => import("./pages/InstallationPage").then((m) => ({ default: m.InstallationPage })));
+const ThemingPage = lazy(() => import("./pages/ThemingPage").then((m) => ({ default: m.ThemingPage })));
+
+/** A component page: suspends until its content module (own chunk) has loaded. */
+const docPages = new Map<string, LazyExoticComponent<ComponentType>>();
+function docPage(meta: DocMeta) {
+  let Page = docPages.get(meta.slug);
+  if (!Page) {
+    Page = lazy(async () => {
+      try {
+        // The page template and the page's content load in parallel.
+        const [{ ComponentPage }, doc] = await Promise.all([loadComponentPage(), meta.load()]);
+        return { default: () => <ComponentPage doc={doc} /> };
+      } catch (error) {
+        docPages.delete(meta.slug); // lazy() caches failures; let a later visit retry
+        throw error;
+      }
+    });
+    docPages.set(meta.slug, Page);
+  }
+  return Page;
+}
+
+function DocRoute({ meta }: { meta: DocMeta }) {
+  const Page = docPage(meta);
+  return <Page />;
+}
+
+/** Start fetching a page's chunks when the pointer heads for its link. */
+const preload = (meta: DocMeta) => () => {
+  void loadComponentPage();
+  void meta.load().catch(() => {});
+};
+
+let initialHashHandled = false;
+/**
+ * On a deep link like /components/button#props the target only exists once
+ * the page chunk has rendered, too late for the browser's own fragment
+ * scroll, so do it once here. (Client navigations are handled by the router.)
+ */
+function InitialHashScroll() {
+  useEffect(() => {
+    if (initialHashHandled) return;
+    initialHashHandled = true;
+    const hash = window.location.hash.slice(1);
+    if (hash) document.getElementById(decodeURIComponent(hash))?.scrollIntoView?.();
+  }, []);
+  return null;
+}
+
 function Route() {
   const { path } = useRouter();
   if (path === "/") return <HomePage />;
@@ -72,15 +125,21 @@ function Route() {
   if (path === "/theming") return <ThemingPage />;
   if (path === "/components") return <ComponentsIndexPage />;
   if (path === CHAT_EXAMPLE.to) return <ChatExamplePage />;
-  const m = path.match(/^\/components\/([a-z-]+)$/);
+  const m = path.match(/^\/components\/([a-z0-9-]+)$/);
   const doc = m ? findDoc(m[1]!) : undefined;
-  if (doc) return <ComponentPage key={doc.slug} doc={doc} />;
+  if (doc) return <DocRoute key={doc.slug} meta={doc} />;
   return <NotFoundPage />;
 }
 
 function DocsShell() {
   const { path, navigate: routerNavigate } = useRouter();
-  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [paletteOpen, setPaletteOpenState] = useState(false);
+  // The palette's chunk loads the first time it opens; it stays mounted after.
+  const [paletteMounted, setPaletteMounted] = useState(false);
+  const setPaletteOpen = useCallback((open: boolean | ((o: boolean) => boolean)) => {
+    setPaletteMounted(true);
+    setPaletteOpenState(open);
+  }, []);
   // A palette command that navigates hands focus to the new page's heading
   // instead of back to the search button (the router focuses it too).
   const paletteNavigated = useRef(false);
@@ -95,7 +154,7 @@ function DocsShell() {
   };
   const [brand, setBrand] = useBrand();
   const { resolved } = useColorMode();
-  const togglePalette = useCallback(() => setPaletteOpen((o) => !o), []);
+  const togglePalette = useCallback(() => setPaletteOpen((o) => !o), [setPaletteOpen]);
   useCommandPaletteShortcut(togglePalette);
   const groups = useMemo(() => docsByCategory(), []);
 
@@ -152,7 +211,7 @@ function DocsShell() {
                 <SidebarSection key={g.category} label={g.category}>
                   {g.category === "AI" && <SidebarItem icon={<MessagesSquare aria-hidden />} label={CHAT_EXAMPLE.label} render={<Link to={CHAT_EXAMPLE.to} />} />}
                   {g.docs.map((d) => (
-                    <SidebarItem key={d.slug} label={d.title} render={<Link to={`/components/${d.slug}`} />} />
+                    <SidebarItem key={d.slug} label={d.title} render={<Link to={`/components/${d.slug}`} onPointerEnter={preload(d)} />} />
                   ))}
                 </SidebarSection>
               ))}
@@ -184,9 +243,15 @@ function DocsShell() {
       }
     >
       <Main>
-        <Route />
+        <PageLoadError path={path}>
+          <Suspense fallback={<PageLoading />}>
+            <Route />
+            <InitialHashScroll />
+          </Suspense>
+        </PageLoadError>
       </Main>
-      <CommandPalette
+      <LazyCommandPalette
+        mounted={paletteMounted}
         open={paletteOpen}
         onOpenChange={setPaletteOpen}
         groups={commands}

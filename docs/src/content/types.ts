@@ -27,6 +27,20 @@ export type ComponentDoc = {
 };
 
 /**
+ * What the shell knows about every page without loading it (sidebar, index,
+ * command palette). Read statically from each content file at build time by
+ * the bitop-docs-meta plugin in vite.config.ts.
+ */
+export type DocMeta = {
+  slug: string;
+  title: string;
+  category: Category;
+  description: string;
+  /** Loads the page module (its own chunk). */
+  load: () => Promise<ComponentDoc>;
+};
+
+/**
  * Pulls the source of a named example function out of the raw module text,
  * so the code shown in the docs is exactly the code that renders the preview.
  */

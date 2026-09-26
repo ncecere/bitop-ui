@@ -4,6 +4,7 @@ import { fileURLToPath, URL } from "node:url";
 import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
 import { defineConfig } from "vitest/config";
+import { docsMeta } from "./docs/docs-meta-plugin.ts";
 
 /** GitHub Pages serves 404.html for unknown paths: reuse the SPA entry. */
 function spaFallback(): Plugin {
@@ -31,16 +32,28 @@ const base = `${new URL(siteUrl).pathname.replace(/\/+$/, "")}/`;
 
 export default defineConfig({
   base,
-  plugins: [react(), spaFallback()],
+  plugins: [react(), docsMeta({ contentDir: fileURLToPath(new URL("./docs/src/content", import.meta.url)) }), spaFallback()],
   define: {
     __SITE_URL__: JSON.stringify(siteUrl),
   },
   resolve: {
     alias: { "@": fileURLToPath(new URL(".", import.meta.url)) },
   },
-  // The docs bundle every example eagerly (so each page renders in tests); ~1.2 MB is
-  // expected since the AI pages added react-markdown + remark-gfm.
-  build: { outDir: "dist", emptyOutDir: true, sourcemap: false, chunkSizeWarningLimit: 1600 },
+  // Each component page (and the heavier guide pages) is its own chunk; the
+  // entry's size budget is enforced by scripts/check-bundle-size.mjs.
+  build: {
+    outDir: "dist",
+    emptyOutDir: true,
+    sourcemap: false,
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          // React + ReactDOM change rarely: keep them in their own long-cached chunk.
+          groups: [{ name: "react", test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/, priority: 10 }],
+        },
+      },
+    },
+  },
   preview: { port: 4173, strictPort: true },
   test: {
     environment: "jsdom",
