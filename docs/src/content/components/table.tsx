@@ -107,7 +107,7 @@ const doc: ComponentDoc = {
       note: "Also accepts native <table> props.",
       rows: [
         { name: "caption", type: "ReactNode", required: true, description: "Names the table (screen-reader only unless showCaption)." },
-        { name: "columns", type: "(string | { label, numeric?, hideLabel? })[]", required: true, description: 'Headers; an empty string becomes a hidden "Actions" header.' },
+        { name: "columns", type: "(string | { label, numeric?, hideLabel?, width?, sort? })[]", required: true, description: 'Headers; an empty string becomes a hidden "Actions" header. sort sets aria-sort on the sorted column (see Data table).' },
         { name: "showCaption", type: "boolean", description: "Show the caption visually." },
         { name: "stickyHeader / maxHeight", type: "boolean / string", description: "Scroll the body under a fixed header." },
         { name: "density", type: '"comfortable" | "compact"', default: '"comfortable"', description: "Row height." },

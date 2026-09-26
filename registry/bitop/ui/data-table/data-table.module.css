@@ -1,0 +1,113 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  min-width: 0;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.filter {
+  flex: 1 1 14rem;
+  max-width: 20rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+/* The sort button fills the header cell and inherits its type style. */
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: calc(var(--space-1) * -1) calc(var(--space-2) * -1);
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-1);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--color-surface-hover);
+      color: var(--color-text);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 0;
+  }
+
+  &[data-active] {
+    color: var(--color-text);
+  }
+
+  th[data-numeric] & {
+    flex-direction: row-reverse;
+  }
+}
+
+.sortIcon {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  opacity: 0.7;
+
+  .sort[data-active] & {
+    opacity: 1;
+  }
+}
+
+.check {
+  display: inline-flex;
+}
+
+.message {
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  font-size: var(--font-size-md);
+  color: var(--color-text-muted);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.summary {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.footer > nav {
+  width: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sort {
+    transition: none;
+  }
+}
