@@ -19,8 +19,9 @@
     "registry:serve": "node scripts/serve-registry.mjs",
     "styling:check": "node scripts/check-styling.mjs",
     "docs:build": "vite build",
+    "size:check": "node scripts/check-bundle-size.mjs",
     "preview": "vite preview",
-    "check": "npm run typecheck && npm run styling:check && npm run test && npm run build && npm run registry:validate",
+    "check": "npm run typecheck && npm run styling:check && npm run test && npm run build && npm run size:check && npm run registry:validate",
     "a11y:browser": "node scripts/a11y-docs.mjs",
     "smoke:consumer": "bash scripts/consumer-smoke.sh"
   },

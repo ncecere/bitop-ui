@@ -171,3 +171,24 @@
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
 }
+
+/* Suspense fallback: reserve space, fade in late so quick loads don't flash. */
+.pageLoading {
+  min-height: 60vh;
+  animation: page-loading-in 160ms ease-out 300ms both;
+}
+
+@keyframes page-loading-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pageLoading {
+    animation-duration: 0s;
+  }
+}

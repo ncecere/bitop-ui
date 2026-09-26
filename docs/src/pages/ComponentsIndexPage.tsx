@@ -15,7 +15,7 @@ export function ComponentsIndexPage() {
             {g.docs.map((d) => (
               <li key={d.slug}>
                 <Card interactive className={styles.linkCard}>
-                  <Link to={`/components/${d.slug}`} className={styles.cardLink}>
+                  <Link to={`/components/${d.slug}`} className={styles.cardLink} onPointerEnter={() => void d.load().catch(() => {})}>
                     {d.title}
                   </Link>
                   <p className={styles.cardText}>{d.description}</p>
