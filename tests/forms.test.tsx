@@ -1,13 +1,16 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
+import { useState } from "react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { Button, IconButton } from "@/registry/bitop/ui/button/button";
 import { Checkbox, CheckboxGroup } from "@/registry/bitop/ui/checkbox/checkbox";
+import { ColorField, contrastRatio, formatRatio, normalizeHex } from "@/registry/bitop/ui/color-field/color-field";
 import { Disclosure } from "@/registry/bitop/ui/disclosure/disclosure";
 import { Field } from "@/registry/bitop/ui/field/field";
 import { Input, NativeSelect, Textarea } from "@/registry/bitop/ui/input/input";
 import { RadioGroup } from "@/registry/bitop/ui/radio-group/radio-group";
 import { Switch } from "@/registry/bitop/ui/switch/switch";
+import { TagInput } from "@/registry/bitop/ui/tag-input/tag-input";
 
 describe("Field", () => {
   it("labels the control and wires description and error", async () => {
@@ -162,5 +165,110 @@ describe("Disclosure", () => {
     expect(trigger).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByLabelText("Maximum depth")).toBeInTheDocument();
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("TagInput", () => {
+  function Demo({ initial = ["policy"], maxTags = 4 }: { initial?: string[]; maxTags?: number }) {
+    const [tags, setTags] = useState<string[]>(initial);
+    return (
+      <>
+        <Field label="Tags">
+          <TagInput value={tags} onValueChange={setTags} maxTags={maxTags} />
+        </Field>
+        <output>{tags.join("|")}</output>
+      </>
+    );
+  }
+
+  it("adds on Enter and comma, lower-cases, dedupes, removes with Backspace and the remove button", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<Demo />);
+    const input = screen.getByRole("textbox", { name: "Tags" });
+    await user.type(input, "Fees{Enter}refunds,POLICY,");
+    expect(screen.getByText("Added tag refunds")).toHaveAttribute("role", "status");
+    expect(container.querySelector("output")).toHaveTextContent("policy|fees|refunds");
+    await user.type(input, "{Backspace}");
+    expect(container.querySelector("output")).toHaveTextContent("policy|fees");
+    await user.click(screen.getByRole("button", { name: "Remove tag policy" }));
+    expect(container.querySelector("output")).toHaveTextContent(/^fees$/);
+    expect(input).toHaveFocus();
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("keeps pending text on blur, splits pasted lists and stops at maxTags", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<Demo initial={[]} maxTags={3} />);
+    const input = screen.getByRole("textbox", { name: "Tags" });
+    await user.type(input, "summer");
+    act(() => input.blur());
+    expect(container.querySelector("output")).toHaveTextContent("summer");
+    await user.click(input);
+    await user.paste("a, b, c, d");
+    expect(container.querySelector("output")).toHaveTextContent("summer|a|b");
+    expect(input).toBeDisabled();
+    expect(input).toHaveAttribute("placeholder", "Limit of 3 tags reached");
+  });
+
+  it("doesn't submit the form on an empty Enter", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn((e: { preventDefault: () => void }) => e.preventDefault());
+    render(
+      <form onSubmit={onSubmit}>
+        <Demo initial={[]} />
+      </form>,
+    );
+    await user.type(screen.getByRole("textbox", { name: "Tags" }), "{Enter}");
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+});
+
+describe("ColorField", () => {
+  it("computes WCAG ratios and normalises hex", () => {
+    expect(normalizeHex("#ABC")).toBe("#aabbcc");
+    expect(normalizeHex("1d4ed8")).toBe("#1d4ed8");
+    expect(normalizeHex("blue")).toBeUndefined();
+    expect(contrastRatio("#000000", "#ffffff")).toBeCloseTo(21, 5);
+    expect(formatRatio(4.46)).toBe("4.4:1");
+  });
+
+  it("reports contrast in words, applies presets and flags invalid hex", async () => {
+    const user = userEvent.setup();
+    function Demo() {
+      const [v, setV] = useState("#f97316");
+      return (
+        <Field label="Accent colour">
+          <ColorField
+            value={v}
+            onValueChange={setV}
+            defaultColor="#1d4ed8"
+            contrastWith="#ffffff"
+            contrastLabel="white text"
+            presets={[{ value: "#1d4ed8", label: "Blue" }]}
+          />
+        </Field>
+      );
+    }
+    const { container } = render(<Demo />);
+    const hex = screen.getByRole("textbox", { name: "Accent colour" });
+    expect(hex).toHaveAccessibleDescription(/below 4.5:1\. Choose a darker colour/);
+    await user.click(screen.getByRole("button", { name: "Blue" }));
+    expect(hex).toHaveValue("#1d4ed8");
+    expect(hex).toHaveAccessibleDescription(/meets WCAG AA/);
+    expect(screen.getByRole("button", { name: "Blue" })).toHaveAttribute("aria-pressed", "true");
+    await user.clear(hex);
+    await user.type(hex, "#12");
+    expect(hex).toHaveAccessibleDescription("Enter a hex colour such as #1d4ed8.");
+    await user.clear(hex);
+    // Empty: the default colour is used and checked.
+    expect(hex).toHaveAttribute("placeholder", "#1d4ed8 (default)");
+    expect(hex).toHaveAccessibleDescription(/meets WCAG AA/);
+    expect(screen.getByRole("button", { name: "Blue" })).toHaveAttribute("aria-pressed", "false");
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("suggests a lighter colour when the text is dark", () => {
+    render(<ColorField value="#1f2937" onValueChange={() => {}} defaultColor="#fef3c7" contrastWith="#111827" contrastLabel="dark text" />);
+    expect(screen.getByText(/Choose a lighter colour/)).toBeInTheDocument();
   });
 });

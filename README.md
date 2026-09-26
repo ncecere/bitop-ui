@@ -8,7 +8,7 @@ A copy-and-own React component library distributed as a [shadcn registry](https:
 - **WCAG 2.1 AA**: contrast is tested for every theme, and every docs page is checked with axe.
 - **Enforced**: `npm run styling:check` (`scripts/check-styling.mjs`) fails the build on Tailwind/Radix/CSS-in-JS/class-name utilities or other component kits, global CSS in a component folder, literal colours or px inline styles, and interactive components that don't build on Base UI.
 
-The registry has 63 items: `core`, two themes (`theme-neutral`, the default, and the opt-in `theme-uf`) and 60 components, including `app-shell`, `command-palette`, `dialog`, `table`, `field`, `select`, `toast`, `color-mode` and the AI elements below.
+The registry has 65 items: `core`, two themes (`theme-neutral`, the default, and the opt-in `theme-uf`) and 62 components, including `app-shell`, `command-palette`, `dialog`, `table`, `field`, `select`, `tag-input`, `color-field`, `toast`, `color-mode` and the AI elements below.
 
 ### AI elements
 

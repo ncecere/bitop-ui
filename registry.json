@@ -443,6 +443,34 @@
       ]
     },
     {
+      "name": "color-field",
+      "type": "registry:ui",
+      "title": "Color field",
+      "description": "Hex colour input with a native picker, preset swatches and a live WCAG contrast check.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/color-field/color-field.tsx",
+          "type": "registry:ui",
+          "target": "@ui/color-field/color-field.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/color-field/color-field.module.css",
+          "type": "registry:file",
+          "target": "@ui/color-field/color-field.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
       "name": "color-mode",
       "type": "registry:ui",
       "title": "Color mode",
@@ -1564,6 +1592,34 @@
       ],
       "categories": [
         "navigation"
+      ]
+    },
+    {
+      "name": "tag-input",
+      "type": "registry:ui",
+      "title": "Tag input",
+      "description": "Text tags with an inline input: Enter or comma adds, Backspace removes, paste adds several, announced politely.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/tag-input/tag-input.tsx",
+          "type": "registry:ui",
+          "target": "@ui/tag-input/tag-input.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/tag-input/tag-input.module.css",
+          "type": "registry:file",
+          "target": "@ui/tag-input/tag-input.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
       ]
     },
     {
