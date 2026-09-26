@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { Alert } from "@/registry/bitop/ui/alert/alert";
@@ -86,6 +86,41 @@ describe("Table and Alert", () => {
     const headers = within(table).getAllByRole("columnheader");
     expect(headers.map((h) => h.textContent)).toEqual(["Name", "Size", "Actions"]);
     expect(headers[1]).toHaveAttribute("data-numeric");
+  });
+
+  it("becomes a focusable region named by the caption only when it overflows", () => {
+    const observers: (() => void)[] = [];
+    const original = globalThis.ResizeObserver;
+    globalThis.ResizeObserver = class {
+      constructor(cb: () => void) {
+        observers.push(cb);
+      }
+      observe() {}
+      disconnect() {}
+      unobserve() {}
+    } as unknown as typeof ResizeObserver;
+    try {
+      const { container } = render(
+        <Table caption="Wide table" columns={["A", "B"]}>
+          <Tr>
+            <Td>1</Td>
+            <Td>2</Td>
+          </Tr>
+        </Table>,
+      );
+      const wrap = container.firstElementChild as HTMLElement;
+      expect(wrap).not.toHaveAttribute("tabindex");
+      expect(screen.queryByRole("region")).toBeNull();
+      // Simulate a table wider than its wrapper (e.g. on a phone).
+      Object.defineProperty(wrap, "scrollWidth", { configurable: true, value: 800 });
+      Object.defineProperty(wrap, "clientWidth", { configurable: true, value: 320 });
+      act(() => observers.forEach((cb) => cb()));
+      const region = screen.getByRole("region", { name: "Wide table" });
+      expect(region).toBe(wrap);
+      expect(region).toHaveAttribute("tabindex", "0");
+    } finally {
+      globalThis.ResizeObserver = original;
+    }
   });
 
   it("uses role=alert for danger and role=status otherwise", () => {

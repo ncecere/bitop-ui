@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentPropsWithRef, type CSSProperties, type ReactNode, useId } from "react";
+import { type ComponentPropsWithRef, type CSSProperties, type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { cx, dataFlag } from "@/registry/bitop/lib/bitop-utils";
 import styles from "./table.module.css";
 
@@ -12,6 +12,11 @@ import styles from "./table.module.css";
  *   </Table>
  *
  * An empty column label ("") becomes a screen-reader-only "Actions" header.
+ *
+ * Whenever the table overflows its wrapper (too wide for a narrow screen, or
+ * taller than `maxHeight`), the wrapper becomes a focusable region named by
+ * the caption, so keyboard users can scroll it (WCAG 2.1.1). Overflow is
+ * measured with a ResizeObserver; a table that fits is not a tab stop.
  */
 
 export type TableColumn =
@@ -56,17 +61,31 @@ export function Table({
   ...props
 }: TableProps) {
   const captionId = useId();
-  const scrolls = Boolean(maxHeight);
+  const wrap = useRef<HTMLDivElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
   const wrapStyle: CSSProperties | undefined = maxHeight ? { maxHeight } : undefined;
+
+  // A scroll container must be keyboard-focusable (WCAG 2.1.1): track whether it scrolls.
+  useEffect(() => {
+    const el = wrap.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const check = () => setOverflowing(el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    if (el.firstElementChild) ro.observe(el.firstElementChild);
+    return () => ro.disconnect();
+  }, []);
+
   return (
-    // A scroll container must be keyboard-focusable (WCAG 2.1.1), so a
-    // height-limited table becomes a focusable region named by its caption.
     <div
+      ref={wrap}
       className={styles.wrap}
       data-framed={dataFlag(framed)}
-      data-scroll={dataFlag(scrolls)}
+      data-scroll={dataFlag(Boolean(maxHeight))}
+      data-overflowing={dataFlag(overflowing)}
       style={wrapStyle}
-      {...(scrolls ? { tabIndex: 0, role: "region", "aria-labelledby": captionId } : {})}
+      {...(overflowing ? { tabIndex: 0, role: "region", "aria-labelledby": captionId } : {})}
     >
       <table
         {...props}

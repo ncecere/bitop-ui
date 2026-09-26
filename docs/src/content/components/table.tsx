@@ -128,7 +128,7 @@ const doc: ComponentDoc = {
   a11y: [
     "caption is required by the type, so every table has an accessible name.",
     'Headers are <th scope="col">; an empty column label becomes a visually hidden "Actions".',
-    "With maxHeight the scroll area is a focusable region named by the caption, so keyboard users can scroll it.",
+    "Whenever the table overflows (too wide for the screen, or taller than maxHeight) the scroll area becomes a focusable region named by the caption, so keyboard users can scroll it; a table that fits is not a tab stop.",
     "Row action buttons need specific names, e.g. “Actions for marketing-site”.",
   ],
 };

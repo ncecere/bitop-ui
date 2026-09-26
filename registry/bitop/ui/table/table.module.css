@@ -6,7 +6,7 @@
     overflow: auto;
   }
 
-  &[data-scroll]:focus-visible {
+  &[data-overflowing]:focus-visible {
     outline-offset: -2px;
   }
 
