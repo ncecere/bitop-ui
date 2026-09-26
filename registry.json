@@ -83,6 +83,34 @@
       "docs": "bitop-ui: import \"@/components/ui/themes/uf.css\" after bitop.css and set data-brand=\"uf\" on <html>."
     },
     {
+      "name": "accordion",
+      "type": "registry:ui",
+      "title": "Accordion",
+      "description": "Stacked headings that show and hide panels (single or multiple open), with heading levels and reduced-motion-aware animation.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/accordion/accordion.tsx",
+          "type": "registry:ui",
+          "target": "@ui/accordion/accordion.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/accordion/accordion.module.css",
+          "type": "registry:file",
+          "target": "@ui/accordion/accordion.module.css"
+        }
+      ],
+      "categories": [
+        "disclosure"
+      ]
+    },
+    {
       "name": "alert",
       "type": "registry:ui",
       "title": "Alert",
@@ -169,6 +197,30 @@
       ],
       "categories": [
         "ai"
+      ]
+    },
+    {
+      "name": "aspect-ratio",
+      "type": "registry:ui",
+      "title": "Aspect ratio",
+      "description": "A box that keeps a width-to-height ratio and crops media inside it.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/aspect-ratio/aspect-ratio.tsx",
+          "type": "registry:ui",
+          "target": "@ui/aspect-ratio/aspect-ratio.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/aspect-ratio/aspect-ratio.module.css",
+          "type": "registry:file",
+          "target": "@ui/aspect-ratio/aspect-ratio.module.css"
+        }
+      ],
+      "categories": [
+        "layout"
       ]
     },
     {
@@ -383,6 +435,34 @@
           "path": "registry/bitop/ui/card/card.module.css",
           "type": "registry:file",
           "target": "@ui/card/card.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
+      "name": "carousel",
+      "type": "registry:ui",
+      "title": "Carousel",
+      "description": "Dependency-free scroll-snap carousel with previous/next buttons, arrow keys, slide semantics and announcements.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/carousel/carousel.tsx",
+          "type": "registry:ui",
+          "target": "@ui/carousel/carousel.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/carousel/carousel.module.css",
+          "type": "registry:file",
+          "target": "@ui/carousel/carousel.module.css"
         }
       ],
       "categories": [
@@ -749,6 +829,38 @@
       ]
     },
     {
+      "name": "data-table",
+      "type": "registry:ui",
+      "title": "Data table",
+      "description": "Typed data table with sortable headers, row selection, a text filter and pagination, built on Table.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/checkbox",
+        "@bitop/field",
+        "@bitop/input",
+        "@bitop/pagination",
+        "@bitop/table"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/data-table/data-table.tsx",
+          "type": "registry:ui",
+          "target": "@ui/data-table/data-table.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/data-table/data-table.module.css",
+          "type": "registry:file",
+          "target": "@ui/data-table/data-table.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
       "name": "date-picker",
       "type": "registry:ui",
       "title": "Date picker",
@@ -805,6 +917,28 @@
       ],
       "categories": [
         "overlays"
+      ]
+    },
+    {
+      "name": "direction",
+      "type": "registry:ui",
+      "title": "Direction",
+      "description": "DirectionProvider and useDirection for right-to-left layouts in Base UI components.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/direction/direction.tsx",
+          "type": "registry:ui",
+          "target": "@ui/direction/direction.tsx"
+        }
+      ],
+      "categories": [
+        "layout"
       ]
     },
     {
@@ -1027,6 +1161,33 @@
       ]
     },
     {
+      "name": "item",
+      "type": "registry:ui",
+      "title": "Item",
+      "description": "Flexible row with media, title, description and actions; renders as a link for navigation lists.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/item/item.tsx",
+          "type": "registry:ui",
+          "target": "@ui/item/item.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/item/item.module.css",
+          "type": "registry:file",
+          "target": "@ui/item/item.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
       "name": "kbd",
       "type": "registry:ui",
       "title": "Kbd",
@@ -1095,6 +1256,33 @@
           "path": "registry/bitop/ui/loader/loader.module.css",
           "type": "registry:file",
           "target": "@ui/loader/loader.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "marker",
+      "type": "registry:ui",
+      "title": "Marker",
+      "description": "Inline conversation marker: status, system note, bordered row or labelled separator.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/marker/marker.tsx",
+          "type": "registry:ui",
+          "target": "@ui/marker/marker.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/marker/marker.module.css",
+          "type": "registry:file",
+          "target": "@ui/marker/marker.module.css"
         }
       ],
       "categories": [
@@ -1210,6 +1398,35 @@
       ],
       "categories": [
         "layout"
+      ]
+    },
+    {
+      "name": "pagination",
+      "type": "registry:ui",
+      "title": "Pagination",
+      "description": "Pagination landmark with previous/next, page links, ellipsis and a page-range helper; links or buttons.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/pagination/pagination.tsx",
+          "type": "registry:ui",
+          "target": "@ui/pagination/pagination.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/pagination/pagination.module.css",
+          "type": "registry:file",
+          "target": "@ui/pagination/pagination.module.css"
+        }
+      ],
+      "categories": [
+        "navigation"
       ]
     },
     {
@@ -1473,6 +1690,34 @@
       ]
     },
     {
+      "name": "resizable",
+      "type": "registry:ui",
+      "title": "Resizable",
+      "description": "Resizable panel groups with draggable, keyboard-operable splitter handles and persistable layouts.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/resizable/resizable.tsx",
+          "type": "registry:ui",
+          "target": "@ui/resizable/resizable.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/resizable/resizable.module.css",
+          "type": "registry:file",
+          "target": "@ui/resizable/resizable.module.css"
+        }
+      ],
+      "categories": [
+        "layout"
+      ]
+    },
+    {
       "name": "response",
       "type": "registry:ui",
       "title": "Response",
@@ -1511,6 +1756,33 @@
       ],
       "categories": [
         "ai"
+      ]
+    },
+    {
+      "name": "scroll-area",
+      "type": "registry:ui",
+      "title": "Scroll area",
+      "description": "Scroll container with slim custom scrollbars; keyboard-focusable and named when it scrolls.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/scroll-area/scroll-area.tsx",
+          "type": "registry:ui",
+          "target": "@ui/scroll-area/scroll-area.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/scroll-area/scroll-area.module.css",
+          "type": "registry:file",
+          "target": "@ui/scroll-area/scroll-area.module.css"
+        }
+      ],
+      "categories": [
+        "layout"
       ]
     },
     {

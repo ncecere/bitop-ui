@@ -27,6 +27,8 @@ export type TableColumn =
       /** Visually hide the header text (still announced). */
       hideLabel?: boolean;
       width?: string;
+      /** Sets aria-sort on the header cell (use on the one sorted column). */
+      sort?: "ascending" | "descending" | "none" | "other";
     };
 
 export type TableProps = Omit<ComponentPropsWithRef<"table">, "children"> & {
@@ -105,6 +107,7 @@ export function Table({
                 <th
                   key={i}
                   scope="col"
+                  aria-sort={"sort" in col ? col.sort : undefined}
                   data-numeric={dataFlag(col.numeric)}
                   style={col.width ? { width: col.width } : undefined}
                   className={styles.th}

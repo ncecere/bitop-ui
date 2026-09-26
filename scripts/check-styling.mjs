@@ -42,11 +42,13 @@ const root =
  */
 const DISPLAY_ONLY = new Set([
   "alert", // text + optional native dismiss <button>
+  "aspect-ratio", // a CSS aspect-ratio box around media
   "badge",
   "card",
   "empty-state",
   "kbd",
   "loader", // decorative dots / status text
+  "marker", // static status / note / separator row; `render` only swaps the element
   "page-header",
   "skeleton",
   "spinner",
