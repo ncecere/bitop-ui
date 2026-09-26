@@ -7,7 +7,8 @@
 3. **Semantic tokens only.** Components use `var(--color-primary)`, `var(--space-4)`, `var(--radius-control)`… never `--palette-*` or hex values. `npm run registry:validate` fails on undefined tokens and palette reads.
 4. **Variants are data attributes** (`data-variant="danger"`, `data-size="sm"`), styled in the CSS Module. Base UI state attributes (`data-checked`, `data-starting-style`…) are styled the same way.
 5. **Composable and open.** Accept `className` (merge with `cx`), pass native props and `ref` through (React 19 `ref` as a prop), export every `…Props` type, and support `render` (Base UI `useRender`) for anything link-like.
-6. **Accessible by construction.** Required accessible names are required props (`label`, `caption`…). Text meets 4.5:1, control boundaries and focus rings 3:1. Status is never colour-only. Respect `prefers-reduced-motion`.
+6. **Enforced by `npm run styling:check`.** `scripts/check-styling.mjs` rejects Tailwind, Radix, CSS-in-JS, clsx/cva/tailwind-merge and other component kits (in package.json, registry.json and imports), non-module CSS in a component folder, literal colours (hex/rgb/hsl/oklch…) in component `.tsx`/`.module.css`, and inline styles with px or numeric lengths. Every `registry:ui` item must import `@base-ui/react` directly or through another bitop item; anything with popup/disclosure ARIA must import it directly. Components with no behaviour at all go on the `DISPLAY_ONLY` allowlist in that script (with a reason); the check then keeps them free of keyboard handlers, tabIndex, focus management and form controls.
+7. **Accessible by construction.** Required accessible names are required props (`label`, `caption`…). Text meets 4.5:1, control boundaries and focus rings 3:1. Status is never colour-only. Respect `prefers-reduced-motion`.
 
 ## Adding a component
 
@@ -67,7 +68,7 @@ Create `docs/src/content/components/date-field.tsx` (copy a similar page, e.g. `
 ### 5. Check everything
 
 ```bash
-npm run typecheck && npm test && npm run build && npm run registry:validate
+npm run check            # typecheck, styling policy, tests, build, registry validation
 npm run smoke:consumer   # optional locally, runs in CI
 ```
 

@@ -36,6 +36,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Styling policy (Base UI + CSS Modules + CSS variables)
+        run: npm run styling:check
+
       - name: Test (vitest + axe, contrast, every docs page)
         run: npm test
 
