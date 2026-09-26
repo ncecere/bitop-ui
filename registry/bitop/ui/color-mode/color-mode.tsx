@@ -14,6 +14,9 @@ import { IconButton, type IconButtonProps } from "@/registry/bitop/ui/button/but
  *
  * To avoid a flash of the wrong theme on load, inline `colorModeScript` in a
  * <script> in your index.html <head> (see the docs).
+ *
+ * Changes follow the system preference (matchMedia) and other tabs: a mode
+ * set in one tab reaches the others through the `storage` event.
  */
 
 export type ColorMode = "light" | "dark" | "system";
@@ -57,10 +60,18 @@ function subscribe(listener: () => void) {
     if (readMode() === "system") apply("system");
     listener();
   };
+  // Another tab changed (or cleared) the stored mode: apply it here too.
+  const onStorage = (event: StorageEvent) => {
+    if (event.key !== null && event.key !== COLOR_MODE_STORAGE_KEY) return;
+    apply(readMode());
+    listener();
+  };
   media?.addEventListener("change", onChange);
+  if (typeof window !== "undefined") window.addEventListener("storage", onStorage);
   return () => {
     listeners.delete(listener);
     media?.removeEventListener("change", onChange);
+    if (typeof window !== "undefined") window.removeEventListener("storage", onStorage);
   };
 }
 

@@ -44,7 +44,7 @@ const doc: ComponentDoc = {
       rows: [
         { name: "mode", type: '"light" | "dark" | "system"', description: "The saved choice." },
         { name: "resolved", type: '"light" | "dark"', description: "What is applied now." },
-        { name: "setMode", type: "(mode) => void", description: "Save and apply a mode." },
+        { name: "setMode", type: "(mode) => void", description: "Save and apply a mode. Other open tabs follow it (storage event)." },
         { name: "toggle", type: "() => void", description: "Switch between light and dark." },
       ],
     },
