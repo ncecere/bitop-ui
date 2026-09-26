@@ -49,6 +49,7 @@ const DISPLAY_ONLY = new Set([
   "kbd",
   "loader", // decorative dots / status text
   "marker", // static status / note / separator row; `render` only swaps the element
+  "package-info", // static dependency-change card: text, badges and lists only
   "page-header",
   "skeleton",
   "spinner",

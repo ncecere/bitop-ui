@@ -1,0 +1,332 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  border-radius: var(--radius-3);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-ring);
+  font-size: var(--font-size-sm);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.summaryBadge svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.duration {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress {
+  --failed: 0%;
+  --skipped: 0%;
+
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.meter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.track {
+  display: flex;
+  height: 0.5rem;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-sunken);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+.passedSegment,
+.failedSegment,
+.skippedSegment {
+  display: block;
+  flex: none;
+  height: 100%;
+  transition: width var(--motion-duration-slow) var(--motion-ease-out);
+}
+
+.passedSegment {
+  background-color: var(--color-success-dot);
+}
+
+.failedSegment {
+  width: var(--failed);
+  background-color: var(--color-danger-dot);
+}
+
+.skippedSegment {
+  width: var(--skipped);
+  background-color: var(--color-warning-dot);
+}
+
+.progressText {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.progressLabel {
+  color: inherit;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.suite {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: var(--radius-2);
+  box-shadow: var(--shadow-ring);
+}
+
+.suiteTrigger,
+.testTrigger {
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-out);
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--color-surface-hover);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: -2px;
+  }
+}
+
+.suiteTrigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--control-height-md);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-2);
+}
+
+.suiteName {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--color-text-muted);
+  transition: transform var(--motion-duration-fast) var(--motion-ease-out);
+
+  [data-panel-open] > & {
+    transform: rotate(90deg);
+  }
+}
+
+.spacer {
+  flex: none;
+  width: 0.875rem;
+}
+
+.statusIcon {
+  display: inline-flex;
+  flex: none;
+
+  & svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &[data-status="passed"] {
+    color: var(--color-success-text);
+  }
+  &[data-status="failed"] {
+    color: var(--color-danger-text);
+  }
+  &[data-status="skipped"] {
+    color: var(--color-warning-text);
+  }
+  &[data-status="running"] {
+    color: var(--color-info-text);
+
+    & svg {
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.stats {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.statPassed {
+  color: var(--color-success-text);
+}
+
+.statFailed {
+  color: var(--color-danger-text);
+}
+
+.statSkipped {
+  color: var(--color-warning-text);
+}
+
+.panel {
+  height: var(--collapsible-panel-height);
+  overflow: hidden;
+  transition: height var(--motion-duration-normal) var(--motion-ease-out);
+
+  &[hidden]:not([hidden="until-found"]) {
+    display: none;
+  }
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    height: 0;
+  }
+}
+
+.tests {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-border);
+  list-style: none;
+}
+
+.test {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  & + & {
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+.testRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--control-height-sm);
+  padding: var(--space-1) var(--space-3);
+}
+
+.testName {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.testDuration {
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.testDetails {
+  padding: 0 var(--space-3) var(--space-3) calc(var(--space-3) + 0.875rem + var(--space-2));
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-2);
+  background-color: var(--color-danger-subtle);
+  box-shadow: inset 0 0 0 1px var(--color-danger-border);
+}
+
+.errorMessage {
+  margin: 0;
+  color: var(--color-danger-text);
+  font-weight: var(--font-weight-medium);
+}
+
+.errorStack {
+  margin: 0;
+  overflow-x: auto;
+  color: var(--color-danger-text);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  line-height: 1.6;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .passedSegment,
+  .failedSegment,
+  .skippedSegment,
+  .suiteTrigger,
+  .testTrigger,
+  .chevron,
+  .panel {
+    transition: none;
+  }
+
+  .statusIcon[data-status="running"] svg {
+    animation: none;
+  }
+}
