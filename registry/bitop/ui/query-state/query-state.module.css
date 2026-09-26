@@ -1,0 +1,4 @@
+/* Padding keeps the alert off the edges of a flush card; override with className. */
+.error {
+  padding: var(--query-state-padding, var(--space-4));
+}

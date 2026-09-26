@@ -1994,6 +1994,33 @@
       ]
     },
     {
+      "name": "query-state",
+      "type": "registry:ui",
+      "title": "Query state",
+      "description": "Switches between loading, error (with retry), empty and content; accepts a TanStack-Query-like result without depending on it.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/alert",
+        "@bitop/empty-state",
+        "@bitop/spinner"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/query-state/query-state.tsx",
+          "type": "registry:ui",
+          "target": "@ui/query-state/query-state.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/query-state/query-state.module.css",
+          "type": "registry:file",
+          "target": "@ui/query-state/query-state.module.css"
+        }
+      ],
+      "categories": [
+        "feedback"
+      ]
+    },
+    {
       "name": "question",
       "type": "registry:ui",
       "title": "Question",
