@@ -58,6 +58,11 @@ const doc: ComponentDoc = {
         { name: "placeholder", type: "string", default: '"Search pages and actions…"', description: "Input placeholder." },
         { name: "label", type: "string", default: '"Command palette"', description: "Accessible name of the dialog and input." },
         { name: "emptyText", type: "ReactNode", default: '"No results found."', description: "Shown when nothing matches." },
+        {
+          name: "finalFocus",
+          type: "Dialog.Popup finalFocus",
+          description: "Where focus goes on close (default: the opener). Return the new page's heading from a function when a command navigates.",
+        },
       ],
     },
     {

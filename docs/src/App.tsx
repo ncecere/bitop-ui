@@ -3,7 +3,7 @@
  * (AppShell, CommandPalette, Select, ColorModeToggle, Toaster…).
  */
 import { ArrowRight, BookOpen, Box, Download, Home, MessagesSquare, Moon, Palette } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AppShell,
   Brand,
@@ -29,7 +29,7 @@ import { HomePage } from "./pages/HomePage";
 import { InstallationPage } from "./pages/InstallationPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { ThemingPage } from "./pages/ThemingPage";
-import { Link, RouterProvider, useRouter } from "./router";
+import { Link, RouterProvider, routeFocusTarget, useRouter } from "./router";
 import styles from "./App.module.css";
 
 export type BrandTheme = "neutral" | "uf";
@@ -79,8 +79,20 @@ function Route() {
 }
 
 function DocsShell() {
-  const { path, navigate } = useRouter();
+  const { path, navigate: routerNavigate } = useRouter();
   const [paletteOpen, setPaletteOpen] = useState(false);
+  // A palette command that navigates hands focus to the new page's heading
+  // instead of back to the search button (the router focuses it too).
+  const paletteNavigated = useRef(false);
+  const navigate = (to: string) => {
+    paletteNavigated.current = true;
+    routerNavigate(to);
+  };
+  const paletteFinalFocus = () => {
+    if (!paletteNavigated.current) return true;
+    paletteNavigated.current = false;
+    return routeFocusTarget() ?? true;
+  };
   const [brand, setBrand] = useBrand();
   const { resolved } = useColorMode();
   const togglePalette = useCallback(() => setPaletteOpen((o) => !o), []);
@@ -174,7 +186,13 @@ function DocsShell() {
       <Main>
         <Route />
       </Main>
-      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} groups={commands} placeholder="Search components and pages…" />
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        groups={commands}
+        placeholder="Search components and pages…"
+        finalFocus={paletteFinalFocus}
+      />
       <Toaster />
     </AppShell>
   );

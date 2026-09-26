@@ -20,20 +20,47 @@ function currentPath() {
 type RouterState = { path: string; navigate: (to: string) => void };
 const RouterContext = createContext<RouterState>({ path: "/", navigate: () => {} });
 
+/**
+ * Where focus goes after a client-side navigation: the `#hash` target, else
+ * the page's <h1>, else <main>. Moving focus there puts keyboard users at the
+ * new content and makes screen readers announce it (WCAG 2.4.3). Non-focusable
+ * targets get tabIndex=-1 so they can take programmatic focus.
+ */
+export function routeFocusTarget(hash?: string): HTMLElement | null {
+  if (typeof document === "undefined") return null;
+  const el = (hash && document.getElementById(decodeURIComponent(hash))) || document.querySelector<HTMLElement>("main h1") || document.querySelector<HTMLElement>("main");
+  if (el && !el.hasAttribute("tabindex") && el.tabIndex < 0) el.setAttribute("tabindex", "-1");
+  return el;
+}
+
 export function RouterProvider({ initialPath, children }: { initialPath?: string; children: ReactNode }) {
   const [path, setPath] = useState(() => initialPath ?? currentPath());
+  // Bumped on every navigation (not on first load), so focus moves only then.
+  const [navigation, setNavigation] = useState<{ count: number; hash?: string }>({ count: 0 });
   useEffect(() => {
     if (initialPath !== undefined) return;
-    const onPop = () => setPath(currentPath());
+    const onPop = () => {
+      setPath(currentPath());
+      setNavigation((n) => ({ count: n.count + 1, hash: window.location.hash.slice(1) || undefined }));
+    };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, [initialPath]);
+
+  useEffect(() => {
+    if (navigation.count === 0) return;
+    const target = routeFocusTarget(navigation.hash);
+    if (!target) return;
+    if (navigation.hash) target.scrollIntoView?.();
+    else window.scrollTo?.(0, 0);
+    target.focus({ preventScroll: true });
+  }, [navigation]);
+
   const navigate = (to: string) => {
     const [pathname, hash] = to.split("#");
     if (initialPath === undefined) window.history.pushState(null, "", toHref(pathname || "/") + (hash ? `#${hash}` : ""));
     setPath(pathname || "/");
-    if (hash) requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView());
-    else if (typeof window !== "undefined") window.scrollTo?.(0, 0);
+    setNavigation((n) => ({ count: n.count + 1, hash: hash || undefined }));
   };
   return <RouterContext.Provider value={{ path, navigate }}>{children}</RouterContext.Provider>;
 }
