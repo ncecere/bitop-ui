@@ -34,6 +34,7 @@ const doc: ComponentDoc = {
         { name: "index", type: "number | number[]", description: "Citation number(s) shown in the chip and its name." },
         { name: "label", type: "ReactNode", description: "Override the chip text (keep it in the accessible name)." },
         { name: "side", type: '"top" | "bottom"', default: '"top"', description: "Preferred side of the card." },
+        { name: "onActivate", type: "() => void", description: "Runs on click / Enter / Space instead of opening the card (hover still previews it), e.g. to focus the matching Source below the answer." },
       ],
     },
   ],

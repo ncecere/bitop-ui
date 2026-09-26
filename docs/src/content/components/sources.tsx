@@ -56,6 +56,7 @@ const doc: ComponentDoc = {
   a11y: [
     "The trigger is a button with aria-expanded; the list is an ordered list named “Sources”.",
     "Each linked source is a single link whose name includes its number and title and says it opens in a new tab.",
+    "A Source with an id and tabIndex={-1} can receive focus from a citation chip (InlineCitation onActivate); it shows a focus ring while focused or while it has data-highlighted.",
   ],
 };
 

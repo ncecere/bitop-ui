@@ -4,6 +4,7 @@ import { Check, ChevronLeft, ChevronRight, Copy } from "lucide-react";
 import {
   Children,
   type ComponentPropsWithRef,
+  type CSSProperties,
   type ReactNode,
   createContext,
   useCallback,
@@ -11,7 +12,7 @@ import {
   useLayoutEffect,
   useState,
 } from "react";
-import { Avatar } from "@/registry/bitop/ui/avatar/avatar";
+import { Avatar, type AvatarProps } from "@/registry/bitop/ui/avatar/avatar";
 import { IconButton } from "@/registry/bitop/ui/button/button";
 import { CopyStatus, useCopyToClipboard } from "@/registry/bitop/ui/copy-button/copy-button";
 import { Tooltip } from "@/registry/bitop/ui/tooltip/tooltip";
@@ -73,16 +74,30 @@ export function MessageContent({ variant, className, ...props }: MessageContentP
 export type MessageAvatarProps = {
   name: string;
   src?: string;
+  /**
+   * Tile colour behind the initials: any CSS colour, e.g. an agent's or
+   * brand's accent. The initials use --color-primary-contrast, so pick a
+   * colour with at least 4.5:1 against it (ColorField checks this).
+   * Without it the Avatar's name-based tint is used.
+   */
+  color?: string;
+  size?: AvatarProps["size"];
+  shape?: AvatarProps["shape"];
   /** Custom content (e.g. a logo) instead of the Avatar. */
   children?: ReactNode;
   className?: string;
 };
 
-/** Decorative: the article's label already says who is speaking. */
-export function MessageAvatar({ name, src, children, className }: MessageAvatarProps) {
+/** Decorative: the article's label already says who is speaking. Also usable on its own as an assistant's tile (directories, headers). */
+export function MessageAvatar({ name, src, color, size = "sm", shape = "circle", children, className }: MessageAvatarProps) {
   return (
-    <span aria-hidden className={cx(styles.avatar, className)}>
-      {children ?? <Avatar name={name} src={src} size="sm" decorative />}
+    <span
+      aria-hidden
+      className={cx(styles.avatar, className)}
+      data-color={dataFlag(Boolean(color))}
+      style={color ? ({ "--message-avatar-color": color } as CSSProperties) : undefined}
+    >
+      {children ?? <Avatar name={name} src={src} size={size} shape={shape} decorative />}
     </span>
   );
 }

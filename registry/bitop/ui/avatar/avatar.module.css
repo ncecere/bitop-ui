@@ -35,6 +35,9 @@
   &[data-size="lg"] {
     --avatar-size: 2.5rem;
   }
+  &[data-size="xl"] {
+    --avatar-size: 3.5rem;
+  }
 
   &[data-hue="2"] {
     --avatar-bg: var(--color-success-subtle);

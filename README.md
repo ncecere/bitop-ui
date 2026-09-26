@@ -14,9 +14,9 @@ The registry has 65 items: `core`, two themes (`theme-neutral`, the default, and
 
 Components for chat and agent UIs (docs: the **AI** section and the full **Chat example** page). They are SDK-agnostic: plain props such as `from: "user" | "assistant"`, `streaming`, tool `state: "pending" | "running" | "completed" | "error"` and chat `status: "ready" | "submitted" | "streaming" | "error"`, so any SDK's message parts map onto them.
 
-- Chat essentials: `conversation` (stick-to-bottom log, empty state, scroll button, screen-reader announcer), `message` (bubbles, actions, feedback, branches), `response` (streaming-safe Markdown with `closeMarkdown()`, citations), `reasoning`, `tool`, `sources`, `inline-citation`, `prompt-input`, `suggestion`, `shimmer`, `loader`, `code-block`, plus the `copy-button` helper.
+- Chat essentials: `conversation` (stick-to-bottom log, empty state, scroll button, screen-reader announcer), `message` (bubbles, actions, feedback, branches), `response` (streaming-safe Markdown with `closeMarkdown()`, citations; `LazyResponse` from `response-lazy.tsx` code-splits the Markdown engine), `reasoning`, `tool`, `sources`, `inline-citation`, `prompt-input`, `suggestion`, `shimmer`, `loader`, `code-block`, plus the `copy-button` helper.
 - Agent UI: `chain-of-thought`, `task`, `plan`, `confirmation`, `context`, `model-selector`, `attachments`, `artifact`, `snippet`, `queue`, `checkpoint`.
-- Dependencies: `react-markdown` and `remark-gfm` (only `response` uses them). No syntax highlighter is bundled: `code-block` takes a `highlight(code, lang)` prop.
+- Dependencies: `react-markdown` and `remark-gfm` (only `response` uses them; render `LazyResponse` to keep them out of your main bundle). No syntax highlighter is bundled: `code-block` takes a `highlight(code, lang)` prop.
 - Inspired by Vercel's [AI Elements](https://github.com/vercel/ai-elements) (Apache-2.0): same component set and composition, original code on Base UI + CSS Modules. See [NOTICE](./NOTICE).
 - Candidates not built yet: canvas / node / edge / connection / controls / panel / toolbar (need xyflow), audio-player, voice and mic selectors, speech-input, transcription, persona (Rive), terminal, sandbox, jsx-preview, web-preview, file-tree, commit, stack-trace, test-results, schema-display, environment-variables, package-info, open-in-chat.
 

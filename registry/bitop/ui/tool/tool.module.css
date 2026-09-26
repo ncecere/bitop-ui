@@ -70,6 +70,15 @@
   flex: none;
 }
 
+.summary {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .chevron {
   flex: none;
   width: 0.875rem;

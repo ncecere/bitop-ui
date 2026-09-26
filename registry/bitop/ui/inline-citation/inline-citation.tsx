@@ -19,6 +19,10 @@ import styles from "./inline-citation.module.css";
  * The chip's accessible name includes the source title ("Source 1: Annual
  * report 2024"), so screen-reader users hear what is cited without opening
  * the card.
+ *
+ * With `onActivate`, a click / Enter / Space calls it instead of opening
+ * the card (hover still previews it). Use it when the full sources are
+ * listed below the answer: jump to and focus the matching Source there.
  */
 
 export type CitationSource = {
@@ -46,6 +50,11 @@ export type InlineCitationProps = {
   /** Override the chip text. Keep it part of the accessible name (WCAG 2.5.3). */
   label?: ReactNode;
   side?: "top" | "bottom";
+  /**
+   * Called on click / Enter / Space instead of opening the card (hover still
+   * previews it), e.g. to scroll to and focus the full source in a list.
+   */
+  onActivate?: () => void;
   className?: string;
 };
 
@@ -73,7 +82,7 @@ function accessibleName(sources: CitationSource[], indices: number[], text: stri
   return `${text}: ${first}${more}`;
 }
 
-export function InlineCitation({ sources, index, label, side = "top", className }: InlineCitationProps) {
+export function InlineCitation({ sources, index, label, side = "top", onActivate, className }: InlineCitationProps) {
   const [page, setPage] = useState(0);
   const indices = index === undefined ? [] : Array.isArray(index) ? index : [index];
   const text = chipText(sources, indices);
@@ -83,13 +92,24 @@ export function InlineCitation({ sources, index, label, side = "top", className 
   const site = current.siteName ?? citationHostname(current.href);
 
   return (
-    <Popover.Root onOpenChange={(open) => !open && setPage(0)}>
+    <Popover.Root
+      onOpenChange={(open, details) => {
+        if (onActivate && details.reason === "trigger-press") {
+          details.cancel();
+          onActivate();
+          return;
+        }
+        if (!open) setPage(0);
+      }}
+    >
       <Popover.Trigger
         openOnHover
         delay={150}
         closeDelay={150}
         className={cx(styles.chip, className)}
         aria-label={accessibleName(sources, indices, text)}
+        // Pressing jumps elsewhere instead of opening a popup: don't announce one.
+        {...(onActivate ? { "aria-haspopup": undefined, "aria-expanded": undefined } : {})}
       >
         {label ?? text}
       </Popover.Trigger>

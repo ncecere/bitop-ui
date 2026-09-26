@@ -103,6 +103,10 @@ import { ModelSelector } from "@/components/ui/model-selector/model-selector";
 import { PromptInput, PromptInputSubmit, PromptInputTextarea, PromptInputToolbar } from "@/components/ui/prompt-input/prompt-input";
 import { Reasoning, ReasoningContent, ReasoningTrigger } from "@/components/ui/reasoning/reasoning";
 import { Response } from "@/components/ui/response/response";
+import { LazyResponse } from "@/components/ui/response/response-lazy";
+import { ColorField } from "@/components/ui/color-field/color-field";
+import { Field } from "@/components/ui/field/field";
+import { TagInput } from "@/components/ui/tag-input/tag-input";
 import { Source, Sources, SourcesContent, SourcesTrigger } from "@/components/ui/sources/sources";
 import { Tool, ToolContent, ToolHeader, ToolInput } from "@/components/ui/tool/tool";
 
@@ -130,6 +134,7 @@ function Chat() {
                 </ToolContent>
               </Tool>
               <Response citations={sources}>{text}</Response>
+              <LazyResponse images="alt">{"Loaded **on demand**."}</LazyResponse>
               <Sources>
                 <SourcesTrigger count={1} />
                 <SourcesContent>
@@ -153,6 +158,21 @@ function Chat() {
       </PromptInput>
       <ConversationAnnouncer status="ready" />
     </div>
+  );
+}
+
+function Forms() {
+  const [tags, setTags] = useState(["a"]);
+  const [hex, setHex] = useState("");
+  return (
+    <>
+      <Field label="Tags">
+        <TagInput value={tags} onValueChange={setTags} />
+      </Field>
+      <Field label="Accent">
+        <ColorField value={hex} onValueChange={setHex} defaultColor="#1d4ed8" contrastWith="#ffffff" />
+      </Field>
+    </>
   );
 }
 
@@ -185,6 +205,7 @@ export default function App() {
           </Tr>
         </Table>
         <Chat />
+        <Forms />
         <CommandPalette open={open} onOpenChange={setOpen} groups={[{ label: "Go", items: [{ id: "home", label: "Home", onSelect: () => {} }] }]} />
       </Main>
     </AppShell>
@@ -197,6 +218,9 @@ EXPECTED=$(node -e 'let n=0;for(const i of require(process.argv[1]).items)n+=i.f
 ACTUAL=$( (find src/components/ui -type f; find src/lib -type f) | wc -l | tr -d ' ')
 echo "Installed files: $ACTUAL (registry ships $EXPECTED)"
 [ "$ACTUAL" -eq "$EXPECTED" ]
+
+# LazyResponse's relative dynamic import must survive the CLI's import rewrite.
+grep -q 'import("./response")' src/components/ui/response/response-lazy.tsx
 
 npm run build
 echo "Consumer smoke test passed: $APP"

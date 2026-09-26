@@ -54,7 +54,7 @@ export function Avatars() {
         <MessageContent>Can you check my numbers?</MessageContent>
       </Message>
       <Message from="assistant">
-        <MessageAvatar name="Assistant" />
+        <MessageAvatar name="Ledger Bot" color="var(--color-primary)" shape="square" />
         <MessageContent>They add up: 12 + 30 = 42.</MessageContent>
         <MessageActions visibility="hover">
           <MessageCopyAction value="They add up: 12 + 30 = 42." />
@@ -118,7 +118,16 @@ const doc: ComponentDoc = {
       ],
     },
     { component: "MessageContent", rows: [{ name: "variant", type: '"bubble" | "plain"', description: "Defaults to bubble for the user, plain for the assistant." }] },
-    { component: "MessageAvatar", rows: [{ name: "name", type: "string", required: true, description: "For the initials." }, { name: "src", type: "string", description: "Image URL." }, { name: "children", type: "ReactNode", description: "Custom content (a logo)." }] },
+    {
+      component: "MessageAvatar",
+      rows: [
+        { name: "name", type: "string", required: true, description: "For the initials." },
+        { name: "src", type: "string", description: "Image URL." },
+        { name: "color", type: "string", description: "Tile colour (any CSS colour, e.g. an agent accent); initials use --color-primary-contrast, so keep 4.5:1 against it." },
+        { name: "size / shape", type: "Avatar size / shape", default: '"sm" / "circle"', description: "Passed to Avatar; also usable as an assistant tile outside messages." },
+        { name: "children", type: "ReactNode", description: "Custom content (a logo)." },
+      ],
+    },
     {
       component: "MessageActions",
       rows: [

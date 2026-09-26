@@ -37,6 +37,14 @@
   display: inline-flex;
   grid-row: 1 / span 3;
   margin-top: 0.125rem;
+
+  /* A custom tile colour (the `color` prop) with contrast-colour initials. */
+  &[data-color] > [data-hue] {
+    --avatar-bg: var(--message-avatar-color, var(--color-primary));
+    --avatar-fg: var(--color-primary-contrast);
+
+    box-shadow: none;
+  }
 }
 
 .content {

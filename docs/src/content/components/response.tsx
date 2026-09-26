@@ -1,5 +1,7 @@
 import { Button } from "@/registry/bitop/ui/button/button";
+import { useEffect } from "react";
 import { Response } from "@/registry/bitop/ui/response/response";
+import { LazyResponse, preloadResponse } from "@/registry/bitop/ui/response/response-lazy";
 import { demoSources, useFakeStream } from "../ai-demo";
 import { type ComponentDoc, examples } from "../types";
 import styles from "./ai-examples.module.css";
@@ -59,6 +61,18 @@ export function Citations() {
   );
 }
 
+export function CodeSplit() {
+  // Start fetching the Markdown chunk as soon as the chat screen mounts.
+  useEffect(() => preloadResponse(), []);
+  return (
+    <div className={styles.stack}>
+      <LazyResponse citations={demoSources} images="alt">
+        {"Loaded on demand: the **Markdown engine** is a separate chunk [1].\n\n![Org chart](https://example.com/org.png) Images show as text with `images=\"alt\"`."}
+      </LazyResponse>
+    </div>
+  );
+}
+
 const doc: ComponentDoc = {
   slug: "response",
   title: "Response",
@@ -66,11 +80,22 @@ const doc: ComponentDoc = {
   description:
     "Renders an assistant's Markdown answer (GFM tables, task lists, code) and stays tidy while it streams. Raw HTML is never rendered; [n] markers can become inline citations.",
   imports: `import { Response } from "@/components/ui/response/response";
+import { LazyResponse, preloadResponse } from "@/components/ui/response/response-lazy";
 import { closeMarkdown } from "@/components/ui/response/close-markdown";`,
   examples: examples(raw, [
     ["Markdown", Markdown, { title: "GitHub-flavoured Markdown", wide: true }],
     ["Streaming", Streaming, { title: "Streaming", description: "Half-written syntax is closed on the fly with closeMarkdown().", wide: true }],
     ["Citations", Citations, { title: "Citation markers", description: "Hover or activate a number to see its source.", wide: true }],
+    [
+      "CodeSplit",
+      CodeSplit,
+      {
+        title: "Code-split (LazyResponse)",
+        description:
+          "Same props as Response, but react-markdown and friends load on first render (React.lazy), so pages without chat don't ship them. Until the chunk arrives the text shows as plain paragraphs; preloadResponse() starts the download early.",
+        wide: true,
+      },
+    ],
   ]),
   props: [
     {
@@ -86,7 +111,13 @@ import { closeMarkdown } from "@/components/ui/response/close-markdown";`,
         { name: "headingOffset", type: "number", default: "2", description: "Levels added to Markdown headings (# → h3), so answers never compete with the page's h1/h2." },
         { name: "skipHtml", type: "boolean", default: "false", description: "Drop raw HTML instead of showing it as text." },
         { name: "remarkPlugins", type: "PluggableList", description: "Extra remark plugins after remark-gfm." },
+        { name: "images", type: '"show" | "alt"', default: '"show"', description: 'With "alt", Markdown images render as "[Image: alt]" text and are never fetched (useful when answers quote untrusted documents).' },
       ],
+    },
+    {
+      component: "LazyResponse / preloadResponse()",
+      rows: [],
+      note: "From response-lazy.tsx (installed with the item). LazyResponse takes the same props as Response and renders it through React.lazy + Suspense; preloadResponse() starts loading the chunk without rendering. Use them when chat is only part of your app.",
     },
     {
       component: "closeMarkdown(markdown)",

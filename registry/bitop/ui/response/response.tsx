@@ -30,6 +30,13 @@ import styles from "./response.module.css";
  *   - With `citations`, markers like [1] or [1, 3] become InlineCitation
  *     chips for those (1-based) sources. Markers inside code or links, and
  *     numbers with no matching source, stay as text.
+ *   - `images="alt"` shows images as "[Image: alt]" text instead of loading
+ *     them, so an answer (e.g. one steered by a prompt-injected document)
+ *     can't make the browser fetch arbitrary URLs.
+ *
+ * To keep react-markdown out of your main bundle, render LazyResponse from
+ * ./response-lazy instead: same props, the Markdown engine loads on first
+ * use (see that file).
  */
 
 export type ResponseProps = Omit<ComponentPropsWithRef<"div">, "children"> & {
@@ -51,6 +58,8 @@ export type ResponseProps = Omit<ComponentPropsWithRef<"div">, "children"> & {
   skipHtml?: boolean;
   /** Extra remark plugins, after remark-gfm. */
   remarkPlugins?: NonNullable<Parameters<typeof Markdown>[0]["remarkPlugins"]>;
+  /** `show` (default) renders Markdown images (lazy-loaded); `alt` shows their alt text instead of fetching them. */
+  images?: "show" | "alt";
 };
 
 /* ---------- [n] citation markers: a tiny remark plugin (no unist deps) ---------- */
@@ -114,6 +123,7 @@ function makeComponents(
   headingOffset: number,
   highlight: CodeBlockHighlighter | undefined,
   cite: ((indices: number[]) => ReactNode) | undefined,
+  images: "show" | "alt",
 ): Components {
   const heading = (level: number) => {
     const Tag = `h${Math.min(6, level + headingOffset)}` as "h3";
@@ -167,6 +177,7 @@ function makeComponents(
       );
     },
     img({ node: _node, alt, ...props }) {
+      if (images === "alt") return <span className={styles.imageAlt}>{alt ? `[Image: ${alt}]` : "[Image]"}</span>;
       return <img {...props} alt={alt ?? ""} loading="lazy" className={styles.image} />;
     },
     sup({ node: _node, children, ...props }) {
@@ -192,6 +203,7 @@ function ResponseImpl({
   headingOffset = 2,
   skipHtml = false,
   remarkPlugins,
+  images = "show",
   className,
   ...props
 }: ResponseProps) {
@@ -209,7 +221,10 @@ function ResponseImpl({
     };
   }, [citations, renderCitation]);
 
-  const merged = useMemo(() => ({ ...makeComponents(headingOffset, highlight, cite), ...components }), [headingOffset, highlight, cite, components]);
+  const merged = useMemo(
+    () => ({ ...makeComponents(headingOffset, highlight, cite, images), ...components }),
+    [headingOffset, highlight, cite, images, components],
+  );
   const plugins = useMemo(() => [remarkGfm, ...(cite ? [remarkCitationMarkers] : []), ...(remarkPlugins ?? [])], [cite, remarkPlugins]);
 
   return (

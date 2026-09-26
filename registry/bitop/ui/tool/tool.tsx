@@ -51,10 +51,12 @@ export type ToolHeaderProps = {
   icon?: ReactNode;
   /** Override the badge text for a state. */
   stateLabel?: string;
+  /** Short result text after the badge, e.g. "5 results" (part of the trigger's accessible name). */
+  summary?: ReactNode;
   className?: string;
 };
 
-export function ToolHeader({ name, title, state, icon, stateLabel, className }: ToolHeaderProps) {
+export function ToolHeader({ name, title, state, icon, stateLabel, summary, className }: ToolHeaderProps) {
   const badge = stateBadge[state];
   return (
     <Collapsible.Trigger className={cx(styles.trigger, className)} data-state={state}>
@@ -65,6 +67,12 @@ export function ToolHeader({ name, title, state, icon, stateLabel, className }: 
       <StatusBadge tone={badge.tone} pulse={badge.pulse} size="sm" className={styles.badge}>
         {stateLabel ?? badge.label}
       </StatusBadge>
+      {summary && (
+        <>
+          {" "}
+          <span className={styles.summary}>{summary}</span>
+        </>
+      )}
       <ChevronDown aria-hidden className={styles.chevron} />
     </Collapsible.Trigger>
   );

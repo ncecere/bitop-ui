@@ -27,7 +27,7 @@ const doc: ComponentDoc = {
       rows: [
         { name: "name", type: "string", required: true, description: "Used for the initials and the accessible name." },
         { name: "src", type: "string", description: "Image URL; initials show until it loads." },
-        { name: "size", type: '"xs" | "sm" | "md" | "lg"', default: '"md"', description: "Diameter." },
+        { name: "size", type: '"xs" | "sm" | "md" | "lg" | "xl"', default: '"md"', description: "Diameter (1.25 to 3.5rem)." },
         { name: "shape", type: '"circle" | "square"', default: '"circle"', description: "Square for workspaces." },
         { name: "decorative", type: "boolean", default: "false", description: "Hide from assistive tech when the name is shown next to it." },
       ],

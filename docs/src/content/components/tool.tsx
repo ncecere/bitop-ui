@@ -9,7 +9,7 @@ export function States() {
     <div className={styles.stack}>
       {states.map((state) => (
         <Tool key={state} defaultOpen={state === "completed"}>
-          <ToolHeader name="search_documents" state={state} />
+          <ToolHeader name="search_documents" state={state} summary={state === "completed" ? "3 results" : undefined} />
           <ToolContent>
             <ToolInput input={{ query: "parental leave", top_k: 5, filters: { collection: "handbook" } }} />
             {state === "completed" && <ToolOutput output={{ hits: 3, documents: ["parental-leave.md", "benefits-faq.md", "leave-request.pdf"] }} />}
@@ -54,6 +54,7 @@ const doc: ComponentDoc = {
         { name: "state", type: '"pending" | "running" | "completed" | "error"', required: true, description: "Status badge." },
         { name: "title", type: "ReactNode", description: "Human title instead of the name." },
         { name: "stateLabel", type: "string", description: "Override the badge text." },
+        { name: "summary", type: "ReactNode", description: 'Short result text after the badge, e.g. "3 results".' },
         { name: "icon", type: "ReactNode", description: "Decorative icon (default: wrench)." },
       ],
     },

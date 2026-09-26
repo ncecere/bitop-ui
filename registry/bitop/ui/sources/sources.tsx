@@ -18,7 +18,10 @@ import styles from "./sources.module.css";
  *   </Sources>
  *
  * Give each Source the same `index` as its [n] citation marker so the two
- * can be matched up.
+ * can be matched up. To let a citation chip jump to its source, give the
+ * Source an `id` and `tabIndex={-1}` and focus it from InlineCitation's
+ * `onActivate` (open the list first); it shows a focus ring while focused,
+ * and while it has a `data-highlighted` attribute.
  */
 
 export type SourcesProps = Omit<Collapsible.Root.Props, "className" | "onOpenChange"> & {

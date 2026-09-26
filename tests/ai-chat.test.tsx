@@ -17,7 +17,7 @@ import {
   nextStickState,
 } from "@/registry/bitop/ui/conversation/conversation";
 import { InlineCitation } from "@/registry/bitop/ui/inline-citation/inline-citation";
-import { Message, MessageAction, MessageActions, MessageContent, MessageCopyAction } from "@/registry/bitop/ui/message/message";
+import { Message, MessageAction, MessageActions, MessageAvatar, MessageContent, MessageCopyAction } from "@/registry/bitop/ui/message/message";
 import {
   PromptInput,
   PromptInputSubmit,
@@ -27,8 +27,10 @@ import {
 } from "@/registry/bitop/ui/prompt-input/prompt-input";
 import { Reasoning, ReasoningContent, ReasoningTrigger } from "@/registry/bitop/ui/reasoning/reasoning";
 import { Response } from "@/registry/bitop/ui/response/response";
+import { LazyResponse, preloadResponse } from "@/registry/bitop/ui/response/response-lazy";
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@/registry/bitop/ui/tool/tool";
 import { Snippet } from "@/registry/bitop/ui/snippet/snippet";
+import { Source, Sources, SourcesContent, SourcesTrigger } from "@/registry/bitop/ui/sources/sources";
 
 const sources = [
   { title: "Leave policy", href: "https://handbook.example.com/leave", description: "16 weeks paid." },
@@ -386,6 +388,27 @@ describe("Response", () => {
   });
 });
 
+describe("Response images and LazyResponse", () => {
+  it("shows images as alt text with images=\"alt\" instead of loading them", () => {
+    const { container, rerender } = render(<Response>{"![Chart of results](https://evil.example/x.png?q=secret)"}</Response>);
+    expect(container.querySelector("img")).toHaveAttribute("alt", "Chart of results");
+    rerender(<Response images="alt">{"![Chart of results](https://evil.example/x.png?q=secret)"}</Response>);
+    expect(container.querySelector("img")).toBeNull();
+    expect(screen.getByText("[Image: Chart of results]")).toBeInTheDocument();
+  });
+
+  it("renders plain paragraphs until the Markdown engine loads, then the same output as Response", async () => {
+    preloadResponse();
+    const { container } = render(<LazyResponse citations={sources}>{"# Title\n\nPaid leave **is** long [1]."}</LazyResponse>);
+    // Suspended: plain text in the prose container, no Markdown yet (or already loaded, in a warm cache).
+    expect(container.firstElementChild).toHaveTextContent(/Title/);
+    expect(await screen.findByRole("heading", { level: 3, name: "Title" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Source 1: Leave policy" })).toBeInTheDocument();
+    expect(container.querySelector("strong")).toHaveTextContent("is");
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
 /* ---------------- Inline citation ---------------- */
 
 describe("InlineCitation", () => {
@@ -495,3 +518,64 @@ describe("Tool", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 });
+
+/* ---------------- Ported from Open RAG System ---------------- */
+
+describe("citation → source jump, tool summary, avatar colour", () => {
+  it("InlineCitation onActivate runs on press instead of opening the card; a Source can take focus", async () => {
+    const user = userEvent.setup();
+    function Demo() {
+      return (
+        <div>
+          <p>
+            Claim{" "}
+            <InlineCitation
+              index={1}
+              sources={[sources[0]!]}
+              onActivate={() => document.getElementById("src-1")?.focus()}
+            />
+          </p>
+          <Sources defaultOpen>
+            <SourcesTrigger count={1} />
+            <SourcesContent>
+              <Source id="src-1" tabIndex={-1} index={1} title="Leave policy" description="16 weeks." />
+            </SourcesContent>
+          </Sources>
+        </div>
+      );
+    }
+    const { container } = render(<Demo />);
+    const chip = screen.getByRole("button", { name: "Source 1: Leave policy" });
+    expect(chip).not.toHaveAttribute("aria-haspopup");
+    await user.click(chip);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(container.querySelector("#src-1")).toHaveFocus();
+    chip.focus();
+    await user.keyboard("{Enter}");
+    expect(container.querySelector("#src-1")).toHaveFocus();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("ToolHeader shows a summary as part of the trigger's name", () => {
+    render(
+      <Tool>
+        <ToolHeader name="search" title="Searched the handbook" state="completed" summary="3 results" />
+        <ToolContent>
+          <ToolOutput output="3 results" />
+        </ToolContent>
+      </Tool>,
+    );
+    expect(screen.getByRole("button", { name: /Searched the handbook.*Completed.*3 results/ })).toBeInTheDocument();
+  });
+
+  it("MessageAvatar takes a tile colour through a CSS custom property", () => {
+    const { container } = render(<MessageAvatar name="Registrar assistant" color="#1d4ed8" size="xl" shape="square" />);
+    const wrap = container.firstElementChild as HTMLElement;
+    expect(wrap).toHaveAttribute("aria-hidden", "true");
+    expect(wrap).toHaveAttribute("data-color");
+    expect(wrap.style.getPropertyValue("--message-avatar-color")).toBe("#1d4ed8");
+    expect(wrap.querySelector("[data-size='xl'][data-shape='square']")).toHaveTextContent("RA");
+  });
+});
+

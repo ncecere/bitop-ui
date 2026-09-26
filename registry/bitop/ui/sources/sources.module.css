@@ -81,6 +81,19 @@
 .source {
   display: flex;
   min-width: 0;
+  border-radius: var(--radius-3);
+
+  /* A Source can be a focus target (id + tabIndex={-1}) for citation chips. */
+  &[tabindex="-1"]:focus {
+    outline: none;
+  }
+
+  &[tabindex="-1"]:focus > .row,
+  &[data-highlighted] > .row {
+    box-shadow:
+      var(--shadow-ring),
+      0 0 0 2px var(--color-focus-ring);
+  }
 }
 
 .row {

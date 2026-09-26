@@ -8,7 +8,7 @@ export type AvatarProps = {
   /** Person or workspace name: used for initials and the accessible name. */
   name: string;
   src?: string;
-  size?: "xs" | "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
   /** `square` suits workspaces/teams. */
   shape?: "circle" | "square";
   /** Hide from assistive technology when the name is already shown next to it. */

@@ -185,6 +185,16 @@
   }
 }
 
+.imageAlt {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* LazyResponse's placeholder until the Markdown engine has loaded: plain text. */
+.fallback {
+  white-space: pre-wrap;
+}
+
 .image {
   max-width: 100%;
   height: auto;

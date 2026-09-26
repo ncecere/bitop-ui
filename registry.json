@@ -1249,7 +1249,7 @@
       "name": "response",
       "type": "registry:ui",
       "title": "Response",
-      "description": "Streaming-safe Markdown for assistant answers: GFM, code blocks, safe links, citation markers, no raw HTML.",
+      "description": "Streaming-safe Markdown for assistant answers: GFM, code blocks, safe links, citation markers, no raw HTML; LazyResponse code-splits the Markdown engine.",
       "dependencies": [
         "react-markdown@^10.1.0",
         "remark-gfm@^4.0.1"
@@ -1265,6 +1265,11 @@
           "path": "registry/bitop/ui/response/response.tsx",
           "type": "registry:ui",
           "target": "@ui/response/response.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/response/response-lazy.tsx",
+          "type": "registry:ui",
+          "target": "@ui/response/response-lazy.tsx"
         },
         {
           "path": "registry/bitop/ui/response/close-markdown.ts",
