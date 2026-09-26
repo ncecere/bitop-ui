@@ -366,6 +366,30 @@
       ]
     },
     {
+      "name": "bar-chart",
+      "type": "registry:ui",
+      "title": "Bar chart",
+      "description": "CSS bar chart with overlapping or stacked series, legend and peak line; role=img with a text summary.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/bar-chart/bar-chart.tsx",
+          "type": "registry:ui",
+          "target": "@ui/bar-chart/bar-chart.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/bar-chart/bar-chart.module.css",
+          "type": "registry:file",
+          "target": "@ui/bar-chart/bar-chart.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
       "name": "breadcrumbs",
       "type": "registry:ui",
       "title": "Breadcrumbs",

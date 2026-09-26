@@ -44,6 +44,7 @@ const DISPLAY_ONLY = new Set([
   "alert", // text + optional native dismiss <button>
   "aspect-ratio", // a CSS aspect-ratio box around media
   "badge",
+  "bar-chart", // CSS bars in one role="img"; no interaction
   "card",
   "empty-state",
   "image", // <img> with loading / error presentation; no interaction
