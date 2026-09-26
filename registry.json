@@ -2894,6 +2894,31 @@
       ]
     },
     {
+      "name": "time",
+      "type": "registry:ui",
+      "title": "Time",
+      "description": "A semantic <time> element with locale-formatted dates or a self-updating relative time.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/format"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/time/time.tsx",
+          "type": "registry:ui",
+          "target": "@ui/time/time.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/time/time.module.css",
+          "type": "registry:file",
+          "target": "@ui/time/time.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
       "name": "toast",
       "type": "registry:ui",
       "title": "Toast",

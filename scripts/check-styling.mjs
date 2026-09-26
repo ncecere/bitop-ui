@@ -57,6 +57,7 @@ const DISPLAY_ONLY = new Set([
   "spinner",
   "stat-card", // metric tile; `render`/`href` only turn the label into a link
   "table",
+  "time", // <time> with formatted text; its only effect is a refresh timer for relative times
 ]);
 
 const BANNED = [
