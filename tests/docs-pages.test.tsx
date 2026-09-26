@@ -9,7 +9,7 @@ import { App } from "@/docs/src/App";
 import { componentDocs } from "@/docs/src/content";
 import registry from "@/registry.json";
 
-const pages = ["/", "/installation", "/theming", "/components", ...componentDocs.map((d) => `/components/${d.slug}`)];
+const pages = ["/", "/installation", "/theming", "/components", "/examples/chat", ...componentDocs.map((d) => `/components/${d.slug}`)];
 
 test("every registry component has a docs page", () => {
   const documented = new Set(componentDocs.map((d) => d.slug));

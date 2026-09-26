@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const base = (process.argv[2] || "http://127.0.0.1:4173").replace(/\/+$/, "");
 const registry = JSON.parse(fs.readFileSync(path.join(root, "registry.json"), "utf8"));
-const pages = ["/", "/installation", "/theming", "/components", ...registry.items.filter((i) => i.type === "registry:ui").map((i) => `/components/${i.name}`)];
+const pages = ["/", "/installation", "/theming", "/components", "/examples/chat", ...registry.items.filter((i) => i.type === "registry:ui").map((i) => `/components/${i.name}`)];
 const modes = [
   ["light", "neutral"],
   ["dark", "neutral"],

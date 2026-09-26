@@ -1,0 +1,48 @@
+import { InlineCitation } from "@/registry/bitop/ui/inline-citation/inline-citation";
+import { demoSources } from "../ai-demo";
+import { type ComponentDoc, examples } from "../types";
+import styles from "./ai-examples.module.css";
+import raw from "./inline-citation.tsx?raw";
+
+export function InText() {
+  return (
+    <p className={styles.stack}>
+      <span>
+        Eligible employees get 16 weeks of paid leave
+        <InlineCitation index={1} sources={[demoSources[0]!]} />
+        and can split it into blocks
+        <InlineCitation index={[2, 3]} sources={[demoSources[1]!, demoSources[2]!]} />. Without numbers the chip shows the site
+        <InlineCitation sources={[demoSources[1]!]} />.
+      </span>
+    </p>
+  );
+}
+
+const doc: ComponentDoc = {
+  slug: "inline-citation",
+  title: "Inline citation",
+  category: "AI",
+  description: "A small numbered chip after a claim. Hover it, or press Enter, to open a card with the source; several sources page with previous / next.",
+  imports: `import { InlineCitation, type CitationSource } from "@/components/ui/inline-citation/inline-citation";`,
+  baseUi: { name: "Popover", href: "https://base-ui.com/react/components/popover" },
+  examples: examples(raw, [["InText", InText, { title: "Single and multiple sources", wide: true }]]),
+  props: [
+    {
+      component: "InlineCitation",
+      rows: [
+        { name: "sources", type: "CitationSource[]", required: true, description: "{ title, href?, siteName?, description?, quote?, icon? }" },
+        { name: "index", type: "number | number[]", description: "Citation number(s) shown in the chip and its name." },
+        { name: "label", type: "ReactNode", description: "Override the chip text (keep it in the accessible name)." },
+        { name: "side", type: '"top" | "bottom"', default: '"top"', description: "Preferred side of the card." },
+      ],
+    },
+  ],
+  a11y: [
+    "Built on Base UI Popover with openOnHover: it opens on hover and on click, Enter or Space.",
+    "Opening it by keyboard or click moves focus into the card, so the source link and previous/next buttons are reachable with Tab; Esc closes it and returns focus to the chip.",
+    "The chip is named after the source (“Source 1: Parental leave policy (2025)”), so screen-reader users hear what's cited without opening the card.",
+    "The page position “2 of 3” is announced politely when paging.",
+  ],
+};
+
+export default doc;

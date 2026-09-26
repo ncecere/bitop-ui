@@ -1,7 +1,7 @@
 import type { ComponentType, ReactNode } from "react";
 import type { PropRow } from "../kit/kit";
 
-export type Category = "Actions" | "Forms" | "Overlays" | "Feedback" | "Display" | "Navigation" | "Layout" | "Theming";
+export type Category = "Actions" | "Forms" | "Overlays" | "Feedback" | "Display" | "Navigation" | "Layout" | "AI" | "Theming";
 
 export type DocExample = {
   title: string;

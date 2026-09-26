@@ -2,7 +2,7 @@
  * The docs site shell. It is built entirely from bitop-ui components
  * (AppShell, CommandPalette, Select, ColorModeToggle, Toaster…).
  */
-import { ArrowRight, BookOpen, Box, Download, Home, Moon, Palette } from "lucide-react";
+import { ArrowRight, BookOpen, Box, Download, Home, MessagesSquare, Moon, Palette } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AppShell,
@@ -23,6 +23,7 @@ import { Toaster } from "@/registry/bitop/ui/toast/toast";
 import { TooltipProvider } from "@/registry/bitop/ui/tooltip/tooltip";
 import { docsByCategory, findDoc } from "./content";
 import { ComponentPage } from "./pages/ComponentPage";
+import { ChatExamplePage } from "./pages/ChatExamplePage";
 import { ComponentsIndexPage } from "./pages/ComponentsIndexPage";
 import { HomePage } from "./pages/HomePage";
 import { InstallationPage } from "./pages/InstallationPage";
@@ -61,12 +62,16 @@ const pages = [
   { to: "/components", label: "All components", icon: <Box aria-hidden /> },
 ];
 
+/** The full chat example, listed first in the AI section. */
+const CHAT_EXAMPLE = { to: "/examples/chat", label: "Chat example" };
+
 function Route() {
   const { path } = useRouter();
   if (path === "/") return <HomePage />;
   if (path === "/installation") return <InstallationPage />;
   if (path === "/theming") return <ThemingPage />;
   if (path === "/components") return <ComponentsIndexPage />;
+  if (path === CHAT_EXAMPLE.to) return <ChatExamplePage />;
   const m = path.match(/^\/components\/([a-z-]+)$/);
   const doc = m ? findDoc(m[1]!) : undefined;
   if (doc) return <ComponentPage key={doc.slug} doc={doc} />;
@@ -84,7 +89,7 @@ function DocsShell() {
 
   useEffect(() => {
     const doc = path.startsWith("/components/") ? findDoc(path.slice("/components/".length)) : undefined;
-    const page = pages.find((p) => p.to === path);
+    const page = [...pages, CHAT_EXAMPLE].find((p) => p.to === path);
     document.title = doc ? `${doc.title} · bitop-ui` : page && page.to !== "/" ? `${page.label} · bitop-ui` : "bitop-ui";
   }, [path]);
 
@@ -104,6 +109,10 @@ function DocsShell() {
         onSelect: () => navigate(`/components/${d.slug}`),
       })),
     })),
+    {
+      label: "Examples",
+      items: [{ id: CHAT_EXAMPLE.to, label: CHAT_EXAMPLE.label, icon: <MessagesSquare aria-hidden />, hint: "Example", keywords: ["ai", "chat", "rag"], onSelect: () => navigate(CHAT_EXAMPLE.to) }],
+    },
     {
       label: "Preferences",
       items: [
@@ -129,6 +138,7 @@ function DocsShell() {
               </SidebarSection>
               {groups.map((g) => (
                 <SidebarSection key={g.category} label={g.category}>
+                  {g.category === "AI" && <SidebarItem icon={<MessagesSquare aria-hidden />} label={CHAT_EXAMPLE.label} render={<Link to={CHAT_EXAMPLE.to} />} />}
                   {g.docs.map((d) => (
                     <SidebarItem key={d.slug} label={d.title} render={<Link to={`/components/${d.slug}`} />} />
                   ))}

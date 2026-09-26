@@ -38,8 +38,9 @@ export default defineConfig({
   resolve: {
     alias: { "@": fileURLToPath(new URL(".", import.meta.url)) },
   },
-  // The docs bundle every example eagerly (so each page renders in tests); ~800 kB is expected.
-  build: { outDir: "dist", emptyOutDir: true, sourcemap: false, chunkSizeWarningLimit: 1200 },
+  // The docs bundle every example eagerly (so each page renders in tests); ~1.2 MB is
+  // expected since the AI pages added react-markdown + remark-gfm.
+  build: { outDir: "dist", emptyOutDir: true, sourcemap: false, chunkSizeWarningLimit: 1600 },
   preview: { port: 4173, strictPort: true },
   test: {
     environment: "jsdom",

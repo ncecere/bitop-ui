@@ -108,6 +108,17 @@ const pairs: [string, string, number][] = [
   ["--color-focus-ring", "--color-bg", UI],
   ["--color-focus-ring", "--color-surface", UI],
   ["--color-focus-ring", "--color-surface-raised", UI],
+  // AI items: user message bubble, citation / count chips, code line numbers,
+  // the prompt counter at its limit, the confirmation request card, source rows on hover.
+  ["--color-text", "--color-neutral-subtle", TEXT],
+  ["--color-text-muted", "--color-neutral-subtle", TEXT],
+  ["--color-primary-subtle-text", "--color-primary-subtle", TEXT],
+  ["--color-text-subtle", "--color-surface-sunken", TEXT],
+  ["--color-text-muted", "--color-surface-sunken", TEXT],
+  ["--color-danger-text", "--color-surface-raised", TEXT],
+  ["--color-text", "--color-warning-subtle", TEXT],
+  ["--color-text-muted", "--color-control-hover", TEXT],
+  ["--color-focus-ring", "--color-surface-sunken", UI],
 ];
 
 const isHex = (v: string) => /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v);

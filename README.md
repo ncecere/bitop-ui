@@ -6,8 +6,19 @@ A copy-and-own React component library distributed as a [shadcn registry](https:
 - **Styling** is CSS Modules, one `*.module.css` next to each component.
 - **Theming** is CSS custom properties: structural tokens plus a theme file. No Tailwind, no runtime styling.
 - **WCAG 2.1 AA**: contrast is tested for every theme, and every docs page is checked with axe.
+- **Enforced**: `npm run styling:check` (`scripts/check-styling.mjs`) fails the build on Tailwind/Radix/CSS-in-JS/class-name utilities or other component kits, global CSS in a component folder, literal colours or px inline styles, and interactive components that don't build on Base UI.
 
-The registry has 39 items: `core`, two themes (`theme-neutral`, the default, and the opt-in `theme-uf`) and 36 components, including `app-shell`, `command-palette`, `dialog`, `table`, `field`, `select`, `toast` and `color-mode`.
+The registry has 63 items: `core`, two themes (`theme-neutral`, the default, and the opt-in `theme-uf`) and 60 components, including `app-shell`, `command-palette`, `dialog`, `table`, `field`, `select`, `toast`, `color-mode` and the AI elements below.
+
+### AI elements
+
+Components for chat and agent UIs (docs: the **AI** section and the full **Chat example** page). They are SDK-agnostic: plain props such as `from: "user" | "assistant"`, `streaming`, tool `state: "pending" | "running" | "completed" | "error"` and chat `status: "ready" | "submitted" | "streaming" | "error"`, so any SDK's message parts map onto them.
+
+- Chat essentials: `conversation` (stick-to-bottom log, empty state, scroll button, screen-reader announcer), `message` (bubbles, actions, feedback, branches), `response` (streaming-safe Markdown with `closeMarkdown()`, citations), `reasoning`, `tool`, `sources`, `inline-citation`, `prompt-input`, `suggestion`, `shimmer`, `loader`, `code-block`, plus the `copy-button` helper.
+- Agent UI: `chain-of-thought`, `task`, `plan`, `confirmation`, `context`, `model-selector`, `attachments`, `artifact`, `snippet`, `queue`, `checkpoint`.
+- Dependencies: `react-markdown` and `remark-gfm` (only `response` uses them). No syntax highlighter is bundled: `code-block` takes a `highlight(code, lang)` prop.
+- Inspired by Vercel's [AI Elements](https://github.com/vercel/ai-elements) (Apache-2.0): same component set and composition, original code on Base UI + CSS Modules. See [NOTICE](./NOTICE).
+- Candidates not built yet: canvas / node / edge / connection / controls / panel / toolbar (need xyflow), audio-player, voice and mic selectors, speech-input, transcription, persona (Rive), terminal, sandbox, jsx-preview, web-preview, file-tree, commit, stack-trace, test-results, schema-display, environment-variables, package-info, open-in-chat.
 
 ## Using it in a project
 
@@ -43,6 +54,7 @@ npm run typecheck         # tsc --noEmit (TypeScript 5.9)
 npm test                  # vitest: component tests + axe, theme contrast, every docs page
 npm run registry:build    # shadcn build → public/r/*.json
 npm run registry:validate # consistency checks on registry.json and public/r
+npm run styling:check     # Base UI + CSS Modules + CSS variables policy (scripts/check-styling.mjs)
 npm run build             # registry + docs → dist/ (dist/r is the registry)
 npm run preview           # serve dist/ at http://127.0.0.1:4173
 npm run smoke:consumer    # fresh Vite app + real shadcn CLI install of every item (needs network)
@@ -59,8 +71,9 @@ registry/bitop/ui/themes/     neutral.css (default, light + dark), uf.css (opt-i
 registry/bitop/lib/           core: bitop-utils.ts (cx, dataFlag, Tone)
 docs/src/                     docs site (Vite + React), dogfooding the registry
 docs/src/content/components/  one docs file per component (examples, props, a11y notes)
+docs/src/examples/            larger examples (the full chat example page)
 tests/                        vitest + testing-library + vitest-axe
-scripts/                      registry build/validate, consumer smoke test, browser a11y audit
+scripts/                      registry build/validate, styling policy, consumer smoke test, browser a11y audit
 .github/workflows/ci.yml      typecheck, test, shadcn build, validate, docs build, smoke test, Pages deploy
 ```
 

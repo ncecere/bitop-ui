@@ -143,6 +143,65 @@
       ]
     },
     {
+      "name": "artifact",
+      "type": "registry:ui",
+      "title": "Artifact",
+      "description": "Panel for generated content: header with title and actions, close button and a scrollable body.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/tooltip"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/artifact/artifact.tsx",
+          "type": "registry:ui",
+          "target": "@ui/artifact/artifact.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/artifact/artifact.module.css",
+          "type": "registry:file",
+          "target": "@ui/artifact/artifact.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "attachments",
+      "type": "registry:ui",
+      "title": "Attachments",
+      "description": "File chips with image previews, size, upload state and a remove button.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/spinner",
+        "@bitop/tooltip"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/attachments/attachments.tsx",
+          "type": "registry:ui",
+          "target": "@ui/attachments/attachments.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/attachments/attachments.module.css",
+          "type": "registry:file",
+          "target": "@ui/attachments/attachments.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "avatar",
       "type": "registry:ui",
       "title": "Avatar",
@@ -274,6 +333,35 @@
       ]
     },
     {
+      "name": "chain-of-thought",
+      "type": "registry:ui",
+      "title": "Chain of thought",
+      "description": "Collapsible timeline of an agent's steps with status, descriptions and search-result chips.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/shimmer"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/chain-of-thought/chain-of-thought.tsx",
+          "type": "registry:ui",
+          "target": "@ui/chain-of-thought/chain-of-thought.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/chain-of-thought/chain-of-thought.module.css",
+          "type": "registry:file",
+          "target": "@ui/chain-of-thought/chain-of-thought.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "checkbox",
       "type": "registry:ui",
       "title": "Checkbox",
@@ -299,6 +387,59 @@
       ],
       "categories": [
         "forms"
+      ]
+    },
+    {
+      "name": "checkpoint",
+      "type": "registry:ui",
+      "title": "Checkpoint",
+      "description": "Conversation divider marking a saved state, with a restore action.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/checkpoint/checkpoint.tsx",
+          "type": "registry:ui",
+          "target": "@ui/checkpoint/checkpoint.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/checkpoint/checkpoint.module.css",
+          "type": "registry:file",
+          "target": "@ui/checkpoint/checkpoint.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "code-block",
+      "type": "registry:ui",
+      "title": "Code block",
+      "description": "Code with a language label, copy button, optional line numbers and a pluggable highlighter.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/copy-button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/code-block/code-block.tsx",
+          "type": "registry:ui",
+          "target": "@ui/code-block/code-block.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/code-block/code-block.module.css",
+          "type": "registry:file",
+          "target": "@ui/code-block/code-block.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
       ]
     },
     {
@@ -351,6 +492,119 @@
       ],
       "categories": [
         "overlays"
+      ]
+    },
+    {
+      "name": "confirmation",
+      "type": "registry:ui",
+      "title": "Confirmation",
+      "description": "Tool-approval card: request with approve/reject actions, then an announced accepted or rejected outcome.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/confirmation/confirmation.tsx",
+          "type": "registry:ui",
+          "target": "@ui/confirmation/confirmation.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/confirmation/confirmation.module.css",
+          "type": "registry:file",
+          "target": "@ui/confirmation/confirmation.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "context",
+      "type": "registry:ui",
+      "title": "Context",
+      "description": "Context-window usage ring and card with a meter, token breakdown (input, output, reasoning, cached) and optional cost.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/context/context.tsx",
+          "type": "registry:ui",
+          "target": "@ui/context/context.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/context/context.module.css",
+          "type": "registry:file",
+          "target": "@ui/context/context.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "conversation",
+      "type": "registry:ui",
+      "title": "Conversation",
+      "description": "Chat message log that sticks to the bottom while content streams, with an empty state, scroll-to-latest button and a screen-reader announcer.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/tooltip"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/conversation/conversation.tsx",
+          "type": "registry:ui",
+          "target": "@ui/conversation/conversation.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/conversation/conversation.module.css",
+          "type": "registry:file",
+          "target": "@ui/conversation/conversation.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "copy-button",
+      "type": "registry:ui",
+      "title": "Copy button",
+      "description": "Icon button that copies text and announces the result; useCopyToClipboard for custom triggers.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/tooltip"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/copy-button/copy-button.tsx",
+          "type": "registry:ui",
+          "target": "@ui/copy-button/copy-button.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/copy-button/copy-button.module.css",
+          "type": "registry:file",
+          "target": "@ui/copy-button/copy-button.module.css"
+        }
+      ],
+      "categories": [
+        "actions"
       ]
     },
     {
@@ -520,6 +774,35 @@
       ]
     },
     {
+      "name": "inline-citation",
+      "type": "registry:ui",
+      "title": "Inline citation",
+      "description": "Numbered citation chip that opens a source card on hover or activation, paging through several sources.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/inline-citation/inline-citation.tsx",
+          "type": "registry:ui",
+          "target": "@ui/inline-citation/inline-citation.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/inline-citation/inline-citation.module.css",
+          "type": "registry:file",
+          "target": "@ui/inline-citation/inline-citation.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "input",
       "type": "registry:ui",
       "title": "Input",
@@ -599,6 +882,30 @@
       ]
     },
     {
+      "name": "loader",
+      "type": "registry:ui",
+      "title": "Loader",
+      "description": "Pulsing dots for pending chat states; decorative unless labelled.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/loader/loader.tsx",
+          "type": "registry:ui",
+          "target": "@ui/loader/loader.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/loader/loader.module.css",
+          "type": "registry:file",
+          "target": "@ui/loader/loader.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "menu",
       "type": "registry:ui",
       "title": "Menu",
@@ -626,6 +933,66 @@
       ]
     },
     {
+      "name": "message",
+      "type": "registry:ui",
+      "title": "Message",
+      "description": "A chat turn: user bubble or assistant prose, avatar, action buttons (copy, feedback, retry) and response branches.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/avatar",
+        "@bitop/button",
+        "@bitop/copy-button",
+        "@bitop/tooltip"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/message/message.tsx",
+          "type": "registry:ui",
+          "target": "@ui/message/message.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/message/message.module.css",
+          "type": "registry:file",
+          "target": "@ui/message/message.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "model-selector",
+      "type": "registry:ui",
+      "title": "Model selector",
+      "description": "Searchable model picker grouped by provider, with capability badges (Base UI Combobox).",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/badge"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/model-selector/model-selector.tsx",
+          "type": "registry:ui",
+          "target": "@ui/model-selector/model-selector.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/model-selector/model-selector.module.css",
+          "type": "registry:file",
+          "target": "@ui/model-selector/model-selector.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "page-header",
       "type": "registry:ui",
       "title": "Page header",
@@ -647,6 +1014,35 @@
       ],
       "categories": [
         "layout"
+      ]
+    },
+    {
+      "name": "plan",
+      "type": "registry:ui",
+      "title": "Plan",
+      "description": "Collapsible plan card with titled steps, statuses, footer actions and a streaming state.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/shimmer"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/plan/plan.tsx",
+          "type": "registry:ui",
+          "target": "@ui/plan/plan.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/plan/plan.module.css",
+          "type": "registry:file",
+          "target": "@ui/plan/plan.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
       ]
     },
     {
@@ -704,6 +1100,67 @@
       ]
     },
     {
+      "name": "prompt-input",
+      "type": "registry:ui",
+      "title": "Prompt input",
+      "description": "Chat composer form: autosizing textarea (Enter to send, IME-safe), toolbar, attachments and a status-aware send/stop button.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/attachments",
+        "@bitop/button",
+        "@bitop/spinner",
+        "@bitop/tooltip"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/prompt-input/prompt-input.tsx",
+          "type": "registry:ui",
+          "target": "@ui/prompt-input/prompt-input.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/prompt-input/prompt-input.module.css",
+          "type": "registry:file",
+          "target": "@ui/prompt-input/prompt-input.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "queue",
+      "type": "registry:ui",
+      "title": "Queue",
+      "description": "Collapsible list of queued messages or to-dos with completion state and row actions.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/tooltip"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/queue/queue.tsx",
+          "type": "registry:ui",
+          "target": "@ui/queue/queue.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/queue/queue.module.css",
+          "type": "registry:file",
+          "target": "@ui/queue/queue.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "radio-group",
       "type": "registry:ui",
       "title": "Radio group",
@@ -729,6 +1186,71 @@
       ],
       "categories": [
         "forms"
+      ]
+    },
+    {
+      "name": "reasoning",
+      "type": "registry:ui",
+      "title": "Reasoning",
+      "description": "Collapsible model thinking that opens while streaming, closes when done and reports how long it took.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/shimmer"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/reasoning/reasoning.tsx",
+          "type": "registry:ui",
+          "target": "@ui/reasoning/reasoning.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/reasoning/reasoning.module.css",
+          "type": "registry:file",
+          "target": "@ui/reasoning/reasoning.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "response",
+      "type": "registry:ui",
+      "title": "Response",
+      "description": "Streaming-safe Markdown for assistant answers: GFM, code blocks, safe links, citation markers, no raw HTML.",
+      "dependencies": [
+        "react-markdown@^10.1.0",
+        "remark-gfm@^4.0.1"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/code-block",
+        "@bitop/inline-citation",
+        "@bitop/text-link"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/response/response.tsx",
+          "type": "registry:ui",
+          "target": "@ui/response/response.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/response/close-markdown.ts",
+          "type": "registry:ui",
+          "target": "@ui/response/close-markdown.ts"
+        },
+        {
+          "path": "registry/bitop/ui/response/response.module.css",
+          "type": "registry:file",
+          "target": "@ui/response/response.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
       ]
     },
     {
@@ -787,6 +1309,33 @@
       ]
     },
     {
+      "name": "shimmer",
+      "type": "registry:ui",
+      "title": "Shimmer",
+      "description": "Animated text shimmer for in-progress labels; static under reduced motion.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/shimmer/shimmer.tsx",
+          "type": "registry:ui",
+          "target": "@ui/shimmer/shimmer.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/shimmer/shimmer.module.css",
+          "type": "registry:file",
+          "target": "@ui/shimmer/shimmer.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "skeleton",
       "type": "registry:ui",
       "title": "Skeleton",
@@ -808,6 +1357,59 @@
       ],
       "categories": [
         "feedback"
+      ]
+    },
+    {
+      "name": "snippet",
+      "type": "registry:ui",
+      "title": "Snippet",
+      "description": "One-line command with a decorative prompt and a copy button.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/copy-button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/snippet/snippet.tsx",
+          "type": "registry:ui",
+          "target": "@ui/snippet/snippet.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/snippet/snippet.module.css",
+          "type": "registry:file",
+          "target": "@ui/snippet/snippet.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "sources",
+      "type": "registry:ui",
+      "title": "Sources",
+      "description": "Collapsible \"Used N sources\" list with titles, links, snippets and citation numbers.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/sources/sources.tsx",
+          "type": "registry:ui",
+          "target": "@ui/sources/sources.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/sources/sources.module.css",
+          "type": "registry:file",
+          "target": "@ui/sources/sources.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
       ]
     },
     {
@@ -859,6 +1461,31 @@
       ],
       "categories": [
         "display"
+      ]
+    },
+    {
+      "name": "suggestion",
+      "type": "registry:ui",
+      "title": "Suggestion",
+      "description": "Prompt-starter pill buttons that wrap or scroll horizontally.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/suggestion/suggestion.tsx",
+          "type": "registry:ui",
+          "target": "@ui/suggestion/suggestion.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/suggestion/suggestion.module.css",
+          "type": "registry:file",
+          "target": "@ui/suggestion/suggestion.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
       ]
     },
     {
@@ -940,6 +1567,35 @@
       ]
     },
     {
+      "name": "task",
+      "type": "registry:ui",
+      "title": "Task",
+      "description": "Collapsible unit of agent work listing the items and files it touched.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/loader"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/task/task.tsx",
+          "type": "registry:ui",
+          "target": "@ui/task/task.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/task/task.module.css",
+          "type": "registry:file",
+          "target": "@ui/task/task.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "text-link",
       "type": "registry:ui",
       "title": "Text link",
@@ -993,6 +1649,36 @@
       ],
       "categories": [
         "feedback"
+      ]
+    },
+    {
+      "name": "tool",
+      "type": "registry:ui",
+      "title": "Tool",
+      "description": "Collapsible tool call with status badge, JSON parameters and result or error.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/badge",
+        "@bitop/code-block"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/tool/tool.tsx",
+          "type": "registry:ui",
+          "target": "@ui/tool/tool.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/tool/tool.module.css",
+          "type": "registry:file",
+          "target": "@ui/tool/tool.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
       ]
     },
     {

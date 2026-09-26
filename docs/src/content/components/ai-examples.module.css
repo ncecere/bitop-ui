@@ -1,0 +1,52 @@
+/* Docs-only frames for the AI examples. */
+.frame {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 22rem;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 44rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.muted {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.artifact {
+  width: 100%;
+  max-width: 40rem;
+  height: 18rem;
+}
+
+/* A tiny demo highlighter (see the Code block page). */
+.tokKeyword {
+  color: var(--color-primary-subtle-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tokString {
+  color: var(--color-success-text);
+}
+
+.tokComment {
+  color: var(--color-text-muted);
+  font-style: italic;
+}

@@ -6,7 +6,9 @@
 #   2. create a Vite react-ts app, add the @/ alias and a hand-written components.json
 #   3. install core, theme-uf and half the components by direct URL (no namespace)
 #   4. add the @bitop namespace and install the rest as @bitop/<name>
-#   5. render AppShell + Dialog + Table + CommandPalette and run `npm run build`
+#   5. render AppShell + Dialog + Table + CommandPalette and a small AI chat
+#      (Conversation, Message, Response, Reasoning, Tool, Sources, PromptInput,
+#      ModelSelector) and run `npm run build`
 #
 # Usage: scripts/consumer-smoke.sh [workdir]   (needs network for npm)
 set -euo pipefail
@@ -95,6 +97,64 @@ import { Button } from "@/components/ui/button/button";
 import { CommandPalette, CommandPaletteTrigger } from "@/components/ui/command-palette/command-palette";
 import { Dialog, DialogClose } from "@/components/ui/dialog/dialog";
 import { Table, Td, Tr } from "@/components/ui/table/table";
+import { Conversation, ConversationAnnouncer, ConversationContent, ConversationScrollButton } from "@/components/ui/conversation/conversation";
+import { Message, MessageActions, MessageContent, MessageCopyAction } from "@/components/ui/message/message";
+import { ModelSelector } from "@/components/ui/model-selector/model-selector";
+import { PromptInput, PromptInputSubmit, PromptInputTextarea, PromptInputToolbar } from "@/components/ui/prompt-input/prompt-input";
+import { Reasoning, ReasoningContent, ReasoningTrigger } from "@/components/ui/reasoning/reasoning";
+import { Response } from "@/components/ui/response/response";
+import { Source, Sources, SourcesContent, SourcesTrigger } from "@/components/ui/sources/sources";
+import { Tool, ToolContent, ToolHeader, ToolInput } from "@/components/ui/tool/tool";
+
+const sources = [{ title: "Policy", href: "https://example.com/policy" }];
+
+function Chat() {
+  const [text, setText] = useState("Paid leave is **16 weeks** [1].");
+  return (
+    <div style={{ height: "30rem", display: "flex", flexDirection: "column" }}>
+      <Conversation>
+        <ConversationContent>
+          <Message from="user">
+            <MessageContent>What's the policy?</MessageContent>
+          </Message>
+          <Message from="assistant">
+            <MessageContent>
+              <Reasoning duration={2}>
+                <ReasoningTrigger />
+                <ReasoningContent>Checking.</ReasoningContent>
+              </Reasoning>
+              <Tool>
+                <ToolHeader name="search" state="completed" />
+                <ToolContent>
+                  <ToolInput input={{ q: "leave" }} />
+                </ToolContent>
+              </Tool>
+              <Response citations={sources}>{text}</Response>
+              <Sources>
+                <SourcesTrigger count={1} />
+                <SourcesContent>
+                  <Source index={1} title="Policy" href="https://example.com/policy" />
+                </SourcesContent>
+              </Sources>
+            </MessageContent>
+            <MessageActions>
+              <MessageCopyAction value={text} />
+            </MessageActions>
+          </Message>
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
+      <PromptInput onSubmit={({ text: t }) => setText(t)}>
+        <PromptInputTextarea />
+        <PromptInputToolbar>
+          <ModelSelector label="Model" models={[{ id: "m", name: "Model", provider: "Acme" }]} defaultValue="m" />
+          <PromptInputSubmit />
+        </PromptInputToolbar>
+      </PromptInput>
+      <ConversationAnnouncer status="ready" />
+    </div>
+  );
+}
 
 export default function App() {
   const [open, setOpen] = useState(false);
@@ -124,6 +184,7 @@ export default function App() {
             <Td numeric>1</Td>
           </Tr>
         </Table>
+        <Chat />
         <CommandPalette open={open} onOpenChange={setOpen} groups={[{ label: "Go", items: [{ id: "home", label: "Home", onSelect: () => {} }] }]} />
       </Main>
     </AppShell>

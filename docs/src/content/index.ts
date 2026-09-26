@@ -6,7 +6,7 @@ export const componentDocs: ComponentDoc[] = Object.values(modules)
   .map((m) => m.default)
   .sort((a, b) => a.title.localeCompare(b.title));
 
-export const categories: Category[] = ["Actions", "Forms", "Overlays", "Feedback", "Display", "Navigation", "Layout", "Theming"];
+export const categories: Category[] = ["Actions", "Forms", "Overlays", "Feedback", "Display", "Navigation", "Layout", "AI", "Theming"];
 
 export function docsByCategory() {
   return categories

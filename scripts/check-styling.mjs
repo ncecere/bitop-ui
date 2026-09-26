@@ -46,6 +46,7 @@ const DISPLAY_ONLY = new Set([
   "card",
   "empty-state",
   "kbd",
+  "loader", // decorative dots / status text
   "page-header",
   "skeleton",
   "spinner",
