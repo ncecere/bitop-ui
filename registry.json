@@ -144,12 +144,13 @@
       "name": "alert",
       "type": "registry:ui",
       "title": "Alert",
-      "description": "Inline message with tone, title, actions and dismiss; ErrorAlert renders unknown errors.",
+      "description": "Inline message with tone, title, actions and dismiss; ErrorAlert renders unknown errors with status-aware titles and an optional retry button.",
       "dependencies": [
         "lucide-react@^1.48.0"
       ],
       "registryDependencies": [
-        "@bitop/core"
+        "@bitop/core",
+        "@bitop/button"
       ],
       "files": [
         {
