@@ -62,7 +62,7 @@ export function BarChart<K extends string>({
   const pct = (v: number) => `${peak > 0 ? (Math.max(0, v) / peak) * 100 : 0}%`;
 
   return (
-    <figure className={cx(styles.root, className)} data-size={size}>
+    <figure className={cx(styles.root, className)} data-size={size} data-layout={layout}>
       {legend && series.length > 0 && (
         <ul className={styles.legend}>
           {series.map((s, i) => (

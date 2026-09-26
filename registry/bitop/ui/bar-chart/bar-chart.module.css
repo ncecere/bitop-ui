@@ -108,7 +108,8 @@
   inset: auto 0 0;
 }
 
-.bars[data-layout="overlap"] .bar:first-child {
+.bars[data-layout="overlap"] .bar:first-child,
+.root[data-layout="overlap"] .legendItem:first-child .swatch {
   opacity: 0.55;
 }
 
