@@ -45,6 +45,8 @@ export type CommandPaletteProps = {
    * returning the new page's heading when a command navigates.
    */
   finalFocus?: BaseDialog.Popup.Props["finalFocus"];
+  /** Class for the dialog popup, merged with the built-in styles (e.g. to scope token overrides). */
+  className?: string;
 };
 
 type Group = { value: string; items: Command[] };
@@ -64,6 +66,7 @@ export function CommandPalette({
   label = "Command palette",
   emptyText = "No results found.",
   finalFocus,
+  className,
 }: CommandPaletteProps) {
   const hintId = useId();
   const items: Group[] = groups.filter((g) => g.items.length > 0).map((g) => ({ value: g.label, items: g.items }));
@@ -78,7 +81,7 @@ export function CommandPalette({
       <BaseDialog.Portal>
         <BaseDialog.Backdrop className={styles.backdrop} />
         <BaseDialog.Viewport className={styles.viewport}>
-          <BaseDialog.Popup className={styles.popup} aria-label={label} finalFocus={finalFocus}>
+          <BaseDialog.Popup className={cx(styles.popup, className)} aria-label={label} finalFocus={finalFocus}>
             <Autocomplete.Root
               open
               inline

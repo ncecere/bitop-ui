@@ -177,4 +177,11 @@ describe("CommandPalette", () => {
     expect(onUsers).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
+
+  it("merges className onto the dialog popup without dropping its own styles", async () => {
+    render(<CommandPalette open onOpenChange={() => {}} groups={[]} className="scoped-palette" />);
+    const dialog = await screen.findByRole("dialog", { name: "Command palette" });
+    expect(dialog).toHaveClass("scoped-palette");
+    expect(dialog.classList.length).toBeGreaterThan(1);
+  });
 });

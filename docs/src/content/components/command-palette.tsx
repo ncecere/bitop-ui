@@ -63,6 +63,7 @@ const doc: ComponentDoc = {
           type: "Dialog.Popup finalFocus",
           description: "Where focus goes on close (default: the opener). Return the new page's heading from a function when a command navigates.",
         },
+        { name: "className", type: "string", description: "Class for the dialog popup, merged with the built-in styles (e.g. to scope token overrides)." },
       ],
     },
     {
