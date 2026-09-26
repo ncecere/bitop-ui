@@ -1,0 +1,4 @@
+/* Global docs-only tweaks (component styles live in CSS Modules). */
+html {
+  scroll-padding-top: calc(var(--topbar-height) + var(--space-4));
+}

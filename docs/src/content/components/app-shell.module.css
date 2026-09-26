@@ -1,0 +1,26 @@
+/* Constrains the full-page shell to a frame inside the docs page. */
+.frame {
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-3);
+}
+
+.frame .shell {
+  min-height: 34rem;
+}
+
+.frame .sidebar {
+  position: relative;
+  height: auto;
+}
+
+.frame .topbar {
+  position: relative;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--space-4);
+}

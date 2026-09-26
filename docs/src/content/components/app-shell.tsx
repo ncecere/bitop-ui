@@ -1,0 +1,199 @@
+import { Bell, Boxes, FileText, Globe, Home, KeyRound, LayoutDashboard, Layers, LogOut, Plus, Rocket, Settings, Shield, Users } from "lucide-react";
+import {
+  AppShell,
+  Brand,
+  Main,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarItem,
+  SidebarModeSwitch,
+  SidebarNav,
+  SidebarSection,
+  SidebarUser,
+  TopBar,
+  WorkspaceSwitcher,
+} from "@/registry/bitop/ui/app-shell/app-shell";
+import { Breadcrumbs } from "@/registry/bitop/ui/breadcrumbs/breadcrumbs";
+import { IconButton } from "@/registry/bitop/ui/button/button";
+import { CommandPaletteTrigger } from "@/registry/bitop/ui/command-palette/command-palette";
+import { MenuGroup, MenuHeader, MenuItem, MenuSeparator } from "@/registry/bitop/ui/menu/menu";
+import { PageHeader } from "@/registry/bitop/ui/page-header/page-header";
+import { StatCard } from "@/registry/bitop/ui/stat-card/stat-card";
+import { toast } from "@/registry/bitop/ui/toast/toast";
+import { type ComponentDoc, examples } from "../types";
+import styles from "./app-shell.module.css";
+import raw from "./app-shell.tsx?raw";
+
+export function Dashboard() {
+  return (
+    <div className={styles.frame}>
+      <AppShell
+        skipTo={null}
+        className={styles.shell}
+        sidebar={
+          <Sidebar className={styles.sidebar}>
+            <SidebarHeader>
+              <Brand name="Acme Cloud" href="#dashboard" />
+              <SidebarModeSwitch
+                label="Portal"
+                items={[
+                  { label: "Workspace", icon: <LayoutDashboard aria-hidden />, href: "#dashboard", current: true },
+                  { label: "Admin", icon: <Shield aria-hidden />, href: "#dashboard", current: false },
+                ]}
+              />
+              <WorkspaceSwitcher name="Acme Inc" description="Owner">
+                <MenuGroup label="Workspaces">
+                  <MenuItem icon={<Boxes aria-hidden />}>Acme Inc</MenuItem>
+                  <MenuItem icon={<Boxes aria-hidden />}>Side project</MenuItem>
+                </MenuGroup>
+                <MenuSeparator />
+                <MenuItem icon={<Plus aria-hidden />}>New workspace</MenuItem>
+              </WorkspaceSwitcher>
+            </SidebarHeader>
+            <SidebarContent>
+              <SidebarNav aria-label="Workspace (example)">
+                <SidebarSection>
+                  <SidebarItem href="#dashboard" icon={<Home aria-hidden />} label="Overview" current />
+                  <SidebarItem href="#dashboard" icon={<Rocket aria-hidden />} label="Deployments" trailing="12" />
+                  <SidebarItem href="#dashboard" icon={<Layers aria-hidden />} label="Projects" />
+                  <SidebarItem href="#dashboard" icon={<KeyRound aria-hidden />} label="API tokens" dot />
+                </SidebarSection>
+                <SidebarSection label="Settings">
+                  <SidebarItem href="#dashboard" icon={<Users aria-hidden />} label="Members" />
+                  <SidebarItem href="#dashboard" icon={<Settings aria-hidden />} label="General" />
+                </SidebarSection>
+              </SidebarNav>
+            </SidebarContent>
+            <SidebarFooter>
+              <SidebarUser name="Ada Lovelace" email="ada@example.com">
+                <MenuHeader>
+                  <strong>Ada Lovelace</strong>
+                  ada@example.com
+                </MenuHeader>
+                <MenuSeparator />
+                <MenuItem icon={<Settings aria-hidden />}>Preferences</MenuItem>
+                <MenuItem icon={<LogOut aria-hidden />}>Sign out</MenuItem>
+              </SidebarUser>
+            </SidebarFooter>
+          </Sidebar>
+        }
+        topbar={
+          <TopBar
+            className={styles.topbar}
+            start={<Breadcrumbs label="Breadcrumb (shell example)" items={[{ label: "Acme Inc", href: "#dashboard" }, { label: "Overview" }]} />}
+            end={
+              <>
+                <CommandPaletteTrigger onClick={() => toast.info("Open your CommandPalette here")} label="Search…" />
+                <IconButton icon={<Bell aria-hidden />} label="Notifications" />
+              </>
+            }
+          />
+        }
+      >
+        <Main id="shell-example-main" render={<div />}>
+          <PageHeader title="Overview" titleAs="h3" description="Your workspace at a glance." />
+          <div className={styles.stats}>
+            <StatCard label="Projects" value="8" icon={<Layers />} />
+            <StatCard label="Deployments" value="1,284" icon={<Rocket />} delta={{ value: "12%", trend: "up" }} />
+            <StatCard label="Visitors today" value="12,902" icon={<Globe />} />
+            <StatCard label="Open incidents" value="0" icon={<FileText />} hint="Last 30 days" />
+          </div>
+        </Main>
+      </AppShell>
+    </div>
+  );
+}
+
+const doc: ComponentDoc = {
+  slug: "app-shell",
+  title: "App shell",
+  category: "Layout",
+  description:
+    "Generic application chrome: a collapsible sidebar (brand, mode switch, workspace switcher, sections, user menu), a top bar and a main landmark with a skip link.",
+  imports: `import {
+  AppShell, Brand, Main, Sidebar, SidebarContent, SidebarFooter, SidebarHeader,
+  SidebarItem, SidebarModeSwitch, SidebarNav, SidebarSection, SidebarToggle,
+  SidebarUser, TopBar, WorkspaceSwitcher, useAppShell,
+} from "@/components/ui/app-shell/app-shell";`,
+  examples: examples(raw, [
+    [
+      "Dashboard",
+      Dashboard,
+      {
+        title: "Dashboard",
+        description: "Use the toggle at the top left to collapse the sidebar; collapsed labels become tooltips. In an app, drop skipTo={null} and render={<div />} and let the shell fill the viewport.",
+        wide: true,
+      },
+    ],
+  ]),
+  props: [
+    {
+      component: "AppShell",
+      rows: [
+        { name: "sidebar / topbar", type: "ReactNode", description: "Usually <Sidebar> and <TopBar>." },
+        { name: "collapsed / defaultCollapsed / onCollapsedChange", type: "boolean / boolean / (c) => void", description: "Sidebar state." },
+        { name: "skipTo", type: "string | null", default: '"main"', description: "Skip-link target id; null omits the link." },
+      ],
+    },
+    {
+      component: "SidebarItem",
+      rows: [
+        { name: "label", type: "ReactNode", required: true, description: "Text; becomes a tooltip when collapsed." },
+        { name: "icon", type: "ReactNode", description: "Decorative icon." },
+        { name: "href / render", type: "string / RenderProp", description: "Plain link or router link." },
+        { name: "current", type: "boolean", description: 'aria-current="page" for plain links.' },
+        { name: "trailing", type: "ReactNode", description: "Count or badge." },
+        { name: "dot", type: "boolean", description: 'Decorative "new" dot (say it in the label if it matters).' },
+      ],
+    },
+    {
+      component: "Brand",
+      rows: [
+        { name: "name", type: "ReactNode", required: true, description: "Product name (link text)." },
+        { name: "logo", type: "ReactNode", description: "Your logo; defaults to a primary tile with a highlight accent." },
+        { name: "href / render", type: "string / RenderProp", default: '"/"', description: "Home link." },
+      ],
+    },
+    {
+      component: "SidebarModeSwitch",
+      rows: [
+        { name: "label", type: "string", required: true, description: "Name of the small navigation landmark." },
+        { name: "items", type: "{ label, icon, href?, render?, current }[]", required: true, description: "Top-level modes, e.g. Workspace and Admin." },
+      ],
+    },
+    {
+      component: "WorkspaceSwitcher / SidebarUser",
+      note: "Children are Menu content (MenuItem, MenuGroup, MenuSeparator, MenuHeader).",
+      rows: [
+        { name: "name", type: "string", required: true, description: "Workspace or user name." },
+        { name: "description / email", type: "ReactNode / string", description: "Second line." },
+        { name: "avatarSrc", type: "string", description: "SidebarUser only." },
+      ],
+    },
+    {
+      component: "TopBar",
+      rows: [
+        { name: "start / end", type: "ReactNode", description: "Left (breadcrumbs) and right (search, actions) content." },
+        { name: "sidebarToggle", type: "boolean", default: "true", description: "Show the collapse button." },
+      ],
+    },
+    {
+      component: "Main",
+      rows: [
+        { name: "id", type: "string", default: '"main"', description: "Skip-link target." },
+        { name: "contained", type: "boolean", default: "true", description: "Wrap in the 1200px Container." },
+        { name: "render", type: "ReactElement", description: "Render another element (e.g. inside a page's <main>)." },
+      ],
+    },
+  ],
+  a11y: [
+    "A skip link to #main is the first focusable element; Main is focusable (tabIndex -1) so the skip lands there.",
+    "The sidebar navigation is a named <nav>; sections are labelled lists and the current page has aria-current=\"page\".",
+    "The collapse toggle has aria-expanded and aria-controls; collapsed labels stay in the accessibility tree and show as tooltips.",
+    "The workspace switcher and user menu announce their purpose (“Current workspace: …”, “Account: …”).",
+  ],
+};
+
+export default doc;

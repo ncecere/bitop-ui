@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="bitop-ui: copy-and-own React components on Base UI, CSS Modules and CSS variables, installed with the shadcn CLI." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>bitop-ui</title>
+    <script>
+      // Apply the saved colour mode and brand before first paint (no flash).
+      (function () {
+        try {
+          var m = localStorage.getItem("bitop-color-mode");
+          var d = m === "dark" || (m !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.dataset.theme = d ? "dark" : "light";
+          var b = localStorage.getItem("bitop-docs-brand");
+          if (b === "uf") document.documentElement.dataset.brand = "uf";
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/docs/src/main.tsx"></script>
+  </body>
+</html>

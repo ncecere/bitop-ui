@@ -10,7 +10,7 @@ export type EmptyStateProps = Omit<ComponentPropsWithRef<"div">, "title"> & {
   /** Primary (and optional secondary) action. */
   action?: ReactNode;
   /** Render the title as a heading at this level (default: a paragraph). */
-  titleAs?: "h2" | "h3" | "h4" | "p";
+  titleAs?: "h1" | "h2" | "h3" | "h4" | "p";
   /** `compact` for use inside tables and small cards. */
   size?: "md" | "compact";
 };

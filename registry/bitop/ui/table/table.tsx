@@ -1,4 +1,6 @@
-import type { ComponentPropsWithRef, CSSProperties, ReactNode } from "react";
+"use client";
+
+import { type ComponentPropsWithRef, type CSSProperties, type ReactNode, useId } from "react";
 import { cx, dataFlag } from "@/registry/bitop/lib/bitop-utils";
 import styles from "./table.module.css";
 
@@ -53,16 +55,28 @@ export function Table({
   className,
   ...props
 }: TableProps) {
+  const captionId = useId();
+  const scrolls = Boolean(maxHeight);
   const wrapStyle: CSSProperties | undefined = maxHeight ? { maxHeight } : undefined;
   return (
-    <div className={styles.wrap} data-framed={dataFlag(framed)} data-scroll={dataFlag(!!maxHeight)} style={wrapStyle}>
+    // A scroll container must be keyboard-focusable (WCAG 2.1.1), so a
+    // height-limited table becomes a focusable region named by its caption.
+    <div
+      className={styles.wrap}
+      data-framed={dataFlag(framed)}
+      data-scroll={dataFlag(scrolls)}
+      style={wrapStyle}
+      {...(scrolls ? { tabIndex: 0, role: "region", "aria-labelledby": captionId } : {})}
+    >
       <table
         {...props}
         data-density={density}
         data-sticky={dataFlag(stickyHeader)}
         className={cx(styles.table, className)}
       >
-        <caption className={showCaption ? styles.caption : "sr-only"}>{caption}</caption>
+        <caption id={captionId} className={showCaption ? styles.caption : "sr-only"}>
+          {caption}
+        </caption>
         <thead>
           <tr>
             {columns.map((c, i) => {

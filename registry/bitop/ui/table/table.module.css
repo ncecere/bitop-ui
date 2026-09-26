@@ -6,6 +6,10 @@
     overflow: auto;
   }
 
+  &[data-scroll]:focus-visible {
+    outline-offset: -2px;
+  }
+
   &[data-framed] {
     border-radius: var(--radius-card);
     background-color: var(--color-surface);

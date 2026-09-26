@@ -3,8 +3,10 @@ import { cx } from "@/registry/bitop/lib/bitop-utils";
 import styles from "./page-header.module.css";
 
 export type PageHeaderProps = Omit<ComponentPropsWithRef<"div">, "title"> & {
-  /** The page's <h1>. */
+  /** The page heading (an <h1> by default). */
   title: ReactNode;
+  /** Heading level, e.g. "h2" when the header sits inside another page. */
+  titleAs?: "h1" | "h2" | "h3";
   description?: ReactNode;
   /** Buttons on the right. */
   actions?: ReactNode;
@@ -14,14 +16,14 @@ export type PageHeaderProps = Omit<ComponentPropsWithRef<"div">, "title"> & {
   meta?: ReactNode;
 };
 
-export function PageHeader({ title, description, actions, breadcrumbs, meta, className, ...props }: PageHeaderProps) {
+export function PageHeader({ title, titleAs: Title = "h1", description, actions, breadcrumbs, meta, className, ...props }: PageHeaderProps) {
   return (
     <div className={cx(styles.header, className)} {...props}>
       {breadcrumbs && <div className={styles.breadcrumbs}>{breadcrumbs}</div>}
       <div className={styles.row}>
         <div className={styles.heading}>
           <div className={styles.titleRow}>
-            <h1 className={styles.title}>{title}</h1>
+            <Title className={styles.title}>{title}</Title>
             {meta && <div className={styles.meta}>{meta}</div>}
           </div>
           {description && <p className={styles.description}>{description}</p>}
