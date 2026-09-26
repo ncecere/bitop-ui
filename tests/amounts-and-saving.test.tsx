@@ -17,6 +17,9 @@ describe("NumberInput", () => {
     expect(formatNumberText("1.5", "en-US", 0)).toBe("1.5");
     expect(formatNumberText("1.25", "en-US", 2)).toBe("1.25");
     expect(formatNumberText("1234567.5", "de-DE", 2)).toBe("1.234.567,5");
+    // Past 2^53 the shown amount must still be the stored one.
+    expect(formatNumberText("9007199254740993", "en-US")).toBe("9,007,199,254,740,993");
+    expect(formatNumberText("12345678901234567890", "en-US")).toBe("12,345,678,901,234,567,890");
     expect(parseNumberText("2,000,000", "en-US")).toBe("2000000");
     expect(parseNumberText(" 1 234,5 ", "de-DE")).toBe("1234.5");
     expect(parseNumberText("1.234,5", "de-DE")).toBe("1234.5");

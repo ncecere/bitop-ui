@@ -47,7 +47,9 @@ export function formatNumberText(value: string, locale?: string, maximumFraction
   const t = value.trim();
   const m = /^-?\d+(?:\.(\d+))?$/.exec(t);
   if (!m || (m[1]?.length ?? 0) > maximumFractionDigits) return value;
-  return new Intl.NumberFormat(locale, { maximumFractionDigits, useGrouping: true }).format(Number(t));
+  // Format the decimal string itself: Number() would round past 2^53 and show a
+  // different amount than the one stored.
+  return new Intl.NumberFormat(locale, { maximumFractionDigits, useGrouping: true }).format(t as Intl.StringNumericLiteral);
 }
 
 /** "50,000" → "50000", "1,5" → "1.5" (de). Text that isn't a number comes back without separators only. */
