@@ -45,7 +45,7 @@ export function useRouter() {
 export type LinkProps = Omit<ComponentPropsWithRef<"a">, "href"> & { to: string };
 
 /** An <a> that navigates client-side. Sets aria-current="page" on the active route. */
-export function Link({ to, onClick, ...props }: LinkProps) {
+export function Link({ to, onClick, "aria-current": ariaCurrent, ...props }: LinkProps) {
   const { path, navigate } = useRouter();
   const handle = (e: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(e);
@@ -53,5 +53,6 @@ export function Link({ to, onClick, ...props }: LinkProps) {
     e.preventDefault();
     navigate(to);
   };
-  return <a href={toHref(to)} aria-current={path === to.split("#")[0] ? "page" : undefined} onClick={handle} {...props} />;
+  // Props first: components that render through us (useRender) pass href: undefined.
+  return <a {...props} href={toHref(to)} aria-current={ariaCurrent ?? (path === to.split("#")[0] ? "page" : undefined)} onClick={handle} />;
 }

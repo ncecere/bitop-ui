@@ -30,6 +30,8 @@ describe.each(pages)("docs page %s", (path) => {
     const { container } = render(<App initialPath={path} />);
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByRole("main")).toBeInTheDocument();
+    // Router links rendered through components (useRender) must keep their href.
+    for (const a of container.querySelectorAll("nav a")) expect(a).toHaveAttribute("href");
     expect(await axe(container)).toHaveNoViolations();
   }, 30_000);
 });

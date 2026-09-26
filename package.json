@@ -17,7 +17,8 @@
     "registry:validate": "node scripts/validate-registry.mjs",
     "docs:build": "vite build",
     "preview": "vite preview",
-    "check": "npm run typecheck && npm run test && npm run build && npm run registry:validate"
+    "check": "npm run typecheck && npm run test && npm run build && npm run registry:validate",
+    "a11y:browser": "node scripts/a11y-docs.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.8.0",
