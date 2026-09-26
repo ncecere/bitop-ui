@@ -1,0 +1,1048 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "bitop",
+  "homepage": "https://github.com/OWNER/bitop-ui",
+  "items": [
+    {
+      "name": "core",
+      "type": "registry:lib",
+      "title": "Core",
+      "description": "Design tokens, base styles (reset, focus ring, reduced motion), the Inter font, shared popup styles and the cx/dataFlag helpers. Every component depends on it.",
+      "dependencies": [
+        "@fontsource-variable/inter@^5.2.0"
+      ],
+      "registryDependencies": [
+        "@bitop/theme-neutral"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/lib/bitop-utils.ts",
+          "type": "registry:lib",
+          "target": "@lib/bitop-utils.ts"
+        },
+        {
+          "path": "registry/bitop/ui/styles/bitop.css",
+          "type": "registry:file",
+          "target": "@ui/styles/bitop.css"
+        },
+        {
+          "path": "registry/bitop/ui/styles/tokens.css",
+          "type": "registry:file",
+          "target": "@ui/styles/tokens.css"
+        },
+        {
+          "path": "registry/bitop/ui/styles/global.css",
+          "type": "registry:file",
+          "target": "@ui/styles/global.css"
+        },
+        {
+          "path": "registry/bitop/ui/styles/popup.module.css",
+          "type": "registry:file",
+          "target": "@ui/styles/popup.module.css"
+        }
+      ],
+      "docs": "bitop-ui: import \"@/components/ui/styles/bitop.css\" once at your app entry (e.g. src/main.tsx), before other CSS. See the installation guide for the Vite/TypeScript requirements.",
+      "categories": [
+        "foundation"
+      ]
+    },
+    {
+      "name": "theme-neutral",
+      "type": "registry:theme",
+      "title": "Neutral theme",
+      "description": "The default theme: cool slate neutrals with an indigo accent, light and dark (data-theme=\"dark\").",
+      "files": [
+        {
+          "path": "registry/bitop/ui/themes/neutral.css",
+          "type": "registry:file",
+          "target": "@ui/themes/neutral.css"
+        }
+      ],
+      "categories": [
+        "theme"
+      ]
+    },
+    {
+      "name": "theme-uf",
+      "type": "registry:theme",
+      "title": "UF theme",
+      "description": "Opt-in University of Florida brand override (blue #0021A5, orange #FA4616) for light and dark. Apply with data-brand=\"uf\".",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/themes/uf.css",
+          "type": "registry:file",
+          "target": "@ui/themes/uf.css"
+        }
+      ],
+      "categories": [
+        "theme"
+      ],
+      "docs": "bitop-ui: import \"@/components/ui/themes/uf.css\" after bitop.css and set data-brand=\"uf\" on <html>."
+    },
+    {
+      "name": "alert",
+      "type": "registry:ui",
+      "title": "Alert",
+      "description": "Inline message with tone, title, actions and dismiss; ErrorAlert renders unknown errors.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/alert/alert.tsx",
+          "type": "registry:ui",
+          "target": "@ui/alert/alert.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/alert/alert.module.css",
+          "type": "registry:file",
+          "target": "@ui/alert/alert.module.css"
+        }
+      ],
+      "categories": [
+        "feedback"
+      ]
+    },
+    {
+      "name": "app-shell",
+      "type": "registry:ui",
+      "title": "App shell",
+      "description": "Collapsible sidebar, mode switch, workspace switcher, user menu, top bar and main landmark.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/avatar",
+        "@bitop/button",
+        "@bitop/layout",
+        "@bitop/menu",
+        "@bitop/tooltip"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/app-shell/app-shell.tsx",
+          "type": "registry:ui",
+          "target": "@ui/app-shell/app-shell.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/app-shell/app-shell.module.css",
+          "type": "registry:file",
+          "target": "@ui/app-shell/app-shell.module.css"
+        }
+      ],
+      "categories": [
+        "layout"
+      ]
+    },
+    {
+      "name": "avatar",
+      "type": "registry:ui",
+      "title": "Avatar",
+      "description": "Image or initials avatar with circle and square shapes.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/avatar/avatar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/avatar/avatar.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/avatar/avatar.module.css",
+          "type": "registry:file",
+          "target": "@ui/avatar/avatar.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
+      "name": "badge",
+      "type": "registry:ui",
+      "title": "Badge",
+      "description": "Badges, StatusBadge and StatusDot with shared tones.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/badge/badge.tsx",
+          "type": "registry:ui",
+          "target": "@ui/badge/badge.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/badge/badge.module.css",
+          "type": "registry:file",
+          "target": "@ui/badge/badge.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
+      "name": "breadcrumbs",
+      "type": "registry:ui",
+      "title": "Breadcrumbs",
+      "description": "Breadcrumb trail with a current page and optional icons.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/breadcrumbs/breadcrumbs.tsx",
+          "type": "registry:ui",
+          "target": "@ui/breadcrumbs/breadcrumbs.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/breadcrumbs/breadcrumbs.module.css",
+          "type": "registry:file",
+          "target": "@ui/breadcrumbs/breadcrumbs.module.css"
+        }
+      ],
+      "categories": [
+        "navigation"
+      ]
+    },
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "description": "Button and IconButton: variants, sizes, loading and render-as-link.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/spinner"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/button/button.tsx",
+          "type": "registry:ui",
+          "target": "@ui/button/button.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/button/button.module.css",
+          "type": "registry:file",
+          "target": "@ui/button/button.module.css"
+        }
+      ],
+      "categories": [
+        "actions"
+      ]
+    },
+    {
+      "name": "card",
+      "type": "registry:ui",
+      "title": "Card",
+      "description": "Card surface with header, body and footer parts.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/card/card.tsx",
+          "type": "registry:ui",
+          "target": "@ui/card/card.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/card/card.module.css",
+          "type": "registry:file",
+          "target": "@ui/card/card.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
+      "name": "checkbox",
+      "type": "registry:ui",
+      "title": "Checkbox",
+      "description": "Checkbox and CheckboxGroup with labels, descriptions and indeterminate state.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/checkbox/checkbox.tsx",
+          "type": "registry:ui",
+          "target": "@ui/checkbox/checkbox.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/checkbox/checkbox.module.css",
+          "type": "registry:file",
+          "target": "@ui/checkbox/checkbox.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
+      "name": "color-mode",
+      "type": "registry:ui",
+      "title": "Color mode",
+      "description": "Light/dark mode hook, no-flash script and a toggle button.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/color-mode/color-mode.tsx",
+          "type": "registry:ui",
+          "target": "@ui/color-mode/color-mode.tsx"
+        }
+      ],
+      "categories": [
+        "theming"
+      ]
+    },
+    {
+      "name": "command-palette",
+      "type": "registry:ui",
+      "title": "Command palette",
+      "description": "Cmd/Ctrl+K palette with grouped, filterable commands.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/kbd"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/command-palette/command-palette.tsx",
+          "type": "registry:ui",
+          "target": "@ui/command-palette/command-palette.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/command-palette/command-palette.module.css",
+          "type": "registry:file",
+          "target": "@ui/command-palette/command-palette.module.css"
+        }
+      ],
+      "categories": [
+        "overlays"
+      ]
+    },
+    {
+      "name": "copy-field",
+      "type": "registry:ui",
+      "title": "Copy field",
+      "description": "Read-only value with a copy button and a live status message.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/copy-field/copy-field.tsx",
+          "type": "registry:ui",
+          "target": "@ui/copy-field/copy-field.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/copy-field/copy-field.module.css",
+          "type": "registry:file",
+          "target": "@ui/copy-field/copy-field.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
+      "name": "dialog",
+      "type": "registry:ui",
+      "title": "Dialog",
+      "description": "Dialog and AlertDialog with focus trapping, sizes and busy/error states.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/alert",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/dialog/dialog.tsx",
+          "type": "registry:ui",
+          "target": "@ui/dialog/dialog.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/dialog/dialog.module.css",
+          "type": "registry:file",
+          "target": "@ui/dialog/dialog.module.css"
+        }
+      ],
+      "categories": [
+        "overlays"
+      ]
+    },
+    {
+      "name": "disclosure",
+      "type": "registry:ui",
+      "title": "Disclosure",
+      "description": "Collapsible section with a summary of its current values.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/disclosure/disclosure.tsx",
+          "type": "registry:ui",
+          "target": "@ui/disclosure/disclosure.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/disclosure/disclosure.module.css",
+          "type": "registry:file",
+          "target": "@ui/disclosure/disclosure.module.css"
+        }
+      ],
+      "categories": [
+        "disclosure"
+      ]
+    },
+    {
+      "name": "drop-zone",
+      "type": "registry:ui",
+      "title": "Drop zone",
+      "description": "Keyboard-operable file picker with drag and drop as an enhancement.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/drop-zone/drop-zone.tsx",
+          "type": "registry:ui",
+          "target": "@ui/drop-zone/drop-zone.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/drop-zone/drop-zone.module.css",
+          "type": "registry:file",
+          "target": "@ui/drop-zone/drop-zone.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
+      "name": "empty-state",
+      "type": "registry:ui",
+      "title": "Empty state",
+      "description": "Icon, title, description and actions for empty views.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/empty-state/empty-state.tsx",
+          "type": "registry:ui",
+          "target": "@ui/empty-state/empty-state.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/empty-state/empty-state.module.css",
+          "type": "registry:file",
+          "target": "@ui/empty-state/empty-state.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
+      "name": "field",
+      "type": "registry:ui",
+      "title": "Field",
+      "description": "Field, Fieldset, Form and FormActions that wire labels, descriptions and errors.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/field/field.tsx",
+          "type": "registry:ui",
+          "target": "@ui/field/field.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/field/field.module.css",
+          "type": "registry:file",
+          "target": "@ui/field/field.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
+      "name": "input",
+      "type": "registry:ui",
+      "title": "Input",
+      "description": "Input, Textarea and NativeSelect controls.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/input/input.tsx",
+          "type": "registry:ui",
+          "target": "@ui/input/input.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/input/input.module.css",
+          "type": "registry:file",
+          "target": "@ui/input/input.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
+      "name": "kbd",
+      "type": "registry:ui",
+      "title": "Kbd",
+      "description": "Keyboard keys and platform-aware shortcuts.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/kbd/kbd.tsx",
+          "type": "registry:ui",
+          "target": "@ui/kbd/kbd.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/kbd/kbd.module.css",
+          "type": "registry:file",
+          "target": "@ui/kbd/kbd.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
+      "name": "layout",
+      "type": "registry:ui",
+      "title": "Layout",
+      "description": "Stack, Inline and Container layout primitives.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/layout/layout.tsx",
+          "type": "registry:ui",
+          "target": "@ui/layout/layout.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/layout/layout.module.css",
+          "type": "registry:file",
+          "target": "@ui/layout/layout.module.css"
+        }
+      ],
+      "categories": [
+        "layout"
+      ]
+    },
+    {
+      "name": "menu",
+      "type": "registry:ui",
+      "title": "Menu",
+      "description": "Dropdown menu with items, link items, groups, separators and a header.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/menu/menu.tsx",
+          "type": "registry:ui",
+          "target": "@ui/menu/menu.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/menu/menu.module.css",
+          "type": "registry:file",
+          "target": "@ui/menu/menu.module.css"
+        }
+      ],
+      "categories": [
+        "overlays"
+      ]
+    },
+    {
+      "name": "page-header",
+      "type": "registry:ui",
+      "title": "Page header",
+      "description": "Page title with breadcrumbs, meta, description and actions.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/page-header/page-header.tsx",
+          "type": "registry:ui",
+          "target": "@ui/page-header/page-header.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/page-header/page-header.module.css",
+          "type": "registry:file",
+          "target": "@ui/page-header/page-header.module.css"
+        }
+      ],
+      "categories": [
+        "layout"
+      ]
+    },
+    {
+      "name": "popover",
+      "type": "registry:ui",
+      "title": "Popover",
+      "description": "Popover with title and description.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/popover/popover.tsx",
+          "type": "registry:ui",
+          "target": "@ui/popover/popover.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/popover/popover.module.css",
+          "type": "registry:file",
+          "target": "@ui/popover/popover.module.css"
+        }
+      ],
+      "categories": [
+        "overlays"
+      ]
+    },
+    {
+      "name": "progress",
+      "type": "registry:ui",
+      "title": "Progress",
+      "description": "Labelled determinate and indeterminate progress bar.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/progress/progress.tsx",
+          "type": "registry:ui",
+          "target": "@ui/progress/progress.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/progress/progress.module.css",
+          "type": "registry:file",
+          "target": "@ui/progress/progress.module.css"
+        }
+      ],
+      "categories": [
+        "feedback"
+      ]
+    },
+    {
+      "name": "radio-group",
+      "type": "registry:ui",
+      "title": "Radio group",
+      "description": "Radio group with default and card variants.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/radio-group/radio-group.tsx",
+          "type": "registry:ui",
+          "target": "@ui/radio-group/radio-group.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/radio-group/radio-group.module.css",
+          "type": "registry:file",
+          "target": "@ui/radio-group/radio-group.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
+      "name": "select",
+      "type": "registry:ui",
+      "title": "Select",
+      "description": "Custom select for options with rich content.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/select/select.tsx",
+          "type": "registry:ui",
+          "target": "@ui/select/select.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/select/select.module.css",
+          "type": "registry:file",
+          "target": "@ui/select/select.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
+      "name": "separator",
+      "type": "registry:ui",
+      "title": "Separator",
+      "description": "Horizontal or vertical separator with an optional label.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/separator/separator.tsx",
+          "type": "registry:ui",
+          "target": "@ui/separator/separator.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/separator/separator.module.css",
+          "type": "registry:file",
+          "target": "@ui/separator/separator.module.css"
+        }
+      ],
+      "categories": [
+        "layout"
+      ]
+    },
+    {
+      "name": "skeleton",
+      "type": "registry:ui",
+      "title": "Skeleton",
+      "description": "Skeleton and SkeletonText loading placeholders.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/skeleton/skeleton.tsx",
+          "type": "registry:ui",
+          "target": "@ui/skeleton/skeleton.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/skeleton/skeleton.module.css",
+          "type": "registry:file",
+          "target": "@ui/skeleton/skeleton.module.css"
+        }
+      ],
+      "categories": [
+        "feedback"
+      ]
+    },
+    {
+      "name": "spinner",
+      "type": "registry:ui",
+      "title": "Spinner",
+      "description": "Spinner and Loading status indicators.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/spinner/spinner.tsx",
+          "type": "registry:ui",
+          "target": "@ui/spinner/spinner.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/spinner/spinner.module.css",
+          "type": "registry:file",
+          "target": "@ui/spinner/spinner.module.css"
+        }
+      ],
+      "categories": [
+        "feedback"
+      ]
+    },
+    {
+      "name": "stat-card",
+      "type": "registry:ui",
+      "title": "Stat card",
+      "description": "Metric card with icon, delta and hint.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/stat-card/stat-card.tsx",
+          "type": "registry:ui",
+          "target": "@ui/stat-card/stat-card.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/stat-card/stat-card.module.css",
+          "type": "registry:file",
+          "target": "@ui/stat-card/stat-card.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
+      "name": "switch",
+      "type": "registry:ui",
+      "title": "Switch",
+      "description": "Labelled switch with description and label position.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/switch/switch.tsx",
+          "type": "registry:ui",
+          "target": "@ui/switch/switch.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/switch/switch.module.css",
+          "type": "registry:file",
+          "target": "@ui/switch/switch.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
+      "name": "table",
+      "type": "registry:ui",
+      "title": "Table",
+      "description": "Table with caption, sticky header, density, numeric columns and empty state.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/table/table.tsx",
+          "type": "registry:ui",
+          "target": "@ui/table/table.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/table/table.module.css",
+          "type": "registry:file",
+          "target": "@ui/table/table.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "Tabs",
+      "description": "Tabs (underline and pills) and link-based NavTabs.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/tabs/tabs.tsx",
+          "type": "registry:ui",
+          "target": "@ui/tabs/tabs.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/tabs/tabs.module.css",
+          "type": "registry:file",
+          "target": "@ui/tabs/tabs.module.css"
+        }
+      ],
+      "categories": [
+        "navigation"
+      ]
+    },
+    {
+      "name": "text-link",
+      "type": "registry:ui",
+      "title": "Text link",
+      "description": "Underlined inline link with muted and external variants.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/text-link/text-link.tsx",
+          "type": "registry:ui",
+          "target": "@ui/text-link/text-link.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/text-link/text-link.module.css",
+          "type": "registry:file",
+          "target": "@ui/text-link/text-link.module.css"
+        }
+      ],
+      "categories": [
+        "actions"
+      ]
+    },
+    {
+      "name": "toast",
+      "type": "registry:ui",
+      "title": "Toast",
+      "description": "Toaster region plus the toast API and useToast hook.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/toast/toast.tsx",
+          "type": "registry:ui",
+          "target": "@ui/toast/toast.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/toast/toast.module.css",
+          "type": "registry:file",
+          "target": "@ui/toast/toast.module.css"
+        }
+      ],
+      "categories": [
+        "feedback"
+      ]
+    },
+    {
+      "name": "tooltip",
+      "type": "registry:ui",
+      "title": "Tooltip",
+      "description": "Tooltip with optional shortcut hint.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/tooltip/tooltip.tsx",
+          "type": "registry:ui",
+          "target": "@ui/tooltip/tooltip.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/tooltip/tooltip.module.css",
+          "type": "registry:file",
+          "target": "@ui/tooltip/tooltip.module.css"
+        }
+      ],
+      "categories": [
+        "overlays"
+      ]
+    },
+    {
+      "name": "visually-hidden",
+      "type": "registry:ui",
+      "title": "Visually hidden",
+      "description": "Content for assistive technology only.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/visually-hidden/visually-hidden.tsx",
+          "type": "registry:ui",
+          "target": "@ui/visually-hidden/visually-hidden.tsx"
+        }
+      ],
+      "categories": [
+        "layout"
+      ]
+    }
+  ]
+}
