@@ -20,3 +20,54 @@
     font-weight: var(--font-weight-medium);
   }
 }
+
+/* Checkbox / radio items: a fixed indicator column keeps labels aligned
+   whether or not the item is checked. The checked state is also exposed as
+   aria-checked, so it is never conveyed by the mark alone. */
+.indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.indicatorMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selectable .indicatorMark svg {
+  color: var(--color-text);
+}
+
+.radioDot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-text);
+}
+
+.selectable[data-disabled] .indicatorMark svg {
+  color: currentColor;
+}
+
+.selectable[data-disabled] .radioDot {
+  background-color: currentColor;
+}
+
+.submenuTrigger {
+  &[data-popup-open]:not([data-highlighted]) {
+    background-color: var(--color-surface-hover);
+  }
+}
+
+.chevron {
+  margin-inline-start: auto;
+}
+
+.chevron:dir(rtl) {
+  transform: scaleX(-1);
+}

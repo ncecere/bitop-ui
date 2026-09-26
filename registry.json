@@ -578,6 +578,34 @@
       ]
     },
     {
+      "name": "context-menu",
+      "type": "registry:ui",
+      "title": "Context menu",
+      "description": "Right-click / long-press menu with items, link items, checkbox and radio items, submenus, groups, shortcuts and a danger tone.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/menu"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/context-menu/context-menu.tsx",
+          "type": "registry:ui",
+          "target": "@ui/context-menu/context-menu.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/context-menu/context-menu.module.css",
+          "type": "registry:file",
+          "target": "@ui/context-menu/context-menu.module.css"
+        }
+      ],
+      "categories": [
+        "overlays"
+      ]
+    },
+    {
       "name": "conversation",
       "type": "registry:ui",
       "title": "Conversation",
@@ -722,6 +750,35 @@
       ]
     },
     {
+      "name": "drawer",
+      "type": "registry:ui",
+      "title": "Drawer",
+      "description": "Edge-attached panel (bottom, top, left or right) with swipe-to-dismiss, snap points and header, body, footer and close parts.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/drawer/drawer.tsx",
+          "type": "registry:ui",
+          "target": "@ui/drawer/drawer.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/drawer/drawer.module.css",
+          "type": "registry:file",
+          "target": "@ui/drawer/drawer.module.css"
+        }
+      ],
+      "categories": [
+        "overlays"
+      ]
+    },
+    {
       "name": "drop-zone",
       "type": "registry:ui",
       "title": "Drop zone",
@@ -799,6 +856,33 @@
       ],
       "categories": [
         "forms"
+      ]
+    },
+    {
+      "name": "hover-card",
+      "type": "registry:ui",
+      "title": "Hover card",
+      "description": "A rich preview of a link's destination, shown on hover or focus after a delay.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/hover-card/hover-card.tsx",
+          "type": "registry:ui",
+          "target": "@ui/hover-card/hover-card.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/hover-card/hover-card.module.css",
+          "type": "registry:file",
+          "target": "@ui/hover-card/hover-card.module.css"
+        }
+      ],
+      "categories": [
+        "overlays"
       ]
     },
     {
@@ -937,9 +1021,10 @@
       "name": "menu",
       "type": "registry:ui",
       "title": "Menu",
-      "description": "Dropdown menu with items, link items, groups, separators and a header.",
+      "description": "Dropdown menu with items, link items, checkbox and radio items, submenus, groups, separators and a header.",
       "dependencies": [
-        "@base-ui/react@^1.8.0"
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
       ],
       "registryDependencies": [
         "@bitop/core"
@@ -958,6 +1043,34 @@
       ],
       "categories": [
         "overlays"
+      ]
+    },
+    {
+      "name": "menubar",
+      "type": "registry:ui",
+      "title": "Menubar",
+      "description": "Application-style menubar of menus with items, checkbox and radio items, submenus and shortcuts.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/menu"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/menubar/menubar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/menubar/menubar.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/menubar/menubar.module.css",
+          "type": "registry:file",
+          "target": "@ui/menubar/menubar.module.css"
+        }
+      ],
+      "categories": [
+        "navigation"
       ]
     },
     {
@@ -1018,6 +1131,34 @@
       ],
       "categories": [
         "ai"
+      ]
+    },
+    {
+      "name": "navigation-menu",
+      "type": "registry:ui",
+      "title": "Navigation menu",
+      "description": "Site navigation with top-level links and triggers that reveal content panels in a shared animated popup; links can render router links.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/navigation-menu/navigation-menu.tsx",
+          "type": "registry:ui",
+          "target": "@ui/navigation-menu/navigation-menu.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/navigation-menu/navigation-menu.module.css",
+          "type": "registry:file",
+          "target": "@ui/navigation-menu/navigation-menu.module.css"
+        }
+      ],
+      "categories": [
+        "navigation"
       ]
     },
     {
@@ -1339,6 +1480,35 @@
       ],
       "categories": [
         "layout"
+      ]
+    },
+    {
+      "name": "sheet",
+      "type": "registry:ui",
+      "title": "Sheet",
+      "description": "A modal dialog that slides in from an edge of the screen, with a required title and description, footer and close button.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/sheet/sheet.tsx",
+          "type": "registry:ui",
+          "target": "@ui/sheet/sheet.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/sheet/sheet.module.css",
+          "type": "registry:file",
+          "target": "@ui/sheet/sheet.module.css"
+        }
+      ],
+      "categories": [
+        "overlays"
       ]
     },
     {
