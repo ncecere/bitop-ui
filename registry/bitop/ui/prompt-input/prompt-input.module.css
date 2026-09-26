@@ -100,6 +100,10 @@
 .submit {
   margin-inline-start: auto;
   border-radius: var(--radius-full);
+
+  &[data-labelled] {
+    padding-inline: var(--space-3) var(--space-4);
+  }
 }
 
 .stopIcon {

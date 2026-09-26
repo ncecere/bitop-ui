@@ -137,6 +137,8 @@ const doc: ComponentDoc = {
         { name: "status", type: "ChatStatus", description: "Defaults to PromptInput's." },
         { name: "onStop", type: "() => void", description: "Defaults to PromptInput's." },
         { name: "labels", type: "{ send?, stop?, sending? }", description: '"Send message", "Stop generating", "Sending message".' },
+        { name: "showLabel", type: "boolean", default: "false", description: 'Show "Send" / "Stop" as text next to the icon (no tooltip).' },
+        { name: "shortLabels", type: "{ send?, stop?, sending? }", description: "The visible text with showLabel; keep each one contained in the matching label (WCAG 2.5.3)." },
       ],
     },
     { component: "PromptInputAttachments / PromptInputAttachButton", rows: [], note: "Chips for the attached files (removing one returns focus to the textarea) and the “Attach files” button." },

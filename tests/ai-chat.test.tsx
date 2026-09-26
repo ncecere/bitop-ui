@@ -579,3 +579,28 @@ describe("citation → source jump, tool summary, avatar colour", () => {
   });
 });
 
+describe("PromptInputSubmit showLabel", () => {
+  it("shows Send / Stop text whose words are part of the accessible name, and Stop still works", async () => {
+    const user = userEvent.setup();
+    const onStop = vi.fn();
+    const { rerender } = render(
+      <PromptInput onSubmit={() => {}}>
+        <PromptInputTextarea defaultValue="hi" />
+        <PromptInputSubmit showLabel />
+      </PromptInput>,
+    );
+    const send = screen.getByRole("button", { name: "Send message" });
+    expect(send).toHaveTextContent("Send");
+    rerender(
+      <PromptInput onSubmit={() => {}} status="streaming" onStop={onStop}>
+        <PromptInputTextarea defaultValue="hi" />
+        <PromptInputSubmit showLabel />
+      </PromptInput>,
+    );
+    const stop = screen.getByRole("button", { name: "Stop generating" });
+    expect(stop).toHaveTextContent("Stop");
+    await user.click(stop);
+    expect(onStop).toHaveBeenCalledOnce();
+  });
+});
+

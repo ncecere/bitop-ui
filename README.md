@@ -32,6 +32,7 @@ Full guide: the docs site's **Installation** page. In short, for a Vite + React 
    ```
 
    See `docs/src/pages/InstallationPage.tsx` for the complete file.
+   Until the registry is hosted, build and serve it from a checkout of this repo (`npm run registry:build && npm run registry:serve`) and use `"@bitop": "http://127.0.0.1:4180/r/{name}.json"`.
 3. Install the core (tokens, base styles, font, helpers; pulls in the neutral theme) and components:
 
    ```bash
@@ -54,6 +55,7 @@ npm run typecheck         # tsc --noEmit (TypeScript 5.9)
 npm test                  # vitest: component tests + axe, theme contrast, every docs page
 npm run registry:build    # shadcn build → public/r/*.json
 npm run registry:validate # consistency checks on registry.json and public/r
+npm run registry:serve    # serve public/r at http://127.0.0.1:4180/r/{name}.json for local installs (REGISTRY_PORT)
 npm run styling:check     # Base UI + CSS Modules + CSS variables policy (scripts/check-styling.mjs)
 npm run build             # registry + docs → dist/ (dist/r is the registry)
 npm run preview           # serve dist/ at http://127.0.0.1:4173

@@ -470,29 +470,75 @@ export type PromptInputSubmitProps = Omit<ButtonProps, "iconOnly" | "aria-label"
   onStop?: () => void;
   /** Labels per state. */
   labels?: Partial<{ send: string; stop: string; sending: string }>;
+  /** Show a short visible label next to the icon ("Send" / "Stop") instead of a tooltip. */
+  showLabel?: boolean;
+  /** The visible labels with showLabel. */
+  shortLabels?: Partial<{ send: string; stop: string; sending: string }>;
 };
 
-export function PromptInputSubmit({ status: statusProp, onStop: onStopProp, labels, className, disabled, onClick, ...props }: PromptInputSubmitProps) {
+export function PromptInputSubmit({
+  status: statusProp,
+  onStop: onStopProp,
+  labels,
+  showLabel = false,
+  shortLabels,
+  className,
+  disabled,
+  onClick,
+  ...props
+}: PromptInputSubmitProps) {
   const ctx = usePromptInput();
   const status = statusProp ?? ctx.status;
   const onStop = onStopProp ?? ctx.onStop;
   const text = { send: "Send message", stop: "Stop generating", sending: "Sending message", ...labels };
+  const short = { send: "Send", stop: "Stop", sending: "Sending", ...shortLabels };
 
   let label = text.send;
+  let visible = short.send;
   let icon: ReactNode = <ArrowUp aria-hidden />;
   let type: "submit" | "button" = "submit";
   let inactive = disabled || ctx.disabled || (!ctx.hasText && ctx.files.length === 0);
   let stop = false;
   if (status === "streaming" || (status === "submitted" && onStop)) {
     label = text.stop;
+    visible = short.stop;
     icon = status === "submitted" ? <Spinner size="sm" /> : <Square aria-hidden className={styles.stopIcon} />;
     type = "button";
     stop = true;
     inactive = disabled || !onStop;
   } else if (status === "submitted") {
     label = text.sending;
+    visible = short.sending;
     icon = <Spinner size="sm" />;
     inactive = true;
+  }
+
+  const handleClick: ButtonProps["onClick"] = (e) => {
+    onClick?.(e);
+    if (stop && !e.defaultPrevented) {
+      e.preventDefault();
+      onStop?.();
+    }
+  };
+
+  if (showLabel) {
+    return (
+      <Button
+        {...props}
+        type={type}
+        variant="primary"
+        size="sm"
+        aria-label={label}
+        data-status={status}
+        data-labelled=""
+        disabled={inactive}
+        className={cx(styles.submit, className)}
+        onClick={handleClick}
+      >
+        {icon}
+        <span aria-hidden>{visible}</span>
+      </Button>
+    );
   }
 
   return (
@@ -507,13 +553,7 @@ export function PromptInputSubmit({ status: statusProp, onStop: onStopProp, labe
         data-status={status}
         disabled={inactive}
         className={cx(styles.submit, className)}
-        onClick={(e) => {
-          onClick?.(e);
-          if (stop && !e.defaultPrevented) {
-            e.preventDefault();
-            onStop?.();
-          }
-        }}
+        onClick={handleClick}
       >
         {icon}
       </Button>

@@ -16,6 +16,7 @@
     "test:watch": "vitest",
     "registry:build": "node scripts/build-registry.mjs",
     "registry:validate": "node scripts/validate-registry.mjs",
+    "registry:serve": "node scripts/serve-registry.mjs",
     "styling:check": "node scripts/check-styling.mjs",
     "docs:build": "vite build",
     "preview": "vite preview",
