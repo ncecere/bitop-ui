@@ -24,6 +24,7 @@ Examples below assume the local CLI is installed:
 npx --no-install bitop list                   # available items (* = recorded in lock file)
 npx --no-install bitop add button dialog     # includes transitive registry/npm dependencies
 npx --no-install bitop diff button           # compare to registry; no writes or installs
+npx --no-install bitop diff                  # compare every item recorded in bitop-lock.json
 npx --no-install bitop update                # refresh all recorded items
 npx --no-install bitop update button         # refresh selected item and dependencies
 npx --no-install bitop add button --overwrite # replace differing files, including local edits
@@ -43,8 +44,19 @@ npx --no-install bitop add button --overwrite # replace differing files, includi
 | `--overwrite` | Replace differing files; for `init`, update the registry configuration. |
 | `--no-install` | Copy files but only print missing npm dependencies to install. |
 | `--verbose` | Include unchanged files in add/update output. |
+| `--check` | Write nothing; exit 1 if any file differs from the registry (missing, outdated or edited). |
 
 The `--no-install` **before** `bitop` controls npx; the one **after** the command controls dependency installation by Bitop.
+
+### Checking for drift in CI
+
+`bitop diff --check` compares every installed item with the registry and exits 1 if anything differs, like `git diff --exit-code`. Run it on a schedule to find out when your copies fall behind the registry or are edited by hand:
+
+```yaml
+- run: npx --no-install bitop diff --check
+```
+
+Exit status 1 also means a command failed (the message then starts with `bitop:` on stderr).
 
 ## Configuration and sources
 

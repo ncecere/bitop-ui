@@ -470,13 +470,18 @@ async function add(names, opts, mode = "add") {
   const registry = openRegistry(config.registry, opts.cwd);
   const lock = readLock(opts.cwd);
   if (!names.length) {
-    if (mode === "update") names = Object.keys(lock.items);
-    if (!names.length) throw new CliError(mode === "update" ? `Nothing to update: ${LOCK_FILE} lists no items.` : "Name at least one item, e.g. bitop add button");
+    // update and diff default to everything the lock file records.
+    if (mode !== "add") names = Object.keys(lock.items);
+    if (!names.length) {
+      throw new CliError(
+        mode === "add" ? "Name at least one item, e.g. bitop add button" : `Name the items to ${mode}: ${LOCK_FILE} lists none.`,
+      );
+    }
   }
   const items = await resolveItems(registry, names.map(itemName));
   const files = plan(config, items, lock, mode, opts.overwrite);
   const deps = missingDependencies(opts.cwd, items);
-  const dry = opts.dryRun || opts.diff;
+  const dry = opts.dryRun || opts.diff || opts.check;
 
   const log = (line) => process.stdout.write(`${line}\n`);
   log(`Registry: ${registry.describe}`);
@@ -537,7 +542,13 @@ async function add(names, opts, mode = "add") {
   }
 
   if (!dry) for (const item of items) if (item.docs && files.some((f) => f.item === item.name && f.status === "create")) log(`\n${item.name}: ${item.docs}`);
-  if (counts.skip && !opts.diff) log(`\n${counts.skip} file(s) skipped. See the changes with --diff; replace them with --overwrite.`);
+  if (counts.skip && !opts.diff && !opts.check) log(`\n${counts.skip} file(s) skipped. See the changes with --diff; replace them with --overwrite.`);
+  if (opts.check) {
+    // For CI: like `git diff --exit-code`, exit 1 when anything differs.
+    const drift = files.filter((f) => f.status !== "unchanged").length;
+    log(drift ? `\nOut of date: ${drift} file(s) differ from the registry.` : "\nUp to date with the registry.");
+    if (drift) process.exitCode = 1;
+  }
 }
 
 async function list(opts) {
@@ -575,7 +586,8 @@ const HELP = `bitop ${VERSION}: copy bitop-ui components into your project
 Usage:
   bitop add <item...>      Install items and their dependencies (core, other items, npm packages)
   bitop update [item...]   Refresh installed items; files you edited are skipped unless --overwrite
-  bitop diff <item...>     Show how your files differ from the registry (writes nothing)
+  bitop diff [item...]     Show how your files differ from the registry (writes nothing;
+                           default: every item in bitop-lock.json)
   bitop list               List the registry's items (* = installed)
   bitop init --registry <source>
                            Write components.json
@@ -588,13 +600,14 @@ Options:
   --diff               Like --dry-run, plus a diff for every file that would change
   --no-install         Write files but only print the npm dependencies to install
   --verbose            Also list unchanged files
+  --check              Write nothing; exit 1 if any file differs from the registry (for CI)
 
 Registry sources: a bitop-ui checkout (../bitop-ui), a built registry
 directory (../bitop-ui/public/r), or a URL/path template with {name}
 (https://host/bitop-ui/r/{name}.json).`;
 
 export function parseArgs(argv) {
-  const opts = { cwd: process.cwd(), registry: undefined, overwrite: false, dryRun: false, diff: false, install: true, verbose: false };
+  const opts = { cwd: process.cwd(), registry: undefined, overwrite: false, dryRun: false, diff: false, check: false, install: true, verbose: false };
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -610,6 +623,7 @@ export function parseArgs(argv) {
     else if (a === "--diff") opts.diff = true;
     else if (a === "--no-install") opts.install = false;
     else if (a === "--verbose") opts.verbose = true;
+    else if (a === "--check") opts.check = true;
     else if (a === "-h" || a === "--help") rest.unshift("help");
     else if (a === "-v" || a === "--version") rest.unshift("version");
     else if (a.startsWith("-")) throw new CliError(`Unknown option ${a}`);
@@ -628,7 +642,7 @@ export async function main(argv) {
     case "update":
       return add(args, opts, "update");
     case "diff":
-      return add(args, { ...opts, diff: true }, "add");
+      return add(args, { ...opts, diff: true }, "diff");
     case "list":
       return list(opts);
     case "init":

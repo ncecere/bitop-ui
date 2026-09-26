@@ -152,6 +152,39 @@ describe("bitop add from a bitop-ui checkout", () => {
     expect(exists(dir, "app/lib/bitop-utils.ts")).toBe(true);
   });
 
+  it("diff --check exits 1 on drift, 0 when current, and defaults to the lock file's items", async () => {
+    const dir = viteProject(repo);
+    await bitop(dir, "add", "button", "--no-install");
+    const clean = await bitop(dir, "diff", "--check");
+    expect(clean.code).toBe(0);
+    expect(clean.stdout).toContain("Items: theme-neutral, core, spinner, button");
+    expect(clean.stdout).toContain("Up to date with the registry.");
+
+    const file = "src/components/ui/spinner/spinner.tsx";
+    const before = read(dir, file);
+    fs.writeFileSync(path.join(dir, file), before + "// local edit\n");
+    const drift = await bitop(dir, "diff", "--check");
+    expect(drift.code).toBe(1);
+    expect(drift.stdout).toContain("Out of date: 1 file(s) differ from the registry.");
+    expect(drift.stdout).toContain("-// local edit");
+    // --check never writes.
+    expect(read(dir, file)).toBe(before + "// local edit\n");
+
+    // A deleted file is drift too; `add --check` works without the diff output.
+    fs.rmSync(path.join(dir, "src/components/ui/button/button.module.css"));
+    const missing = await bitop(dir, "add", "button", "--check", "--no-install");
+    expect(missing.code).toBe(1);
+    expect(missing.stdout).toContain("+ src/components/ui/button/button.module.css");
+    expect(exists(dir, "src/components/ui/button/button.module.css")).toBe(false);
+  });
+
+  it("diff with no items and no lock file explains what to do", async () => {
+    const dir = viteProject(repo);
+    const result = await bitop(dir, "diff");
+    expect(result.code).toBe(1);
+    expect(result.stderr).toContain("Name the items to diff: bitop-lock.json lists none.");
+  });
+
   it("previews new-file contents without writing", async () => {
     const dir = viteProject(repo);
     const result = await bitop(dir, "add", "button", "--diff");
