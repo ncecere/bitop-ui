@@ -523,6 +523,36 @@
       ]
     },
     {
+      "name": "commit",
+      "type": "registry:ui",
+      "title": "Commit",
+      "description": "Commit summary with copyable hash, author, relative time and a collapsible list of changed files.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/avatar",
+        "@bitop/copy-button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/commit/commit.tsx",
+          "type": "registry:ui",
+          "target": "@ui/commit/commit.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/commit/commit.module.css",
+          "type": "registry:file",
+          "target": "@ui/commit/commit.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "confirmation",
       "type": "registry:ui",
       "title": "Confirmation",
@@ -774,6 +804,38 @@
       ]
     },
     {
+      "name": "environment-variables",
+      "type": "registry:ui",
+      "title": "Environment variables",
+      "description": "Env var list with masked values, show/hide per variable and for all, copy and required badges.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/badge",
+        "@bitop/button",
+        "@bitop/copy-button",
+        "@bitop/switch",
+        "@bitop/tooltip"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/environment-variables/environment-variables.tsx",
+          "type": "registry:ui",
+          "target": "@ui/environment-variables/environment-variables.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/environment-variables/environment-variables.module.css",
+          "type": "registry:file",
+          "target": "@ui/environment-variables/environment-variables.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "field",
       "type": "registry:ui",
       "title": "Field",
@@ -799,6 +861,34 @@
       ],
       "categories": [
         "forms"
+      ]
+    },
+    {
+      "name": "file-tree",
+      "type": "registry:ui",
+      "title": "File tree",
+      "description": "Expandable folder/file tree with WAI-ARIA tree semantics, keyboard navigation, type-ahead and selection.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/file-tree/file-tree.tsx",
+          "type": "registry:ui",
+          "target": "@ui/file-tree/file-tree.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/file-tree/file-tree.module.css",
+          "type": "registry:file",
+          "target": "@ui/file-tree/file-tree.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
       ]
     },
     {
@@ -1014,6 +1104,34 @@
           "path": "registry/bitop/ui/model-selector/model-selector.module.css",
           "type": "registry:file",
           "target": "@ui/model-selector/model-selector.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "package-info",
+      "type": "registry:ui",
+      "title": "Package info",
+      "description": "Dependency change card: name, current to new version, change-type badge, description and dependencies.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/badge"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/package-info/package-info.tsx",
+          "type": "registry:ui",
+          "target": "@ui/package-info/package-info.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/package-info/package-info.module.css",
+          "type": "registry:file",
+          "target": "@ui/package-info/package-info.module.css"
         }
       ],
       "categories": [
@@ -1287,6 +1405,36 @@
       ]
     },
     {
+      "name": "schema-display",
+      "type": "registry:ui",
+      "title": "Schema display",
+      "description": "API endpoint or JSON Schema display with parameters, request/response bodies and nested collapsible properties.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/badge",
+        "@bitop/code-block"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/schema-display/schema-display.tsx",
+          "type": "registry:ui",
+          "target": "@ui/schema-display/schema-display.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/schema-display/schema-display.module.css",
+          "type": "registry:file",
+          "target": "@ui/schema-display/schema-display.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "select",
       "type": "registry:ui",
       "title": "Select",
@@ -1470,6 +1618,35 @@
       ]
     },
     {
+      "name": "stack-trace",
+      "type": "registry:ui",
+      "title": "Stack trace",
+      "description": "Parsed error stack with error header, file:line:column frames, collapsed internal frames and copy.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/copy-button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/stack-trace/stack-trace.tsx",
+          "type": "registry:ui",
+          "target": "@ui/stack-trace/stack-trace.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/stack-trace/stack-trace.module.css",
+          "type": "registry:file",
+          "target": "@ui/stack-trace/stack-trace.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "stat-card",
       "type": "registry:ui",
       "title": "Stat card",
@@ -1650,6 +1827,65 @@
           "path": "registry/bitop/ui/task/task.module.css",
           "type": "registry:file",
           "target": "@ui/task/task.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "terminal",
+      "type": "registry:ui",
+      "title": "Terminal",
+      "description": "Terminal output with ANSI colours, streaming auto-scroll, copy and clear.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/copy-button",
+        "@bitop/loader"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/terminal/terminal.tsx",
+          "type": "registry:ui",
+          "target": "@ui/terminal/terminal.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/terminal/terminal.module.css",
+          "type": "registry:file",
+          "target": "@ui/terminal/terminal.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "test-results",
+      "type": "registry:ui",
+      "title": "Test results",
+      "description": "Test run summary with pass-rate bar, suites, test statuses and collapsible error details.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/badge"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/test-results/test-results.tsx",
+          "type": "registry:ui",
+          "target": "@ui/test-results/test-results.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/test-results/test-results.module.css",
+          "type": "registry:file",
+          "target": "@ui/test-results/test-results.module.css"
         }
       ],
       "categories": [

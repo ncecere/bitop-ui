@@ -1,0 +1,236 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--radius-3);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-ring);
+  font-size: var(--font-size-sm);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.method {
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.02em;
+}
+
+.path {
+  min-width: 0;
+  color: var(--color-text);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.pathParam {
+  color: var(--color-primary-subtle-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+.description {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-normal);
+}
+
+.section + .section {
+  border-top: 1px solid var(--color-border);
+}
+
+.sectionTrigger,
+.propertyTrigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-out);
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--color-surface-hover);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: -2px;
+  }
+}
+
+.sectionTrigger {
+  min-height: var(--control-height-lg);
+  padding: var(--space-2) var(--space-4);
+}
+
+.sectionTitle {
+  font-weight: var(--font-weight-semibold);
+}
+
+.count {
+  margin-inline-start: auto;
+}
+
+.chevron {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--color-text-muted);
+  transition: transform var(--motion-duration-fast) var(--motion-ease-out);
+
+  [data-panel-open] > & {
+    transform: rotate(90deg);
+  }
+}
+
+.spacer {
+  flex: none;
+  width: 0.875rem;
+}
+
+.panel {
+  height: var(--collapsible-panel-height);
+  overflow: hidden;
+  transition: height var(--motion-duration-normal) var(--motion-ease-out);
+
+  &[hidden]:not([hidden="until-found"]) {
+    display: none;
+  }
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    height: 0;
+  }
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-border);
+  list-style: none;
+
+  /* Nested properties indent under their parent's name. */
+  & & {
+    margin-inline-start: var(--space-5);
+    border-top: 0;
+    border-inline-start: 1px solid var(--color-border-emphasis);
+  }
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: var(--space-2) var(--space-4);
+
+  & + & {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .rows .rows > & {
+    padding-inline: var(--space-3) var(--space-4);
+  }
+}
+
+.nested {
+  padding: 0;
+
+  & > .propertyTrigger {
+    padding: var(--space-2) var(--space-4);
+  }
+
+  & > .propDescription {
+    padding-block-end: var(--space-2);
+    padding-inline: calc(var(--space-4) + 0.875rem + var(--space-2)) var(--space-4);
+  }
+
+  .rows .rows > & > .propertyTrigger {
+    padding-inline: var(--space-3) var(--space-4);
+  }
+
+  .rows .rows > & > .propDescription {
+    padding-inline-start: calc(var(--space-3) + 0.875rem + var(--space-2));
+  }
+}
+
+.line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  min-width: 0;
+}
+
+.name {
+  color: var(--color-text);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.type {
+  color: var(--color-text-muted);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+}
+
+.format {
+  color: var(--color-text-subtle);
+}
+
+.required {
+  flex: none;
+}
+
+.propDescription {
+  padding-inline-start: calc(0.875rem + var(--space-2));
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.enum {
+  & code {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+  }
+}
+
+.example {
+  margin: 0 var(--space-4) var(--space-4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sectionTrigger,
+  .propertyTrigger,
+  .chevron,
+  .panel {
+    transition: none;
+  }
+}

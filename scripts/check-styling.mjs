@@ -47,6 +47,7 @@ const DISPLAY_ONLY = new Set([
   "empty-state",
   "kbd",
   "loader", // decorative dots / status text
+  "package-info", // static dependency-change card: text, badges and lists only
   "page-header",
   "skeleton",
   "spinner",
