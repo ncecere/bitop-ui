@@ -105,9 +105,18 @@ const doc: ComponentDoc = {
         { name: "onSubmit", type: "({ text, files }, event) => void | boolean | Promise", required: true, description: "Called with the message. Return false (or reject) to keep the draft." },
         { name: "status", type: '"ready" | "submitted" | "streaming" | "error"', default: '"ready"', description: "Drives PromptInputSubmit; submits are ignored while submitted/streaming." },
         { name: "onStop", type: "() => void", description: "Stops the response; enables the Stop button." },
-        { name: "disabled", type: "boolean", description: "Disables the textarea and buttons." },
+        {
+          name: "disabled",
+          type: "boolean",
+          description: "Disables the textarea and every button (PromptInputButton included), ignores new files from any path (picker, paste, drop, addFiles) and hides the attachment remove buttons.",
+        },
         { name: "attachments", type: "boolean", default: "false", description: "Enable the file picker, paste and drag-and-drop." },
-        { name: "accept / multiple / maxFiles / maxFileSize", type: "string / boolean / number / number", description: "File rules (maxFileSize in bytes)." },
+        {
+          name: "accept / multiple / maxFiles / maxFileSize",
+          type: "string / boolean / number / number",
+          description:
+            "File rules (maxFileSize in bytes); accept is checked with matchesAccept from bitop-utils. With multiple={false} a new file replaces the current one. Image preview URLs are revoked when a file is replaced, removed or sent, and on unmount.",
+        },
         { name: "onFileError", type: "({ code, message, file }) => void", description: "A file was rejected." },
       ],
     },

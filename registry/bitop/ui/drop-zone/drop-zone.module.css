@@ -57,3 +57,15 @@
   line-height: var(--line-height-normal);
   color: var(--color-text-muted);
 }
+
+/* Rejected files: a polite live region, always in the DOM; takes no space while empty. */
+.rejected {
+  max-width: 34rem;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  color: var(--color-danger-text);
+
+  &[data-empty] {
+    position: absolute;
+  }
+}

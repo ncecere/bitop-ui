@@ -35,8 +35,9 @@ export function Upload() {
         busy={progress !== null}
         label="Drag and drop files here, or"
         buttonLabel="Choose files to upload"
-        description="PDF, PNG, CSV or Markdown. Up to 20 files per upload."
+        description="PDF, PNG, CSV or Markdown, up to 5 MB each."
         accept=".pdf,.png,.csv,.md"
+        maxSize={5 * 1024 * 1024}
       />
       {progress !== null && <Progress label="Uploading" value={progress} />}
       <p role="status">{message}</p>
@@ -55,11 +56,17 @@ const doc: ComponentDoc = {
     {
       component: "DropZone",
       rows: [
-        { name: "onFiles", type: "(files: File[]) => void", required: true, description: "Chosen or dropped files (never empty)." },
+        { name: "onFiles", type: "(files: File[]) => void", required: true, description: "Accepted chosen or dropped files (never empty)." },
+        {
+          name: "onReject",
+          type: '(rejections: { file: File; reason: "type" | "size" }[]) => void',
+          description: "Files that failed accept or maxSize. They are also announced in a status line under the button.",
+        },
         { name: "label", type: "ReactNode", default: '"Drag and drop files here, or"', description: "Group heading." },
         { name: "buttonLabel", type: "string", description: "Button text and accessible name." },
         { name: "description", type: "ReactNode", description: "Accepted types and limits; describes the button." },
-        { name: "accept / multiple", type: "string / boolean", default: "— / true", description: "Passed to the file input." },
+        { name: "accept / multiple", type: "string / boolean", default: "— / true", description: 'Accepted types (".pdf", "image/*", "application/json"), checked for picked and dropped files alike; the picker also uses it as a hint.' },
+        { name: "maxSize", type: "number", description: "Largest accepted file, in bytes." },
         { name: "busy / disabled", type: "boolean", description: "Busy shows a spinner; neither delivers files." },
         { name: "icon", type: "ReactNode", description: "Replace the upload icon." },
       ],
@@ -69,6 +76,7 @@ const doc: ComponentDoc = {
     "The zone is a labelled group; the button opens the native file picker, so keyboard and screen-reader users never need drag and drop.",
     "The description is attached to the button with aria-describedby.",
     "While busy the button is aria-busy and files are ignored.",
+    "Rejected files are named in a polite status line (“setup.exe isn't an accepted file type.”), so the reason is announced, not just shown.",
   ],
 };
 

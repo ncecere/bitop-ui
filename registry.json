@@ -1120,7 +1120,7 @@
       "name": "drop-zone",
       "type": "registry:ui",
       "title": "Drop zone",
-      "description": "Keyboard-operable file picker with drag and drop as an enhancement.",
+      "description": "Keyboard-operable file picker with drag and drop as an enhancement; filters files by type and size and announces rejections.",
       "dependencies": [
         "lucide-react@^1.48.0"
       ],

@@ -21,7 +21,7 @@ import { Attachment, type AttachmentData, Attachments } from "@/registry/bitop/u
 import { Button, type ButtonProps } from "@/registry/bitop/ui/button/button";
 import { Spinner } from "@/registry/bitop/ui/spinner/spinner";
 import { Tooltip } from "@/registry/bitop/ui/tooltip/tooltip";
-import { cx, dataFlag } from "@/registry/bitop/lib/bitop-utils";
+import { cx, dataFlag, matchesAccept } from "@/registry/bitop/lib/bitop-utils";
 import styles from "./prompt-input.module.css";
 
 /*
@@ -48,7 +48,11 @@ import styles from "./prompt-input.module.css";
  *   (submitted), Stop (streaming, and submitted when onStop is given).
  * - Focus stays in the textarea after sending, so typing can continue.
  * - `attachments` enables the file picker, paste and drag-and-drop; files
- *   are passed to onSubmit and shown by PromptInputAttachments.
+ *   are passed to onSubmit and shown by PromptInputAttachments. Image
+ *   previews use object URLs, created only for files that are kept and
+ *   revoked when a file is replaced, removed, sent or the composer unmounts.
+ * - `disabled` blocks everything: typing, sending, tool buttons, adding
+ *   files (picker, paste, drop, addFiles) and removing attachments.
  */
 
 export type ChatStatus = "ready" | "submitted" | "streaming" | "error";
@@ -87,17 +91,8 @@ const isBusy = (s: ChatStatus) => s === "submitted" || s === "streaming";
 let fileSeq = 0;
 const fileId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `file-${++fileSeq}`);
 
-/** Does `file` match an accept string such as "image/*,.pdf,application/json"? */
-export function matchesAccept(file: File, accept: string | undefined): boolean {
-  if (!accept) return true;
-  const name = file.name.toLowerCase();
-  const type = (file.type || "").toLowerCase();
-  return accept
-    .split(",")
-    .map((a) => a.trim().toLowerCase())
-    .filter(Boolean)
-    .some((a) => (a.startsWith(".") ? name.endsWith(a) : a.endsWith("/*") ? type.startsWith(a.slice(0, -1)) : type === a));
-}
+/** Does `file` match an accept string such as "image/*,.pdf,application/json"? (Re-exported from bitop-utils.) */
+export { matchesAccept };
 
 export type PromptInputProps = Omit<ComponentPropsWithRef<"form">, "onSubmit"> & {
   onSubmit: (message: PromptInputMessage, event: FormEvent<HTMLFormElement>) => void | boolean | Promise<void | boolean>;
@@ -146,10 +141,19 @@ export function PromptInput({
   // Revoke preview URLs on unmount.
   useEffect(() => () => filesRef.current.forEach((f) => f.url && URL.revokeObjectURL(f.url)), []);
 
+  /** Replaces the file list, revoking the preview URL of every file that leaves it. */
+  const commitFiles = useCallback((next: PromptInputFile[]) => {
+    const kept = new Set(next.map((f) => f.id));
+    filesRef.current.forEach((f) => f.url && !kept.has(f.id) && URL.revokeObjectURL(f.url));
+    filesRef.current = next;
+    setFiles(next);
+  }, []);
+
   const addFiles = useCallback(
     (list: FileList | File[]) => {
+      if (disabled) return;
       const incoming = Array.from(list);
-      const accepted: PromptInputFile[] = [];
+      let accepted: File[] = [];
       let count = filesRef.current.length;
       for (const file of incoming) {
         if (!matchesAccept(file, accept)) {
@@ -165,21 +169,22 @@ export function PromptInput({
           break;
         }
         count++;
-        const url = file.type.startsWith("image/") && typeof URL.createObjectURL === "function" ? URL.createObjectURL(file) : undefined;
-        accepted.push({ id: fileId(), name: file.name, size: file.size, type: file.type, url, file });
+        accepted.push(file);
       }
-      if (accepted.length) setFiles((prev) => (multiple ? [...prev, ...accepted] : accepted.slice(0, 1)));
+      if (!accepted.length) return;
+      // Single-file mode keeps the first file and replaces the current one.
+      if (!multiple) accepted = accepted.slice(0, 1);
+      // Preview URLs only for files that are kept (commitFiles revokes replaced ones).
+      const added = accepted.map((file): PromptInputFile => {
+        const url = file.type.startsWith("image/") && typeof URL.createObjectURL === "function" ? URL.createObjectURL(file) : undefined;
+        return { id: fileId(), name: file.name, size: file.size, type: file.type, url, file };
+      });
+      commitFiles(multiple ? [...filesRef.current, ...added] : added);
     },
-    [accept, maxFiles, maxFileSize, multiple, onFileError],
+    [accept, commitFiles, disabled, maxFiles, maxFileSize, multiple, onFileError],
   );
 
-  const removeFile = useCallback((id: string) => {
-    setFiles((prev) => {
-      const gone = prev.find((f) => f.id === id);
-      if (gone?.url) URL.revokeObjectURL(gone.url);
-      return prev.filter((f) => f.id !== id);
-    });
-  }, []);
+  const removeFile = useCallback((id: string) => commitFiles(filesRef.current.filter((f) => f.id !== id)), [commitFiles]);
 
   /**
    * Clears what was sent, and only that: an async onSubmit can resolve after
@@ -187,9 +192,7 @@ export function PromptInput({
    * newer draft must survive.
    */
   const clearSubmitted = (text: string, fileIds: Set<string>) => {
-    const sent = filesRef.current.filter((f) => fileIds.has(f.id));
-    sent.forEach((f) => f.url && URL.revokeObjectURL(f.url));
-    if (sent.length) setFiles((prev) => prev.filter((f) => !fileIds.has(f.id)));
+    if (filesRef.current.some((f) => fileIds.has(f.id))) commitFiles(filesRef.current.filter((f) => !fileIds.has(f.id)));
     const el = textareaRef.current;
     if (!controlled.current && el && el.value === text) {
       el.value = "";
@@ -437,15 +440,29 @@ export type PromptInputButtonProps = Omit<ButtonProps, "iconOnly" | "aria-label"
   pressed?: boolean;
 };
 
-export function PromptInputButton({ label, children, showLabel = false, pressed, variant = "ghost", size = "sm", className, ...props }: PromptInputButtonProps) {
+export function PromptInputButton({
+  label,
+  children,
+  showLabel = false,
+  pressed,
+  variant = "ghost",
+  size = "sm",
+  className,
+  disabled,
+  ...props
+}: PromptInputButtonProps) {
+  // A disabled PromptInput disables its tool buttons too (usable outside one).
+  const ctx = useContext(PromptInputContext);
+  const inactive = Boolean(disabled || ctx?.disabled);
   const button = showLabel ? (
-    <Button {...props} variant={variant} size={size} aria-pressed={pressed} data-pressed={dataFlag(pressed)} className={cx(styles.toolButton, className)}>
+    <Button {...props} disabled={inactive} variant={variant} size={size} aria-pressed={pressed} data-pressed={dataFlag(pressed)} className={cx(styles.toolButton, className)}>
       {children}
       <span>{label}</span>
     </Button>
   ) : (
     <Button
       {...props}
+      disabled={inactive}
       variant={variant}
       size={size}
       iconOnly
@@ -569,9 +586,12 @@ export function PromptInputSubmit({
   );
 }
 
-/** Chips for the composer's attached files; removing one returns focus to the textarea. */
+/**
+ * Chips for the composer's attached files; removing one returns focus to the
+ * textarea. While PromptInput is disabled the remove buttons are hidden.
+ */
 export function PromptInputAttachments({ className }: { className?: string }) {
-  const { files, removeFile, textareaRef } = usePromptInput();
+  const { files, removeFile, textareaRef, disabled } = usePromptInput();
   if (!files.length) return null;
   return (
     <Attachments className={cx(styles.attachments, className)}>
@@ -579,10 +599,14 @@ export function PromptInputAttachments({ className }: { className?: string }) {
         <Attachment
           key={f.id}
           file={f}
-          onRemove={() => {
-            removeFile(f.id);
-            textareaRef.current?.focus();
-          }}
+          onRemove={
+            disabled
+              ? undefined
+              : () => {
+                  removeFile(f.id);
+                  textareaRef.current?.focus();
+                }
+          }
         />
       ))}
     </Attachments>

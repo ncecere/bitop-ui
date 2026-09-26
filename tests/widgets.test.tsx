@@ -1,10 +1,11 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { Alert } from "@/registry/bitop/ui/alert/alert";
 import { CopyField } from "@/registry/bitop/ui/copy-field/copy-field";
 import { DropZone } from "@/registry/bitop/ui/drop-zone/drop-zone";
 import { Table, Td, Tr } from "@/registry/bitop/ui/table/table";
+import { matchesAccept } from "@/registry/bitop/lib/bitop-utils";
 
 describe("DropZone", () => {
   it("is named and described, and the picker path calls onFiles", async () => {
@@ -42,6 +43,49 @@ describe("DropZone", () => {
     const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
     await userEvent.upload(input, [new File(["x"], "x.txt")]);
     expect(onFiles).not.toHaveBeenCalled();
+  });
+
+  it("filters dropped and picked files by accept and maxSize, reports and announces rejections", async () => {
+    const onFiles = vi.fn();
+    const onReject = vi.fn();
+    const { container } = render(<DropZone onFiles={onFiles} onReject={onReject} accept=".pdf,image/*" maxSize={1000} />);
+    const zone = screen.getByRole("group");
+    const ok = new File(["%PDF"], "a.pdf", { type: "application/pdf" });
+    const exe = new File(["x"], "b.exe", { type: "application/x-msdownload" });
+    const big = new File([new Uint8Array(2000)], "big.png", { type: "image/png" });
+    const small = new File(["x"], "c.png", { type: "image/png" });
+    fireEvent.drop(zone, { dataTransfer: { files: [ok, exe, big, small] } });
+    expect(onFiles).toHaveBeenCalledTimes(1);
+    expect(onFiles.mock.calls[0]![0]).toEqual([ok, small]);
+    expect(onReject).toHaveBeenCalledWith([
+      { file: exe, reason: "type" },
+      { file: big, reason: "size" },
+    ]);
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("b.exe");
+    expect(status).toHaveTextContent("big.png");
+
+    // The picker path is filtered too (the browser's accept is only a hint); all rejected → no onFiles.
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+    await userEvent.setup({ applyAccept: false }).upload(input, [exe]);
+    expect(onFiles).toHaveBeenCalledTimes(1);
+    expect(onReject).toHaveBeenLastCalledWith([{ file: exe, reason: "type" }]);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("matchesAccept", () => {
+  const file = (name: string, type: string) => new File(["x"], name, { type });
+  it.each([
+    ["a.PDF", "", ".pdf", true],
+    ["a.pdf", "application/pdf", "image/*", false],
+    ["p.jpg", "image/jpeg", "image/*, .pdf", true],
+    ["d.json", "application/json", "application/json", true],
+    ["d.json", "application/json", "", true],
+    ["x.bin", "application/octet-stream", "*/*", true],
+    ["x.bin", "application/octet-stream", ".pdf,text/plain", false],
+  ])("%s (%s) against %j → %s", (name, type, accept, expected) => {
+    expect(matchesAccept(file(name, type), accept)).toBe(expected);
   });
 });
 
