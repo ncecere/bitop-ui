@@ -1,0 +1,70 @@
+.root {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.button {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+.toggle {
+  position: relative;
+  z-index: 1;
+  border-radius: var(--radius-full);
+}
+
+/* Decorative "recording" ring; the pressed state and status text carry the meaning. */
+.pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 0 0 var(--color-danger-border);
+  animation: pulse 1.6s var(--motion-ease-out) infinite;
+}
+
+.status {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+
+  &[data-tone="danger"] {
+    color: var(--color-danger-text);
+  }
+
+  &:empty {
+    margin-inline-start: calc(var(--space-2) * -1);
+  }
+}
+
+.interim {
+  flex-basis: 100%;
+  min-width: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+@keyframes pulse {
+  from {
+    box-shadow: 0 0 0 0 var(--color-danger-border);
+    opacity: 1;
+  }
+
+  to {
+    box-shadow: 0 0 0 0.75rem var(--color-danger-border);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--color-danger-border);
+  }
+}

@@ -1,0 +1,27 @@
+.popup {
+  min-width: 14rem;
+}
+
+.item {
+  text-decoration: none;
+}
+
+.icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-text-muted);
+
+  & > * {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.external {
+  width: 0.875rem;
+  height: 0.875rem;
+}
