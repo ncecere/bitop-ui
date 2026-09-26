@@ -18,7 +18,8 @@ import styles from "./query-state.module.css";
  * Order: loading, then error, then empty, then the children. With `query`,
  * "loading" means pending *without data*, so a background refetch (or kept
  * previous/placeholder data) keeps the current content on screen instead of
- * flashing a spinner. Nothing here imports TanStack Query.
+ * flashing a spinner, and a failed refetch shows the error above the last
+ * good data instead of replacing it. Nothing here imports TanStack Query.
  */
 
 /** The subset of a TanStack Query result (or SWR-style object) that QueryState reads. */
@@ -94,10 +95,27 @@ export function QueryState<TData = unknown>(props: QueryStateProps<TData>) {
     );
   }
 
+  const alert = error ? (
+    <ErrorAlert error={error} onRetry={onRetry} retryLabel={retryLabel} retrying={Boolean(query?.isFetching)} describe={describeError} />
+  ) : null;
+
   if (error) {
+    // A failed background refetch keeps the last good data (as TanStack Query
+    // does): show it with the error above instead of blanking the page.
+    const stale = query && hasData && !empty ? renderContent(children, data) : null;
+    if (stale !== null) {
+      return (
+        <>
+          <div data-query-state="error" className={cx(styles.error, className)}>
+            {alert}
+          </div>
+          {stale}
+        </>
+      );
+    }
     return (
       <div data-query-state="error" className={cx(styles.error, className)}>
-        <ErrorAlert error={error} onRetry={onRetry} retryLabel={retryLabel} retrying={Boolean(query?.isFetching)} describe={describeError} />
+        {alert}
       </div>
     );
   }
@@ -115,5 +133,9 @@ export function QueryState<TData = unknown>(props: QueryStateProps<TData>) {
   if (typeof children !== "function") return <>{children}</>;
   // A render function only runs with data (e.g. a query that is disabled and idle renders nothing).
   if (query && !hasData) return null;
-  return <>{children(data as NonNullable<TData>)}</>;
+  return <>{renderContent(children, data)}</>;
+}
+
+function renderContent<TData>(children: QueryStateProps<TData>["children"], data: TData | undefined): ReactNode {
+  return typeof children === "function" ? children(data as NonNullable<TData>) : children;
 }

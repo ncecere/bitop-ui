@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import {
@@ -196,6 +196,18 @@ describe("QueryState", () => {
       rerender(view(result({ data: ["alpha"], isPending: true, isFetching: true })));
       expect(screen.getByText("alpha")).toBeInTheDocument();
       expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    it("keeps the data visible with the error above it when a background refetch fails", async () => {
+      const refetch = vi.fn(async () => undefined);
+      render(view(result({ data: ["alpha"], error: httpError(500, "boom"), refetch })));
+      // The last good data stays; the failure is reported alongside it, with a retry.
+      expect(screen.getByText("alpha")).toBeInTheDocument();
+      const alert = screen.getByRole("alert");
+      expect(alert).toHaveTextContent("Something went wrong on our side");
+      expect(alert.compareDocumentPosition(screen.getByText("alpha")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      await userEvent.click(within(alert).getByRole("button", { name: "Try again" }));
+      expect(refetch).toHaveBeenCalledTimes(1);
     });
 
     it("explicit props win over the query", () => {

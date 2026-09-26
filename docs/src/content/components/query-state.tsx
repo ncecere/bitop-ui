@@ -102,7 +102,7 @@ const doc: ComponentDoc = {
     [
       "WithQuery",
       WithQuery,
-      { title: "From a query result", description: "Loading means pending without data, so refreshing keeps the list visible. A render function only runs once data exists." },
+      { title: "From a query result", description: "Loading means pending without data, so refreshing keeps the list visible. If a refresh fails, the last good data stays with the error above it. A render function only runs once data exists." },
     ],
     ["SkeletonLoading", SkeletonLoading, { title: "Skeleton fallback", description: "loadingLabel is still announced to screen readers." }],
   ]),
@@ -131,7 +131,7 @@ const doc: ComponentDoc = {
   a11y: [
     'Loading renders a role="status" region with the label, also when a skeleton fallback is used (the fallback container gets aria-busy).',
     'Errors use ErrorAlert: role="alert" for danger, role="status" for warnings such as 429.',
-    "Content stays mounted during background refetches, so focus and scroll position are not lost.",
+    "Content stays mounted during background refetches, so focus and scroll position are not lost. A failed refetch announces the error (role=\"alert\") without removing the data.",
   ],
 };
 
