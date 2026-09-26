@@ -1,0 +1,91 @@
+/*
+ * DatePicker trigger: looks like the text controls in input.module.css
+ * (--color-border-strong boundary, >= 3:1; focus ring + halo).
+ */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 14rem;
+  height: var(--control-height-md);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background-color: var(--color-control);
+  color: var(--color-text);
+  box-shadow: var(--shadow-0);
+  font-family: inherit;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  text-align: start;
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color var(--motion-duration-fast) var(--motion-ease-out),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out);
+
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      border-color: var(--color-border-hover);
+    }
+  }
+
+  &:focus-visible,
+  &[data-popup-open] {
+    border-color: var(--color-focus-ring);
+    box-shadow: var(--shadow-focus);
+  }
+
+  &:disabled {
+    background-color: var(--color-control-disabled);
+    color: var(--color-text-subtle);
+    cursor: not-allowed;
+  }
+
+  &[aria-invalid="true"],
+  &[data-invalid] {
+    border-color: var(--color-danger);
+  }
+
+  &[data-placeholder] .value {
+    color: var(--color-text-subtle);
+  }
+
+  &[data-size="sm"] {
+    height: var(--control-height-sm);
+    padding: 0 0.625rem;
+    font-size: var(--font-size-sm);
+  }
+
+  &[data-block] {
+    width: 100%;
+  }
+}
+
+.icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.popup {
+  width: max-content;
+  min-width: 0;
+  padding: 0;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0 var(--space-3) var(--space-3);
+}
