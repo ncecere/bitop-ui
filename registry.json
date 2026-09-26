@@ -1724,6 +1724,32 @@
       ]
     },
     {
+      "name": "number-input",
+      "type": "registry:ui",
+      "title": "Number input",
+      "description": "Text input for amounts with thousands separators while not editing, an optional unit, and locale-aware parsing.",
+      "dependencies": [],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/input"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/number-input/number-input.tsx",
+          "type": "registry:ui",
+          "target": "@ui/number-input/number-input.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/number-input/number-input.module.css",
+          "type": "registry:file",
+          "target": "@ui/number-input/number-input.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
       "name": "open-in-chat",
       "type": "registry:ui",
       "title": "Open in chat",
@@ -2194,6 +2220,31 @@
       ]
     },
     {
+      "name": "save-bar",
+      "type": "registry:ui",
+      "title": "Save bar",
+      "description": "Sticky bar with a form's Save and Discard actions, shown while there are unsaved changes.",
+      "dependencies": [],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/save-bar/save-bar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/save-bar/save-bar.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/save-bar/save-bar.module.css",
+          "type": "registry:file",
+          "target": "@ui/save-bar/save-bar.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
+      ]
+    },
+    {
       "name": "schema-display",
       "type": "registry:ui",
       "title": "Schema display",
@@ -2551,8 +2602,9 @@
       "name": "stat-card",
       "type": "registry:ui",
       "title": "Stat card",
-      "description": "Metric card with icon, delta and hint.",
+      "description": "Metric card with icon, delta, hint, details and an optional whole-card link.",
       "dependencies": [
+        "@base-ui/react@^1.8.0",
         "lucide-react@^1.48.0"
       ],
       "registryDependencies": [

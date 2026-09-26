@@ -52,9 +52,10 @@ const DISPLAY_ONLY = new Set([
   "marker", // static status / note / separator row; `render` only swaps the element
   "package-info", // static dependency-change card: text, badges and lists only
   "page-header",
+  "save-bar", // sticky container for a form's buttons and a status message
   "skeleton",
   "spinner",
-  "stat-card",
+  "stat-card", // metric tile; `render`/`href` only turn the label into a link
   "table",
 ]);
 
