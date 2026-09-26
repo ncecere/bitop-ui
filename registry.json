@@ -1257,6 +1257,25 @@
       ]
     },
     {
+      "name": "format",
+      "type": "registry:lib",
+      "title": "Format",
+      "description": "Locale-aware, never-throwing Intl helpers: formatDate, formatNumber, formatBytes, formatRelativeTime and plural.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/lib/bitop-format.ts",
+          "type": "registry:lib",
+          "target": "@lib/bitop-format.ts"
+        }
+      ],
+      "categories": [
+        "foundation"
+      ]
+    },
+    {
       "name": "hover-card",
       "type": "registry:ui",
       "title": "Hover card",
