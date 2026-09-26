@@ -77,6 +77,7 @@ const doc: ComponentDoc = {
   a11y: [
     "The trigger is a button with aria-expanded and aria-controls (Base UI Collapsible).",
     "Automatic opening and closing stop as soon as the user toggles the panel, so it never moves under them.",
+    "If focus is inside the panel when it closes automatically, focus moves to the trigger instead of being lost.",
     "The shimmer is decorative; the text “Thinking…” is always readable (muted colour, 4.5:1) and static under reduced motion.",
   ],
 };

@@ -337,6 +337,27 @@ describe("Reasoning", () => {
     );
     expect(screen.getByRole("button", { name: "Thought for 1 second" })).toHaveAttribute("aria-expanded", "false");
   });
+
+  it("moves focus to the trigger when it auto-closes with focus inside the panel", () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    function Focusable({ streaming }: { streaming: boolean }) {
+      return (
+        <Reasoning streaming={streaming} autoCloseDelay={500}>
+          <ReasoningTrigger />
+          <ReasoningContent>
+            <a href="#step">Step 1</a>
+          </ReasoningContent>
+        </Reasoning>
+      );
+    }
+    const { rerender } = render(<Focusable streaming />);
+    const trigger = screen.getByRole("button");
+    act(() => screen.getByRole("link", { name: "Step 1" }).focus());
+    rerender(<Focusable streaming={false} />);
+    act(() => vi.advanceTimersByTime(500));
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect(trigger).toHaveFocus();
+  });
 });
 
 /* ---------------- Response ---------------- */

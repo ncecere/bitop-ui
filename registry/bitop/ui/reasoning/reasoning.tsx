@@ -2,7 +2,7 @@
 
 import { Collapsible } from "@base-ui/react/collapsible";
 import { Brain, ChevronDown } from "lucide-react";
-import { type ReactNode, createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { type ReactNode, type RefObject, createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Shimmer } from "@/registry/bitop/ui/shimmer/shimmer";
 import { cx } from "@/registry/bitop/lib/bitop-utils";
 import styles from "./reasoning.module.css";
@@ -19,6 +19,8 @@ import styles from "./reasoning.module.css";
  * - Opens automatically when `streaming` becomes true, and closes once,
  *   `autoCloseDelay` ms after it becomes false.
  * - Once the user toggles it, it never moves on its own again.
+ * - If focus is inside the panel when it closes automatically, focus moves
+ *   to the trigger instead of being lost to <body>.
  * - The trigger reads "Thinking…" (shimmering) while streaming, then
  *   "Thought for N seconds" (measured, or the `duration` prop).
  * - Controlled (`open` + `onOpenChange`) or uncontrolled (`defaultOpen`).
@@ -26,7 +28,13 @@ import styles from "./reasoning.module.css";
  *   onOpenChange.
  */
 
-type ReasoningContextValue = { streaming: boolean; duration: number | undefined; open: boolean };
+type ReasoningContextValue = {
+  streaming: boolean;
+  duration: number | undefined;
+  open: boolean;
+  triggerRef: RefObject<HTMLButtonElement | null>;
+  panelRef: RefObject<HTMLDivElement | null>;
+};
 const ReasoningContext = createContext<ReasoningContextValue | null>(null);
 
 export function useReasoning() {
@@ -69,6 +77,8 @@ export function Reasoning({
   const closedOnce = useRef(false);
   const startedAt = useRef<number | null>(streaming ? Date.now() : null);
   const wasStreaming = useRef(streaming);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   const request = useCallback(
     (next: boolean) => {
@@ -91,14 +101,20 @@ export function Reasoning({
       startedAt.current = null;
       if (!autoClose || userToggled.current || closedOnce.current) return;
       closedOnce.current = true;
-      const t = setTimeout(() => !userToggled.current && request(false), autoCloseDelay);
+      const t = setTimeout(() => {
+        if (userToggled.current) return;
+        // Keyboard users reading the panel would otherwise lose focus to <body>.
+        const panel = panelRef.current;
+        if (panel && typeof document !== "undefined" && panel.contains(document.activeElement)) triggerRef.current?.focus();
+        request(false);
+      }, autoCloseDelay);
       return () => clearTimeout(t);
     }
     // Only transitions of `streaming` matter; isOpen / request are read at that moment.
   }, [streaming]);
 
   return (
-    <ReasoningContext.Provider value={{ streaming, duration: durationProp ?? measured, open: isOpen }}>
+    <ReasoningContext.Provider value={{ streaming, duration: durationProp ?? measured, open: isOpen, triggerRef, panelRef }}>
       <Collapsible.Root
         open={isOpen}
         onOpenChange={(next) => {
@@ -129,9 +145,9 @@ export type ReasoningTriggerProps = {
 };
 
 export function ReasoningTrigger({ getLabel = reasoningLabel, className, children }: ReasoningTriggerProps) {
-  const { streaming, duration } = useReasoning();
+  const { streaming, duration, triggerRef } = useReasoning();
   return (
-    <Collapsible.Trigger className={cx(styles.trigger, className)}>
+    <Collapsible.Trigger ref={triggerRef} className={cx(styles.trigger, className)}>
       <Brain aria-hidden className={styles.icon} />
       <span className={styles.label}>{children ?? getLabel(streaming, duration)}</span>
       <ChevronDown aria-hidden className={styles.chevron} />
@@ -145,8 +161,9 @@ export type ReasoningContentProps = {
 };
 
 export function ReasoningContent({ className, children }: ReasoningContentProps) {
+  const { panelRef } = useReasoning();
   return (
-    <Collapsible.Panel className={cx(styles.panel, className)}>
+    <Collapsible.Panel ref={panelRef} className={cx(styles.panel, className)}>
       <div className={styles.content}>{children}</div>
     </Collapsible.Panel>
   );
