@@ -111,6 +111,36 @@
       ]
     },
     {
+      "name": "agent",
+      "type": "registry:ui",
+      "title": "Agent",
+      "description": "Agent definition card: name, model, instructions, tools (accordion with input schemas) and output schema.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/badge",
+        "@bitop/code-block"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/agent/agent.tsx",
+          "type": "registry:ui",
+          "target": "@ui/agent/agent.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/agent/agent.module.css",
+          "type": "registry:file",
+          "target": "@ui/agent/agent.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "alert",
       "type": "registry:ui",
       "title": "Alert",
@@ -247,6 +277,36 @@
           "path": "registry/bitop/ui/attachments/attachments.module.css",
           "type": "registry:file",
           "target": "@ui/attachments/attachments.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "audio-player",
+      "type": "registry:ui",
+      "title": "Audio player",
+      "description": "Native audio with custom controls: play/pause, skip, seek and volume sliders, mute and playback speed.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/select"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/audio-player/audio-player.tsx",
+          "type": "registry:ui",
+          "target": "@ui/audio-player/audio-player.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/audio-player/audio-player.module.css",
+          "type": "registry:file",
+          "target": "@ui/audio-player/audio-player.module.css"
         }
       ],
       "categories": [
@@ -1224,6 +1284,33 @@
       ]
     },
     {
+      "name": "image",
+      "type": "registry:ui",
+      "title": "Image",
+      "description": "AI-generated image from base64, bytes or a URL, with required alt text, a loading placeholder and aspect ratio.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/image/image.tsx",
+          "type": "registry:ui",
+          "target": "@ui/image/image.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/image/image.module.css",
+          "type": "registry:file",
+          "target": "@ui/image/image.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "inline-citation",
       "type": "registry:ui",
       "title": "Inline citation",
@@ -1551,6 +1638,35 @@
       ]
     },
     {
+      "name": "mic-selector",
+      "type": "registry:ui",
+      "title": "Mic selector",
+      "description": "Microphone picker over mediaDevices with a permission prompt, live device updates and an unsupported fallback.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/select"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/mic-selector/mic-selector.tsx",
+          "type": "registry:ui",
+          "target": "@ui/mic-selector/mic-selector.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/mic-selector/mic-selector.module.css",
+          "type": "registry:file",
+          "target": "@ui/mic-selector/mic-selector.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "model-selector",
       "type": "registry:ui",
       "title": "Model selector",
@@ -1605,6 +1721,35 @@
       ],
       "categories": [
         "navigation"
+      ]
+    },
+    {
+      "name": "open-in-chat",
+      "type": "registry:ui",
+      "title": "Open in chat",
+      "description": "Menu of links that open a prompt in ChatGPT, Claude, v0 and other chat apps; providers are configurable.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/menu"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/open-in-chat/open-in-chat.tsx",
+          "type": "registry:ui",
+          "target": "@ui/open-in-chat/open-in-chat.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/open-in-chat/open-in-chat.module.css",
+          "type": "registry:file",
+          "target": "@ui/open-in-chat/open-in-chat.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
       ]
     },
     {
@@ -2018,6 +2163,37 @@
       ]
     },
     {
+      "name": "sandbox",
+      "type": "registry:ui",
+      "title": "Sandbox",
+      "description": "Collapsible code-execution panel with a status badge and Code / Output tabs.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/badge",
+        "@bitop/code-block",
+        "@bitop/tabs"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/sandbox/sandbox.tsx",
+          "type": "registry:ui",
+          "target": "@ui/sandbox/sandbox.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/sandbox/sandbox.module.css",
+          "type": "registry:file",
+          "target": "@ui/sandbox/sandbox.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "schema-display",
       "type": "registry:ui",
       "title": "Schema display",
@@ -2283,6 +2459,35 @@
           "path": "registry/bitop/ui/sources/sources.module.css",
           "type": "registry:file",
           "target": "@ui/sources/sources.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "speech-input",
+      "type": "registry:ui",
+      "title": "Speech input",
+      "description": "Microphone toggle that transcribes speech with the Web Speech API or records audio for server transcription.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/speech-input/speech-input.tsx",
+          "type": "registry:ui",
+          "target": "@ui/speech-input/speech-input.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/speech-input/speech-input.module.css",
+          "type": "registry:file",
+          "target": "@ui/speech-input/speech-input.module.css"
         }
       ],
       "categories": [
@@ -2757,6 +2962,33 @@
       ]
     },
     {
+      "name": "transcription",
+      "type": "registry:ui",
+      "title": "Transcription",
+      "description": "Transcript segments with timestamps; highlights the segment at the current time and seeks on activation.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/transcription/transcription.tsx",
+          "type": "registry:ui",
+          "target": "@ui/transcription/transcription.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/transcription/transcription.module.css",
+          "type": "registry:file",
+          "target": "@ui/transcription/transcription.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
       "name": "visually-hidden",
       "type": "registry:ui",
       "title": "Visually hidden",
@@ -2776,6 +3008,69 @@
       ],
       "categories": [
         "layout"
+      ]
+    },
+    {
+      "name": "voice-selector",
+      "type": "registry:ui",
+      "title": "Voice selector",
+      "description": "Searchable text-to-speech voice picker in a dialog, with voice metadata and preview buttons.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/dialog",
+        "@bitop/input"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/voice-selector/voice-selector.tsx",
+          "type": "registry:ui",
+          "target": "@ui/voice-selector/voice-selector.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/voice-selector/voice-selector.module.css",
+          "type": "registry:file",
+          "target": "@ui/voice-selector/voice-selector.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
+      ]
+    },
+    {
+      "name": "web-preview",
+      "type": "registry:ui",
+      "title": "Web preview",
+      "description": "Sandboxed iframe preview with back/forward/reload, an address field and a console panel.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/input",
+        "@bitop/spinner",
+        "@bitop/tooltip"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/web-preview/web-preview.tsx",
+          "type": "registry:ui",
+          "target": "@ui/web-preview/web-preview.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/web-preview/web-preview.module.css",
+          "type": "registry:file",
+          "target": "@ui/web-preview/web-preview.module.css"
+        }
+      ],
+      "categories": [
+        "ai"
       ]
     }
   ]

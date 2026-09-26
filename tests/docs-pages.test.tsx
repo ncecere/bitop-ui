@@ -32,6 +32,8 @@ describe.each(pages)("docs page %s", (path) => {
     expect(screen.getByRole("main")).toBeInTheDocument();
     // Router links rendered through components (useRender) must keep their href.
     for (const a of container.querySelectorAll("nav a")) expect(a).toHaveAttribute("href");
-    expect(await axe(container)).toHaveNoViolations();
+    // iframes: false: axe can't message jsdom frames (their parent isn't the
+    // test's global window), and a frame's content isn't ours to audit anyway.
+    expect(await axe(container, { iframes: false })).toHaveNoViolations();
   }, 30_000);
 });

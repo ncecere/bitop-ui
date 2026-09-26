@@ -46,6 +46,7 @@ const DISPLAY_ONLY = new Set([
   "badge",
   "card",
   "empty-state",
+  "image", // <img> with loading / error presentation; no interaction
   "kbd",
   "loader", // decorative dots / status text
   "marker", // static status / note / separator row; `render` only swaps the element
