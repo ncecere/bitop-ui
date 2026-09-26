@@ -5,7 +5,7 @@ import { PageHeader } from "@/registry/bitop/ui/page-header/page-header";
 import { TextLink } from "@/registry/bitop/ui/text-link/text-link";
 import { ChatDemo } from "../examples/chat-demo";
 import raw from "../examples/chat-demo.tsx?raw";
-import { C, CodeBlock, DocSection, InstallTabs, Prose } from "../kit/kit";
+import { C, CodeBlock, DocSection, InstallCommand, Prose } from "../kit/kit";
 import { Link } from "../router";
 import styles from "./pages.module.css";
 
@@ -46,7 +46,7 @@ export function ChatExamplePage() {
       </DocSection>
 
       <DocSection id="installation" title="Installation">
-        <InstallTabs items={items} label="install command for the chat items" />
+        <InstallCommand items={items} label="install command for the chat items" />
       </DocSection>
 
       <DocSection id="how-it-works" title="How it fits together">

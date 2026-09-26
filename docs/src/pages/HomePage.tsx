@@ -12,16 +12,16 @@ import { toast } from "@/registry/bitop/ui/toast/toast";
 import { componentDocs } from "../content";
 import { CodeBlock, DocSection } from "../kit/kit";
 import { Link } from "../router";
-import { namespaceCommand } from "../site";
+import { addCommand } from "../site";
 import styles from "./pages.module.css";
 
 const features = [
-  { icon: <Blocks aria-hidden />, title: "Copy and own", text: "Components are installed as source with the shadcn CLI. Change anything; there is no package to fork." },
+  { icon: <Blocks aria-hidden />, title: "Copy and own", text: "The bitop CLI copies components into your project as source. Change anything; there is no package to fork." },
   { icon: <Layers aria-hidden />, title: "Base UI behaviour", text: "Focus management, keyboard interaction and ARIA come from Base UI. We add the styling and sensible APIs." },
   { icon: <Palette aria-hidden />, title: "CSS variables + CSS Modules", text: "No Tailwind and no runtime styling. Semantic tokens drive every component, so a theme is a small CSS file." },
   { icon: <Accessibility aria-hidden />, title: "WCAG 2.1 AA", text: "Contrast is checked for every theme in CI, and every docs page is tested with axe." },
   { icon: <Moon aria-hidden />, title: "Dark mode and brands", text: "A neutral default theme with dark mode, plus an opt-in UF theme. Add your own brand the same way." },
-  { icon: <Terminal aria-hidden />, title: "One command per component", text: "npx shadcn add @bitop/dialog pulls the component, its dependencies and the core styles." },
+  { icon: <Terminal aria-hidden />, title: "One command per component", text: "bitop add dialog pulls the component, its dependencies and the core styles. bitop update refreshes files you haven't edited." },
 ];
 
 export function HomePage() {
@@ -31,8 +31,8 @@ export function HomePage() {
         <p className={styles.eyebrow}>Component registry</p>
         <h1 className={styles.heroTitle}>Accessible React components you copy into your app</h1>
         <p className={styles.heroText}>
-          bitop-ui is a shadcn-style registry of {componentDocs.length} components built on Base UI, CSS Modules and CSS variables. Install what you need with the
-          shadcn CLI, then own the code.
+          bitop-ui is a registry of {componentDocs.length} components built on Base UI, CSS Modules and CSS variables. Copy what you need into your app with the
+          bitop CLI, then own the code.
         </p>
         <Inline gap={3}>
           <Button render={<Link to="/installation" />}>
@@ -42,7 +42,7 @@ export function HomePage() {
             Browse components
           </Button>
         </Inline>
-        <CodeBlock code={namespaceCommand(["core", "button", "dialog"])} label="install command" language="bash" />
+        <CodeBlock code={addCommand(["core", "button", "dialog"])} label="install command" language="bash" />
       </div>
 
       <DocSection id="why" title="Why bitop-ui">

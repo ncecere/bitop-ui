@@ -1,36 +1,36 @@
-import { Alert } from "@/registry/bitop/ui/alert/alert";
 import { PageHeader } from "@/registry/bitop/ui/page-header/page-header";
 import { TextLink } from "@/registry/bitop/ui/text-link/text-link";
 import { componentDocs } from "../content";
-import { C, CodeBlock, DocSection, InstallTabs, Prose } from "../kit/kit";
+import { C, CodeBlock, DocSection, InstallCommand, Prose } from "../kit/kit";
 import { Link } from "../router";
-import { REGISTRY_URL, itemUrl } from "../site";
+import { registryTemplate } from "../site";
 import styles from "./pages.module.css";
 
+const cliInstall = `# bitop-ui checked out next to your project (until @bitop/cli is on npm):
+npm install -D file:../bitop-ui/packages/cli
+
+# check it works
+npx --no-install bitop --help`;
+
+const initCommand = `# Choose ONE source:
+npx --no-install bitop init --registry "${registryTemplate}"
+# OR a checkout (nothing to build or serve):
+npx --no-install bitop init --registry ../bitop-ui`;
+
 const componentsJson = `{
-  "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "new-york",
-  "rsc": false,
-  "tsx": true,
-  "tailwind": {
-    "config": "",
-    "css": "src/index.css",
-    "baseColor": "",
-    "cssVariables": true,
-    "prefix": ""
-  },
-  "iconLibrary": "lucide",
   "aliases": {
-    "components": "@/components",
     "ui": "@/components/ui",
-    "lib": "@/lib",
-    "utils": "@/lib/utils",
-    "hooks": "@/hooks"
+    "lib": "@/lib"
   },
   "registries": {
-    "@bitop": "${REGISTRY_URL}/{name}.json"
+    "@bitop": "${registryTemplate}"
   }
 }`;
+
+const updating = `npx --no-install bitop diff button             # compare without writing
+npx --no-install bitop update                  # refresh installed items; skip local edits
+npx --no-install bitop add button --overwrite  # replace even your edits
+npx --no-install bitop list                    # registry items (* = installed)`;
 
 const tsconfig = `// tsconfig.json (and tsconfig.app.json in the Vite template)
 {
@@ -88,7 +88,7 @@ export function InstallationPage() {
     <article className={styles.page}>
       <PageHeader
         title="Installation"
-        description="Set up a React project to install bitop-ui items with the shadcn CLI. No Tailwind required."
+        description="Set up a React project and copy bitop-ui items into it with the bitop CLI. No Tailwind required."
       />
 
       <DocSection id="requirements" title="Requirements">
@@ -103,7 +103,7 @@ export function InstallationPage() {
             <li>
               An <C>@/*</C> import alias that points at your source folder, in both TypeScript and the bundler.
             </li>
-            <li>Node 20 or newer to run the CLI.</li>
+            <li>Node 20 (20.19+) or 22.12+ to run the CLI.</li>
           </ul>
         </Prose>
       </DocSection>
@@ -113,28 +113,43 @@ export function InstallationPage() {
         <CodeBlock code={viteConfig} label="Vite config" language="ts" />
       </DocSection>
 
-      <DocSection id="components-json" title="2. Create components.json">
-        <Alert tone="info" title="Write it by hand">
-          <C>npx shadcn init</C> stops with “No Tailwind CSS configuration found”, so create the file yourself. The <C>tailwind</C> block is required by
-          the schema but unused: bitop-ui items never write to that CSS file.
-        </Alert>
-        <CodeBlock code={componentsJson} label="components.json" language="json" />
+      <DocSection id="cli" title="2. Add the bitop CLI" description="A small Node script with no runtime npm dependencies. @bitop/cli is not published to npm yet; install it from a checkout.">
+        <CodeBlock code={cliInstall} label="install the CLI" language="bash" />
         <Prose>
           <p>
-            The <C>registries</C> entry enables the <C>@bitop/…</C> names. The <C>ui</C> and <C>lib</C> aliases decide where files go: every file uses an{" "}
-            <C>@ui/</C> or <C>@lib/</C> target, so installs follow your folders.
+            <C>npx --no-install bitop</C> uses your installed CLI without downloading another package. Alternatively, run{" "}
+            <C>node ../bitop-ui/packages/cli/bin/bitop.mjs</C> from your project with the same arguments. Commands below assume the CLI is installed locally.
+            Consumers need neither shadcn nor Tailwind; shadcn is only used for development-time registry build/schema validation.
           </p>
         </Prose>
       </DocSection>
 
-      <DocSection id="core" title="3. Add the core and a theme">
+      <DocSection id="components-json" title="3. Create components.json" description="Choose one init command, not both. For an existing components.json, add the registry entry manually to preserve your settings.">
+        <CodeBlock code={initCommand} label="init command" language="bash" />
+        <CodeBlock code={componentsJson} label="components.json" language="json" />
+        <Prose>
+          <p>
+            <C>aliases.ui</C> and <C>aliases.lib</C> decide where files go (found through your tsconfig <C>paths</C>) and how imports between items are
+            written. <C>registries["@bitop"]</C> is where items come from: a bitop-ui checkout, a built registry folder (<C>public/r</C>), or a URL with a{" "}
+            <C>{"{name}"}</C> placeholder. Existing shadcn-style configuration is supported; unrelated fields are ignored. URL-form registry dependencies
+            resolve by item name through this configured source, not from external origins.
+          </p>
+          <p>
+            Alias resolution checks <C>tsconfig.json</C>, <C>tsconfig.app.json</C>, then <C>jsconfig.json</C>; it does not follow <C>extends</C> or{" "}
+            <C>references</C>. Unmatched <C>@/…</C> aliases fall back to <C>src/…</C>. Set <C>bitop.paths.ui</C> and <C>bitop.paths.lib</C> in{" "}
+            <C>components.json</C> to override disk locations without changing import aliases.
+          </p>
+        </Prose>
+      </DocSection>
+
+      <DocSection id="core" title="4. Add the core and a theme">
         <Prose>
           <p>
             <C>core</C> installs the tokens, base styles, Inter font and helpers, and pulls in the default neutral theme. Add <C>theme-uf</C> as well if you
             want the UF brand.
           </p>
         </Prose>
-        <InstallTabs items={["core"]} label="core install command" />
+        <InstallCommand items={["core"]} label="core install command" />
         <Prose>
           <p>Then import the stylesheet once, before any other CSS:</p>
         </Prose>
@@ -148,53 +163,53 @@ export function InstallationPage() {
         <CodeBlock code={noFlash} label="no-flash script" language="html" />
       </DocSection>
 
-      <DocSection id="components" title="4. Add components">
-        <InstallTabs items={["dialog", "table"]} label="component install command" />
+      <DocSection id="components" title="5. Add components">
+        <InstallCommand items={["dialog", "table"]} label="component install command" />
         <Prose>
-          <p>Dependencies (other items and npm packages) are installed automatically. Files land next to each other:</p>
+          <p>Dependencies (other items and npm packages) are installed automatically; npm packages your project already lists are left alone, pins included. Use trusted sources: package installation may run lifecycle scripts. Add <C>--no-install</C> after the Bitop command to copy files but only print missing dependencies. Files land next to each other:</p>
         </Prose>
         <CodeBlock code={tree} label="file tree" language="text" />
         <CodeBlock code={usage} label="usage example" language="tsx" />
         <Prose>
           <p>To install everything at once:</p>
         </Prose>
-        <InstallTabs items={all} label="install-all command" />
+        <InstallCommand items={all} label="install-all command" />
       </DocSection>
 
-      <DocSection id="notes" title="Notes and caveats">
+      <DocSection id="updating" title="6. Update and compare">
+        <CodeBlock code={updating} label="update commands" language="bash" />
+        <Prose>
+          <p>
+            <C>bitop-lock.json</C> records what each install wrote, so <C>update</C> can tell your edits from upstream changes: files you changed are skipped
+            (and listed) unless you pass <C>--overwrite</C>. Updates do not merge edits or delete obsolete files. Add <C>--dry-run</C> to preview without
+            writing files or installing packages. Commit the lock file; it tracks file hashes, not pinned registry versions.
+          </p>
+        </Prose>
+      </DocSection>
+
+      <DocSection id="notes" title="Notes">
         <Prose>
           <ul>
-            <li>
-              <strong>Direct URLs need no configuration.</strong> <C>npx shadcn@latest add {itemUrl("button")}</C> works without the <C>registries</C> entry
-              when the registry was built with <C>SITE_URL</C> set (the published one is), because dependencies are then absolute URLs. A registry built
-              without it declares dependencies as <C>@bitop/…</C>, and installing by URL fails with “add the registry configuration under registries” until
-              you add the entry above.
-            </li>
             <li>
               <strong>Helpers live in </strong>
               <C>lib/bitop-utils.ts</C>, not <C>lib/utils.ts</C>, so bitop-ui never overwrites shadcn/ui's <C>cn</C> helper. Both libraries can live in one
               project.
             </li>
             <li>
-              <strong>Every component is a folder</strong> (<C>ui/button/button.tsx</C> + <C>button.module.css</C>), so names never collide with shadcn/ui's
-              flat files. Import from <C>@/components/ui/button/button</C>.
+              <strong>Every component is a folder</strong> (<C>ui/button/button.tsx</C> + <C>button.module.css</C>). Import from{" "}
+              <C>@/components/ui/button/button</C>.
             </li>
             <li>
               <strong>CSS Module types</strong> come from <C>vite/client</C> (already in the Vite template's <C>types</C>) or <C>next-env.d.ts</C>.
             </li>
             <li>
-              <strong>Themes ask for confirmation.</strong> Adding a <C>theme-*</C> item first on the command line prompts before “overwriting CSS variables”;
-              nothing is overwritten outside the theme file. Pass <C>--yes</C> in scripts.
+              <strong>Safety</strong>: registry files must land inside your configured <C>ui</C> and <C>lib</C> folders; symlink writes are refused.
+              The CLI also writes configuration and lock files, and invokes your package manager unless disabled. Copied code and npm dependencies must be trusted.
             </li>
             <li>
-              <strong>Updating</strong>: re-run <C>add</C> with <C>--overwrite</C>, or preview changes with <C>--diff</C>. You own the files, so review the diff
-              if you changed them.
+              <strong>React Server Components</strong>: components that use hooks or Base UI start with <C>"use client"</C> (harmless in Vite). Next.js App
+              Router should work but hasn't been verified yet.
             </li>
-            <li>
-              <strong>React Server Components</strong>: components that use hooks or Base UI start with <C>"use client"</C>. The CLI keeps the directive
-              (harmless in Vite). Next.js App Router should work but hasn't been verified yet.
-            </li>
-            <li>The CLI drops a file's leading comment when it rewrites imports, so component notes sit below the imports.</li>
           </ul>
         </Prose>
       </DocSection>

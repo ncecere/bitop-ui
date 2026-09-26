@@ -1,0 +1,17 @@
+{
+  "name": "@bitop/cli",
+  "version": "0.1.0",
+  "description": "Copy bitop-ui components (Base UI + CSS Modules + CSS variables) into your project as source you own.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "bitop": "bin/bitop.mjs"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}

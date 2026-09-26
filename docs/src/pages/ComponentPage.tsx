@@ -3,7 +3,7 @@ import { Breadcrumbs } from "@/registry/bitop/ui/breadcrumbs/breadcrumbs";
 import { PageHeader } from "@/registry/bitop/ui/page-header/page-header";
 import { TextLink } from "@/registry/bitop/ui/text-link/text-link";
 import registry from "@/registry.json";
-import { C, CodeBlock, DocSection, Example, InstallTabs, PropsTable, Prose } from "../kit/kit";
+import { C, CodeBlock, DocSection, Example, InstallCommand, PropsTable, Prose } from "../kit/kit";
 import type { ComponentDoc } from "../content/types";
 import { Link } from "../router";
 import styles from "./pages.module.css";
@@ -33,7 +33,7 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
       />
 
       <DocSection id="installation" title="Installation">
-        <InstallTabs items={[doc.slug]} />
+        <InstallCommand items={[doc.slug]} />
         <Prose>
           <p>
             This adds{" "}

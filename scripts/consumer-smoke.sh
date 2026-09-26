@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# End-to-end check that the registry installs into a fresh, Tailwind-free
-# Vite + React + TypeScript app with the real shadcn CLI:
+# End-to-end check that every item installs into a fresh, Tailwind-free
+# Vite + React + TypeScript app with the bitop CLI (packages/cli):
 #
 #   1. build the registry and docs for http://127.0.0.1:$PORT and serve them
-#   2. create a Vite react-ts app, add the @/ alias and a hand-written components.json
-#   3. install core, theme-uf and half the components by direct URL (no namespace)
-#   4. add the @bitop namespace and install the rest as @bitop/<name>
+#   2. create a Vite react-ts app, add the @/ alias, `bitop init` components.json
+#   3. install core, theme-uf and half the components from the served registry
+#      (npm dependencies are installed by the CLI)
+#   4. install the rest straight from this checkout, then check a re-run is a no-op
 #   5. render AppShell + Dialog + Table + CommandPalette and a small AI chat
 #      (Conversation, Message, Response, Reasoning, Tool, Sources, PromptInput,
 #      ModelSelector) and run `npm run build`
@@ -18,7 +19,6 @@ PORT="${PORT:-4175}"  # avoid fetch-blocked ports (e.g. 4190)
 BASE="http://127.0.0.1:${PORT}"
 WORK="${1:-$(mktemp -d)}"
 APP="${WORK}/bitop-consumer"
-SHADCN="${SHADCN:-shadcn@latest}"
 
 cd "$ROOT"
 SITE_URL="$BASE" npm run --silent registry:build
@@ -29,7 +29,7 @@ trap 'kill $PREVIEW 2>/dev/null || true' EXIT
 for _ in $(seq 1 50); do curl -sf "$BASE/r/core.json" >/dev/null && break; sleep 0.2; done
 
 rm -rf "$APP" && mkdir -p "$WORK" && cd "$WORK"
-npm create vite@latest bitop-consumer -- --template react-ts --no-interactive >/dev/null
+npm create vite@9.2.1 bitop-consumer -- --template react-ts --no-interactive >/dev/null
 cd "$APP"
 npm install --silent
 
@@ -51,31 +51,22 @@ export default defineConfig({
   resolve: { alias: { "@": path.resolve(import.meta.dirname, "./src") } },
 });
 EOF
-cat > components.json <<'EOF'
-{
-  "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "new-york",
-  "rsc": false,
-  "tsx": true,
-  "tailwind": { "config": "", "css": "src/index.css", "baseColor": "", "cssVariables": true, "prefix": "" },
-  "iconLibrary": "lucide",
-  "aliases": { "components": "@/components", "ui": "@/components/ui", "lib": "@/lib", "utils": "@/lib/utils", "hooks": "@/hooks" }
-}
-EOF
+# Exercise the distributable package and its bin entry, not just the checkout script.
+PACK_NAME=$(cd "$ROOT/packages/cli" && npm pack --silent --pack-destination "$WORK")
+npm install --save-dev "$WORK/$PACK_NAME" --silent
+BITOP=("$APP/node_modules/.bin/bitop")
+"${BITOP[@]}" init --registry "$BASE/r/{name}.json"
 
 ITEMS=()
 while IFS= read -r name; do ITEMS+=("$name"); done < <(node -e 'for (const i of require(process.argv[1]).items) if (i.type === "registry:ui") console.log(i.name)' "$ROOT/registry.json")
 HALF=$(( ${#ITEMS[@]} / 2 ))
-URLS=("$BASE/r/core.json" "$BASE/r/theme-uf.json")
-for n in "${ITEMS[@]:0:$HALF}"; do URLS+=("$BASE/r/$n.json"); done
-echo "Installing ${#URLS[@]} items by direct URL…"
-npx --yes "$SHADCN" add "${URLS[@]}" --yes </dev/null
-
-node -e 'const fs=require("fs");const c=JSON.parse(fs.readFileSync("components.json"));c.registries={"@bitop":process.argv[1]+"/r/{name}.json"};fs.writeFileSync("components.json",JSON.stringify(c,null,2))' "$BASE"
-NS=("@bitop/theme-neutral")
-for n in "${ITEMS[@]:$HALF}"; do NS+=("@bitop/$n"); done
-echo "Installing ${#NS[@]} items with the @bitop namespace…"
-npx --yes "$SHADCN" add "${NS[@]}" --yes </dev/null
+echo "Installing core, theme-uf and ${HALF} components from the hosted registry ($BASE)…"
+"${BITOP[@]}" add core theme-uf "${ITEMS[@]:0:$HALF}"
+echo "Installing the other $(( ${#ITEMS[@]} - HALF )) components straight from the checkout…"
+"${BITOP[@]}" add theme-neutral "${ITEMS[@]:$HALF}" --registry "$ROOT"
+# A second run must be a no-op.
+"${BITOP[@]}" add "${ITEMS[@]}" --registry "$ROOT" > "$WORK/reinstall.log"
+grep -q " 0 new, 0 updated;.* 0 skipped" "$WORK/reinstall.log"
 
 cat > src/main.tsx <<'EOF'
 import { StrictMode } from "react";
@@ -219,7 +210,7 @@ ACTUAL=$( (find src/components/ui -type f; find src/lib -type f) | wc -l | tr -d
 echo "Installed files: $ACTUAL (registry ships $EXPECTED)"
 [ "$ACTUAL" -eq "$EXPECTED" ]
 
-# LazyResponse's relative dynamic import must survive the CLI's import rewrite.
+# LazyResponse's relative dynamic import must survive the import rewrite.
 grep -q 'import("./response")' src/components/ui/response/response-lazy.tsx
 
 npm run build

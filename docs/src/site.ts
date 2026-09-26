@@ -5,11 +5,8 @@
 export const SITE_URL: string = __SITE_URL__;
 export const REGISTRY_URL = `${SITE_URL}/r`;
 
-export const itemUrl = (name: string) => `${REGISTRY_URL}/${name}.json`;
+/** The registry source for components.json when installing from this site. */
+export const registryTemplate = `${REGISTRY_URL}/{name}.json`;
 
-export const namespaceCommand = (names: string[]) => `npx shadcn@latest add ${names.map((n) => `@bitop/${n}`).join(" ")}`;
-export const urlCommand = (names: string[]) => `npx shadcn@latest add ${names.map(itemUrl).join(" ")}`;
-
-export const registriesSnippet = `"registries": {
-  "@bitop": "${REGISTRY_URL}/{name}.json"
-}`;
+/** The install command for items (the source comes from components.json). */
+export const addCommand = (names: string[]) => `npx --no-install bitop add ${names.join(" ")}`;

@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "license": "MIT",
-  "description": "A copy-and-own React component registry built on Base UI, CSS Modules and CSS variables. Installed with the shadcn CLI.",
+  "description": "A copy-and-own React component registry built on Base UI, CSS Modules and CSS variables. Installed with the first-party Bitop CLI.",
   "type": "module",
   "engines": {
     "node": ">=20.19"

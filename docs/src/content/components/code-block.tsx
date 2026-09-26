@@ -7,7 +7,7 @@ import raw from "./code-block.tsx?raw";
 export function Basic() {
   return (
     <div className={styles.stack}>
-      <CodeBlock language="bash" code="npx shadcn@latest add @bitop/response @bitop/code-block" />
+      <CodeBlock language="bash" code="npx --no-install bitop add response code-block" />
       <CodeBlock
         filename="src/lib/sum.ts"
         language="ts"

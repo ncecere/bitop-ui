@@ -61,7 +61,7 @@ jobs:
           path: dist
 
   consumer-smoke:
-    name: Install into a fresh Vite app with the shadcn CLI
+    name: Install into a fresh Vite app with the Bitop CLI
     runs-on: ubuntu-latest
     needs: build
     steps:

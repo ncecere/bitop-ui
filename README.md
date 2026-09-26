@@ -1,6 +1,6 @@
 # bitop-ui
 
-A copy-and-own React component library distributed as a [shadcn registry](https://ui.shadcn.com/docs/registry). Consumers install components as source with `npx shadcn add @bitop/<name>` and then own the code.
+A copy-and-own React component library. The `bitop` CLI (`packages/cli`) copies components into your project as source, with their dependencies, and you own the code from then on. The workflow is inspired by shadcn/ui, but bitop doesn't need the shadcn CLI or Tailwind.
 
 - **Behaviour and accessibility** come from [Base UI](https://base-ui.com) (`@base-ui/react` 1.8).
 - **Styling** is CSS Modules, one `*.module.css` next to each component.
@@ -8,7 +8,7 @@ A copy-and-own React component library distributed as a [shadcn registry](https:
 - **WCAG 2.1 AA**: contrast is tested for every theme, and every docs page is checked with axe.
 - **Enforced**: `npm run styling:check` (`scripts/check-styling.mjs`) fails the build on Tailwind/Radix/CSS-in-JS/class-name utilities or other component kits, global CSS in a component folder, literal colours or px inline styles, and interactive components that don't build on Base UI.
 
-The registry has 65 items: `core`, two themes (`theme-neutral`, the default, and the opt-in `theme-uf`) and 62 components, including `app-shell`, `command-palette`, `dialog`, `table`, `field`, `select`, `tag-input`, `color-field`, `toast`, `color-mode` and the AI elements below.
+The registry has 110 items: `core`, two themes (`theme-neutral`, the default, and the opt-in `theme-uf`) and 107 components. They include familiar UI patterns (accordion, calendar, combobox, data-table, dialog, drawer, menubar, navigation-menu, sheet, slider, toggle-group…) plus app-level pieces (`app-shell`, `command-palette`, `page-header`, `stat-card`) and the AI elements below.
 
 ### AI elements
 
@@ -22,27 +22,42 @@ Components for chat and agent UIs (docs: the **AI** section and the full **Chat 
 
 ## Using it in a project
 
-Full guide: the docs site's **Installation** page. In short, for a Vite + React 19 + TypeScript app:
+Full guide: the docs site's **Installation** page and the [CLI reference](./packages/cli/README.md). In short, for a Vite + React 19 + TypeScript app with Node 20 (20.19+) or 22.12+:
 
 1. Add an `@/*` path alias to `tsconfig.json`/`tsconfig.app.json` and to `vite.config.ts`.
-2. Write `components.json` by hand (`shadcn init` requires Tailwind), with the registry namespace:
-
-   ```json
-   "registries": { "@bitop": "https://OWNER.github.io/bitop-ui/r/{name}.json" }
-   ```
-
-   See `docs/src/pages/InstallationPage.tsx` for the complete file.
-   Until the registry is hosted, build and serve it from a checkout of this repo (`npm run registry:build && npm run registry:serve`) and use `"@bitop": "http://127.0.0.1:4180/r/{name}.json"`.
-3. Install the core (tokens, base styles, font, helpers; pulls in the neutral theme) and components:
+2. Add the CLI. Until `@bitop/cli` is published to npm, install it from a checkout next to your project:
 
    ```bash
-   npx shadcn@latest add @bitop/core @bitop/button @bitop/dialog
-   # or without the namespace, by URL:
-   npx shadcn@latest add https://OWNER.github.io/bitop-ui/r/dialog.json
+   npm install -D file:../bitop-ui/packages/cli
    ```
-4. Import the styles once: `import "@/components/ui/styles/bitop.css";` (and `themes/uf.css` after it for the UF brand, with `<html data-brand="uf">`).
+3. Point it at a registry. Choose **one** command; it writes `components.json`. If you already have a shadcn-style config, add `registries["@bitop"]` instead of replacing it.
 
-Files land in your `ui` alias (`src/components/ui/<name>/<name>.tsx` + `<name>.module.css`, shared styles in `ui/styles`, themes in `ui/themes`) and `lib/bitop-utils.ts`.
+   ```bash
+   npx --no-install bitop init --registry ../bitop-ui # checkout: nothing to build or serve
+   # OR use a hosted registry:
+   npx --no-install bitop init --registry "https://OWNER.github.io/bitop-ui/r/{name}.json"
+   ```
+4. Install the core (tokens, base styles, font, helpers; pulls in the neutral theme) and components:
+
+   ```bash
+   npx --no-install bitop add core button dialog
+   ```
+5. Import the styles once: `import "@/components/ui/styles/bitop.css";` (and `themes/uf.css` after it for the UF brand, with `<html data-brand="uf">`).
+
+Alternatively, run `node ../bitop-ui/packages/cli/bin/bitop.mjs` from your project with the same arguments, without installing the CLI. `npx --no-install` uses the locally installed CLI rather than downloading an unrelated package.
+
+Files land in your `ui` alias (`src/components/ui/<name>/<name>.tsx` + `<name>.module.css`, shared styles in `ui/styles`, themes in `ui/themes`) and `lib/bitop-utils.ts`. Missing npm packages are installed with your package manager; packages you already list keep their versions. Use trusted registries and npm packages: package installation may run lifecycle scripts. `bitop add … --no-install` copies files but only prints the dependencies to install.
+
+### Keeping components up to date
+
+```bash
+npx --no-install bitop diff button             # compare without writing
+npx --no-install bitop update                  # refresh installed items; skip local edits
+npx --no-install bitop add button --overwrite  # replace even your edits
+npx --no-install bitop list                    # registry items (* = installed)
+```
+
+`bitop-lock.json` records file hashes, which is how `update` tells your edits apart from upstream changes. Commit it. Updates do not merge edits or delete obsolete files. Use `--dry-run` to preview without writing files or installing packages.
 
 ## Developing
 
@@ -53,15 +68,17 @@ npm install
 npm run dev               # docs site at http://localhost:5173
 npm run typecheck         # tsc --noEmit (TypeScript 5.9)
 npm test                  # vitest: component tests + axe, theme contrast, every docs page
-npm run registry:build    # shadcn build → public/r/*.json
+npm run registry:build    # build the registry JSON → public/r/*.json
 npm run registry:validate # consistency checks on registry.json and public/r
-npm run registry:serve    # serve public/r at http://127.0.0.1:4180/r/{name}.json for local installs (REGISTRY_PORT)
+npm run registry:serve    # serve public/r at http://127.0.0.1:4180/r/{name}.json (REGISTRY_PORT)
 npm run styling:check     # Base UI + CSS Modules + CSS variables policy (scripts/check-styling.mjs)
 npm run build             # registry + docs → dist/ (dist/r is the registry)
 npm run preview           # serve dist/ at http://127.0.0.1:4173
-npm run smoke:consumer    # fresh Vite app + real shadcn CLI install of every item (needs network)
+npm run smoke:consumer    # fresh Vite app + bitop CLI install of every item, then build (needs network)
 npm run a11y:browser      # agent-browser axe audit of every docs page in 4 theme/mode combos (needs preview running)
 ```
+
+The shadcn CLI is a **development-only** dependency for registry build/schema validation. Consumers use Bitop and need neither shadcn nor Tailwind.
 
 ### Repository layout
 
@@ -75,13 +92,14 @@ docs/src/                     docs site (Vite + React), dogfooding the registry
 docs/src/content/components/  one docs file per component (examples, props, a11y notes)
 docs/src/examples/            larger examples (the full chat example page)
 tests/                        vitest + testing-library + vitest-axe
+packages/cli/                 the bitop CLI (dependency-free Node script)
 scripts/                      registry build/validate, styling policy, consumer smoke test, browser a11y audit
-.github/workflows/ci.yml      typecheck, test, shadcn build, validate, docs build, smoke test, Pages deploy
+.github/workflows/ci.yml      typecheck, test, registry build, validate, docs build, smoke test, Pages deploy
 ```
 
 ### How imports are resolved for consumers
 
-Source files import each other through the `@/registry/bitop/...` alias (mapped to the repo root in `tsconfig.json` and `vite.config.ts`). When a consumer installs an item, the shadcn CLI rewrites those specifiers to the consumer's aliases:
+Source files import each other through the `@/registry/bitop/...` alias (mapped to the repo root in `tsconfig.json` and `vite.config.ts`). When a consumer installs an item, the Bitop CLI rewrites those specifiers to the consumer's aliases:
 
 | In this repo | In the consumer (default aliases) |
 |---|---|
@@ -90,15 +108,17 @@ Source files import each other through the `@/registry/bitop/...` alias (mapped 
 | `@/registry/bitop/lib/bitop-utils` | `@/lib/bitop-utils` |
 | `./button.module.css` | unchanged (the CSS file sits next to the `.tsx`) |
 
-Every file declares a `target` (`@ui/<name>/<name>.tsx`, `@lib/bitop-utils.ts`), so the install location follows the consumer's `ui`/`lib` aliases. `.tsx`/`.ts` files are `registry:ui`/`registry:lib` (the CLI rewrites their imports); CSS files are `registry:file`, which the CLI copies verbatim. `scripts/validate-registry.mjs` enforces these rules, including that no specifier would be mangled by the CLI's `@/registry/<style>/ui` rewrite.
+Every file declares a `target` (`@ui/<name>/<name>.tsx`, `@lib/bitop-utils.ts`), so the install location follows the consumer's `ui`/`lib` aliases. Bitop rewrites code-file imports and copies CSS verbatim. `scripts/validate-registry.mjs` checks the registry conventions and compatibility with the development tooling.
+
+Alias resolution reads `tsconfig.json`, `tsconfig.app.json`, then `jsconfig.json`, preferring exact aliases then the longest wildcard prefix within each file; it does not follow `extends` or `references`. Unmatched `@/…` aliases fall back to `src/…`. Set `bitop.paths.ui` / `bitop.paths.lib` in `components.json` to override disk locations (imports still use `aliases`).
 
 ## Publishing
 
 The registry is static JSON, so any static host works. The docs build (`dist/`) contains the site and the registry at `dist/r/`.
 
-- **`SITE_URL`** (or `VITE_SITE_URL`) is the absolute URL the site is served from, e.g. `https://OWNER.github.io/bitop-ui`. It sets the Vite base path, the install commands shown in the docs and, for `registry:build`, turns `@bitop/*` dependencies into absolute URLs so direct-URL installs work without namespace configuration. Without it, dependencies stay `@bitop/*` (host-independent, but consumers must configure the namespace).
+- **`SITE_URL`** (or `VITE_SITE_URL`) is the absolute URL the site is served from, e.g. `https://OWNER.github.io/bitop-ui`. It sets the Vite base path, the registry URL shown in the docs and, for `registry:build`, turns `@bitop/*` dependencies into absolute URLs. Bitop resolves both namespaced and URL-form (`…/r/<name>.json`) dependencies by item name through the configured registry source; it does **not** fetch those dependencies from external origins.
 - **GitHub Pages**: `.github/workflows/ci.yml` builds with `SITE_URL` from the repository variable of that name (default: the Pages project URL) and has a `deploy` job that is skipped until you set the repository variable `DEPLOY_PAGES=true` and select "GitHub Actions" as the Pages source. `404.html` is a copy of `index.html` so client-side routes work on Pages.
-- Consumers pin nothing: they re-run `npx shadcn add … --overwrite` (or `--diff` to preview) to update.
+- Consumers compare with `npx --no-install bitop diff <item>` and refresh with `npx --no-install bitop update`. The lock file tracks file hashes, not pinned registry versions; `--overwrite` explicitly replaces local edits.
 
 ## Contributing
 

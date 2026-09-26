@@ -1,7 +1,7 @@
 import { PageHeader } from "@/registry/bitop/ui/page-header/page-header";
 import { Table, Td, Tr } from "@/registry/bitop/ui/table/table";
 import { TextLink } from "@/registry/bitop/ui/text-link/text-link";
-import { C, CodeBlock, DocSection, InstallTabs, Prose } from "../kit/kit";
+import { C, CodeBlock, DocSection, InstallCommand, Prose } from "../kit/kit";
 import { Link } from "../router";
 import styles from "./pages.module.css";
 
@@ -138,7 +138,7 @@ export function ThemingPage() {
             only. It is opt-in: import it after <C>bitop.css</C> and set <C>data-brand="uf"</C>.
           </p>
         </Prose>
-        <InstallTabs items={["theme-uf"]} label="UF theme install command" />
+        <InstallCommand items={["theme-uf"]} label="UF theme install command" />
         <CodeBlock code={`import "@/components/ui/themes/uf.css";\n\n<html data-brand="uf">`} label="UF theme usage" language="tsx" />
         <Prose>
           <p>UF orange is 3.53:1 on white, so it is used for decorative marks only, never for text or control boundaries.</p>

@@ -8,12 +8,11 @@ import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { Badge } from "@/registry/bitop/ui/badge/badge";
 import { IconButton } from "@/registry/bitop/ui/button/button";
 import { Disclosure } from "@/registry/bitop/ui/disclosure/disclosure";
-import { Tab, Tabs, TabsList, TabsPanel } from "@/registry/bitop/ui/tabs/tabs";
 import { Table, Td, Tr } from "@/registry/bitop/ui/table/table";
 import { Tooltip } from "@/registry/bitop/ui/tooltip/tooltip";
 import { VisuallyHidden } from "@/registry/bitop/ui/visually-hidden/visually-hidden";
 import { cx } from "@/registry/bitop/lib/bitop-utils";
-import { namespaceCommand, urlCommand } from "../site";
+import { addCommand } from "../site";
 import styles from "./kit.module.css";
 
 /* ---------------- Code ---------------- */
@@ -118,21 +117,9 @@ export function Example({ title, description, code, children, wide }: ExamplePro
 
 /* ---------------- Install ---------------- */
 
-export function InstallTabs({ items, label = "install command" }: { items: string[]; label?: string }) {
-  return (
-    <Tabs defaultValue="namespace" className={styles.installTabs}>
-      <TabsList variant="pills" aria-label="Install method">
-        <Tab value="namespace">@bitop namespace</Tab>
-        <Tab value="url">Direct URL</Tab>
-      </TabsList>
-      <TabsPanel value="namespace">
-        <CodeBlock code={namespaceCommand(items)} label={label} language="bash" />
-      </TabsPanel>
-      <TabsPanel value="url">
-        <CodeBlock code={urlCommand(items)} label={label} language="bash" />
-      </TabsPanel>
-    </Tabs>
-  );
+/** The `bitop add` command for items. The registry source comes from components.json. */
+export function InstallCommand({ items, label = "install command" }: { items: string[]; label?: string }) {
+  return <CodeBlock code={addCommand(items)} label={label} language="bash" />;
 }
 
 /* ---------------- Props ---------------- */
