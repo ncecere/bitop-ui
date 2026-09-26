@@ -1,13 +1,32 @@
 "use client";
 
 import { ArrowDown, ArrowUp, ChevronsUpDown, Search } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentPropsWithRef,
+  type FocusEvent,
+  type ReactNode,
+} from "react";
+import { ErrorAlert } from "@/registry/bitop/ui/alert/alert";
+import { Button } from "@/registry/bitop/ui/button/button";
 import { Checkbox } from "@/registry/bitop/ui/checkbox/checkbox";
 import { Field } from "@/registry/bitop/ui/field/field";
 import { Input } from "@/registry/bitop/ui/input/input";
-import { Paginator } from "@/registry/bitop/ui/pagination/pagination";
-import { Table, Td, Th, Tr, type TableColumn, type TableProps } from "@/registry/bitop/ui/table/table";
-import { cx } from "@/registry/bitop/lib/bitop-utils";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+  Paginator,
+} from "@/registry/bitop/ui/pagination/pagination";
+import { Skeleton } from "@/registry/bitop/ui/skeleton/skeleton";
+import { Table, TableActions, Td, Th, Tr, type TableColumn, type TableProps } from "@/registry/bitop/ui/table/table";
+import { cx, dataFlag } from "@/registry/bitop/lib/bitop-utils";
 import styles from "./data-table.module.css";
 
 /*
@@ -33,6 +52,24 @@ import styles from "./data-table.module.css";
  * All processing happens in memory. For server-side data, control `sort`,
  * `filter` and `page`, pass the current page's rows as `data` and set
  * `manual` plus `rowCount`.
+ *
+ * Async data: `loading`, `error` + `onRetry`, and either `cursor` (Previous /
+ * Next for APIs that return cursors) or `loadMore` (a button after the
+ * table). What the body shows:
+ *
+ *   rows to show?  yes → the rows. `error` adds an ErrorAlert above the
+ *                        table; `loading` sets aria-busy and dims them
+ *                        (stale rows never flash away).
+ *                  no  → `error` (ErrorAlert in the body, Retry stays put
+ *                        while `loading`) > `loading` (skeleton rows and a
+ *                        polite "Loading…" status) > `empty` (no data) >
+ *                        `noResults` (the filter matched nothing).
+ *
+ * The toolbar is always rendered. `cursor` replaces numbered pagination:
+ * with it, `pageSize`/`page` are ignored. When a control that had focus
+ * disappears or becomes disabled (Load more at the end, Next on the last
+ * page, Retry after recovery, a deleted row's action), focus moves to the
+ * current page, the remaining step button or the table, instead of <body>.
  */
 
 export type SortDirection = "ascending" | "descending";
@@ -63,6 +100,26 @@ export type DataTableColumn<T> = {
   width?: string;
   /** Muted secondary text. */
   muted?: boolean;
+};
+
+/** Server-driven Previous / Next paging (APIs that return next/previous cursors). */
+export type DataTableCursor = {
+  hasPrevious: boolean;
+  hasNext: boolean;
+  onPrevious: () => void;
+  onNext: () => void;
+  /** Range text next to the controls, e.g. "Showing 26–50". Announced politely when it changes. */
+  label?: ReactNode;
+};
+
+/** A "Load more" button after the table (infinite / appended lists). */
+export type DataTableLoadMore = {
+  hasMore: boolean;
+  /** The next batch is being fetched: the button shows a spinner and ignores clicks, but keeps focus. */
+  loading?: boolean;
+  onLoadMore: () => void;
+  /** Button text (default "Load more"). */
+  label?: string;
 };
 
 export type DataTableProps<T> = Omit<TableProps, "columns" | "children" | "empty"> & {
@@ -112,7 +169,56 @@ export type DataTableProps<T> = Omit<TableProps, "columns" | "children" | "empty
   toolbar?: ReactNode;
   /** Name of the pagination landmark (default: "{caption} pages" if caption is a string). */
   paginationLabel?: string;
+
+  /** Data is being fetched: aria-busy, skeleton rows when there is nothing to show, dimmed rows otherwise. */
+  loading?: boolean;
+  /** Number of skeleton rows while loading with no rows (default: pageSize up to 10, else 5). */
+  loadingRows?: number;
+  /** Announced while loading with no rows (default "Loading rows…"). */
+  loadingLabel?: string;
+  /** A failed fetch: shown as an ErrorAlert (in place of the body when there are no rows, else above the table). */
+  error?: unknown;
+  /** Adds a Retry button to the error alert. */
+  onRetry?: () => void;
+  /** Title of the error alert (default "Couldn't load rows"). */
+  errorTitle?: ReactNode;
+  /** Server-driven Previous / Next paging. Replaces numbered pagination (`pageSize` and `page` are ignored). */
+  cursor?: DataTableCursor;
+  /** A "Load more" button after the table; the number of new rows is announced. */
+  loadMore?: DataTableLoadMore;
+  /** Per-row actions in a trailing, right-aligned, unsortable column. */
+  rowActions?: (row: T) => ReactNode;
+  /** Accessible (visually hidden) header of the actions column (default "Actions"). */
+  rowActionsLabel?: string;
 };
+
+export type CellTextProps = Omit<ComponentPropsWithRef<"span">, "children"> & {
+  /** The main line, e.g. a name. */
+  primary: ReactNode;
+  /** A smaller, muted second line, e.g. an email or id. */
+  secondary?: ReactNode;
+};
+
+/**
+ * The common two-line cell: a name over a muted subtitle.
+ *
+ *   cell: (u) => <CellText primary={u.name} secondary={u.email} />
+ *
+ * A space separates the lines for assistive technology and copy/paste.
+ */
+export function CellText({ primary, secondary, className, ...props }: CellTextProps) {
+  return (
+    <span {...props} className={cx(styles.cellText, className)}>
+      <span className={styles.cellPrimary}>{primary}</span>
+      {secondary !== undefined && secondary !== null && secondary !== "" && (
+        <>
+          {" "}
+          <span className={styles.cellSecondary}>{secondary}</span>
+        </>
+      )}
+    </span>
+  );
+}
 
 function useControllable<V>(value: V | undefined, defaultValue: V, onChange?: (v: V) => void): [V, (v: V) => void] {
   const [inner, setInner] = useState(defaultValue);
@@ -148,6 +254,8 @@ export function compareValues(a: Primitive, b: Primitive): number {
   return collator ? collator.compare(sa, sb) : sa < sb ? -1 : sa > sb ? 1 : 0;
 }
 
+const SKELETON_WIDTHS = ["72%", "48%", "86%", "60%", "40%"];
+
 function textOf(v: Primitive): string {
   if (v === null || v === undefined) return "";
   if (v instanceof Date) return v.toLocaleDateString();
@@ -172,7 +280,7 @@ export function DataTable<T>({
   onFilterChange,
   filterLabel = "Filter rows",
   filterPlaceholder = "Filter…",
-  pageSize,
+  pageSize: pageSizeProp,
   page: pageProp,
   defaultPage = 1,
   onPageChange,
@@ -182,6 +290,16 @@ export function DataTable<T>({
   noResults,
   toolbar,
   paginationLabel,
+  loading = false,
+  loadingRows,
+  loadingLabel = "Loading rows\u2026",
+  error,
+  onRetry,
+  errorTitle = "Couldn't load rows",
+  cursor,
+  loadMore,
+  rowActions,
+  rowActionsLabel = "Actions",
   caption,
   className,
   ...tableProps
@@ -190,6 +308,80 @@ export function DataTable<T>({
   const [selected, setSelected] = useControllable<string[]>(selectedProp, defaultSelectedIds, onSelectionChange);
   const [filter, setFilterValue] = useControllable<string>(filterProp, defaultFilter, onFilterChange);
   const [page, setPage] = useControllable<number>(pageProp, defaultPage, onPageChange);
+  // Cursor paging and numbered paging are mutually exclusive: the cursor wins.
+  const pageSize = cursor ? undefined : pageSizeProp;
+
+  const rootRef = useRef<HTMLDivElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLDivElement>(null);
+
+  /* ----- "Load more": announce how many rows arrived ----- */
+  const [announcement, setAnnouncement] = useState("");
+  const pendingMore = useRef<{ from: number; sawLoading: boolean } | null>(null);
+  const moreLoading = Boolean(loadMore?.loading);
+  const hasMore = Boolean(loadMore?.hasMore);
+
+  function requestMore() {
+    if (!loadMore || loadMore.loading) return;
+    pendingMore.current = { from: data.length, sawLoading: false };
+    setAnnouncement("");
+    loadMore.onLoadMore();
+  }
+
+  useEffect(() => {
+    const pending = pendingMore.current;
+    if (!pending) return;
+    if (moreLoading) {
+      pending.sawLoading = true;
+      return;
+    }
+    const added = data.length - pending.from;
+    if (added > 0) {
+      pendingMore.current = null;
+      setAnnouncement(`${added} more ${added === 1 ? "row" : "rows"} loaded${hasMore ? "" : ". All rows loaded"}.`);
+    } else if (pending.sawLoading) {
+      // Finished without new rows (an error, or nothing left).
+      pendingMore.current = null;
+    }
+  }, [data.length, moreLoading, hasMore]);
+
+  /* ----- Keep focus when the focused control disappears or is disabled ----- */
+  const lastFocused = useRef<HTMLElement | null>(null);
+
+  function trackFocus(event: FocusEvent<HTMLDivElement>) {
+    const target = event.target as HTMLElement;
+    // The toolbar belongs to the consumer; leave its focus alone.
+    lastFocused.current = toolbarRef.current?.contains(target) ? null : target;
+  }
+
+  function trackBlur(event: FocusEvent<HTMLDivElement>) {
+    const target = event.target as HTMLElement & { disabled?: boolean };
+    // Focus moved to nothing while the control is still usable (a click on
+    // the page background, switching windows): not ours to restore.
+    if (!event.relatedTarget && target.isConnected && !target.disabled && target === lastFocused.current) {
+      lastFocused.current = null;
+    }
+  }
+
+  useLayoutEffect(() => {
+    const el = lastFocused.current as (HTMLElement & { disabled?: boolean }) | null;
+    if (!el) return;
+    const gone = !el.isConnected || el.disabled === true;
+    if (!gone) return;
+    const active = typeof document === "undefined" ? null : document.activeElement;
+    lastFocused.current = null;
+    if (active && active !== document.body && active !== el) return;
+    const footer = footerRef.current;
+    const inFooter = el.isConnected && footer?.contains(el);
+    const target =
+      (inFooter &&
+        (footer!.querySelector<HTMLElement>('[aria-current="page"]') ??
+          footer!.querySelector<HTMLElement>("button:not(:disabled):not([aria-disabled='true'])"))) ||
+      rootRef.current?.querySelector<HTMLElement>("table");
+    if (!target) return;
+    if (target.tagName === "TABLE" && !target.hasAttribute("tabindex")) target.tabIndex = -1;
+    target.focus();
+  });
 
   const rows = useMemo(() => data.map((row, index) => ({ row, id: getRowId(row, index) })), [data, getRowId]);
 
@@ -237,6 +429,7 @@ export function DataTable<T>({
 
   function setFilter(value: string) {
     setFilterValue(value);
+    setAnnouncement("");
     if (pageSize && currentPage !== 1) setPage(1);
   }
 
@@ -291,26 +484,66 @@ export function DataTable<T>({
         sort: active,
       };
     }),
+    ...(rowActions ? [{ label: rowActionsLabel, hideLabel: true, width: "1%" }] : []),
   ];
 
   const filtering = filter.trim() !== "";
   const noRows = data.length === 0 && !filtering;
-  const emptyContent =
-    visible.length > 0
-      ? undefined
-      : noRows
-        ? (empty ?? <p className={styles.message}>No rows.</p>)
-        : (noResults ?? <p className={styles.message}>No results for “{filter.trim()}”.</p>);
+  const hasRows = visible.length > 0;
+  const hasError = Boolean(error);
+  // Precedence without rows: error > loading (skeletons) > empty > noResults.
+  const showSkeleton = !hasRows && loading && !hasError;
+  const errorAlert = hasError ? (
+    <ErrorAlert
+      error={error}
+      title={errorTitle}
+      actions={
+        onRetry && (
+          // Rendered as a non-native button so it keeps focus while `loading`.
+          <Button size="sm" variant="secondary" loading={loading} render={<button type="button" />} onClick={onRetry}>
+            Retry
+          </Button>
+        )
+      }
+    />
+  ) : null;
+  const emptyContent = hasRows ? undefined : hasError ? (
+    <div className={styles.errorCell}>{errorAlert}</div>
+  ) : showSkeleton ? undefined : noRows ? (
+    (empty ?? <p className={styles.message}>No rows.</p>)
+  ) : (
+    (noResults ?? <p className={styles.message}>No results for “{filter.trim()}”.</p>)
+  );
+  const skeletonCount = Math.max(1, loadingRows ?? (pageSize ? Math.min(pageSize, 10) : 5));
+  const statusMessage = showSkeleton
+    ? loadingLabel
+    : announcement || (filtering ? `${total} ${total === 1 ? "row matches" : "rows match"} the filter` : "");
 
   const selectedCount = selected.length;
   const firstRow = total === 0 ? 0 : pageSize ? (currentPage - 1) * pageSize + 1 : 1;
   const lastRow = pageSize ? Math.min(total, currentPage * pageSize) : total;
   const navLabel = paginationLabel ?? (typeof caption === "string" ? `${caption} pages` : "Table pages");
 
+  const showCursorNav = Boolean(cursor && (cursor.hasPrevious || cursor.hasNext));
+  const summaryText = [
+    selectable && `${selectedCount} of ${manual ? total : data.length} selected`,
+    pageSize && `Rows ${firstRow}–${lastRow} of ${total}`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const showLoadMore = Boolean(loadMore?.hasMore) && !(loading && data.length === 0);
+
   return (
-    <div className={cx(styles.root, className)}>
+    <div
+      ref={rootRef}
+      className={cx(styles.root, className)}
+      data-loading={dataFlag(loading)}
+      data-stale={dataFlag(loading && hasRows)}
+      onFocus={trackFocus}
+      onBlur={trackBlur}
+    >
       {(filterable || toolbar) && (
-        <div className={styles.toolbar}>
+        <div ref={toolbarRef} className={styles.toolbar}>
           {filterable && (
             <div className={styles.filter}>
               <Field label={filterLabel} hideLabel>
@@ -328,7 +561,25 @@ export function DataTable<T>({
           {toolbar && <div className={styles.actions}>{toolbar}</div>}
         </div>
       )}
-      <Table {...tableProps} caption={caption} columns={headerColumns} empty={emptyContent}>
+      {hasError && hasRows && errorAlert}
+      <Table
+        {...tableProps}
+        aria-busy={loading || tableProps["aria-busy"] || undefined}
+        className={styles.table}
+        caption={caption}
+        columns={headerColumns}
+        empty={emptyContent}
+      >
+        {showSkeleton &&
+          Array.from({ length: skeletonCount }, (_, i) => (
+            <Tr key={`skeleton-${i}`} aria-hidden className={styles.skeletonRow}>
+              {headerColumns.map((_c, j) => (
+                <Td key={j}>
+                  <Skeleton shape="text" width={SKELETON_WIDTHS[(i + j * 2) % SKELETON_WIDTHS.length]} />
+                </Td>
+              ))}
+            </Tr>
+          ))}
         {visible.map(({ row, id }) => {
           const isSelected = selectedSet.has(id);
           return (
@@ -353,24 +604,69 @@ export function DataTable<T>({
                   </Td>
                 );
               })}
+              {rowActions && (
+                <Td nowrap>
+                  <TableActions>{rowActions(row)}</TableActions>
+                </Td>
+              )}
             </Tr>
           );
         })}
       </Table>
-      {(selectable || pageSize) && (
-        <div className={styles.footer}>
+      {showLoadMore && loadMore && (
+        <div className={styles.more}>
+          {/* Non-native so the button keeps focus while the next batch loads. */}
+          <Button variant="secondary" size="sm" loading={moreLoading} render={<button type="button" />} onClick={requestMore}>
+            {loadMore.label ?? "Load more"}
+          </Button>
+        </div>
+      )}
+      {(selectable || Boolean(pageSize) || cursor) && (
+        <div ref={footerRef} className={styles.footer}>
           <p className={styles.summary}>
-            {[selectable && `${selectedCount} of ${manual ? total : data.length} selected`, pageSize && `Rows ${firstRow}–${lastRow} of ${total}`]
-              .filter(Boolean)
-              .join(" · ")}
+            {summaryText}
+            {cursor && (
+              <>
+                {summaryText && cursor.label ? " · " : null}
+                <span aria-live="polite">{cursor.label}</span>
+              </>
+            )}
           </p>
           {pageSize !== undefined && pageCount > 1 && (
             <Paginator page={currentPage} pageCount={pageCount} onPageChange={setPage} size="sm" label={navLabel} compact />
           )}
+          {cursor && showCursorNav && (
+            <Pagination label={navLabel} data-compact="">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    size="sm"
+                    compact
+                    disabled={!cursor.hasPrevious}
+                    render={<button type="button" />}
+                    onClick={() => {
+                      if (!loading) cursor.onPrevious();
+                    }}
+                  />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext
+                    size="sm"
+                    compact
+                    disabled={!cursor.hasNext}
+                    render={<button type="button" />}
+                    onClick={() => {
+                      if (!loading) cursor.onNext();
+                    }}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
         </div>
       )}
       <p role="status" className="sr-only">
-        {filtering ? `${total} ${total === 1 ? "row matches" : "rows match"} the filter` : ""}
+        {statusMessage}
       </p>
     </div>
   );
