@@ -21,7 +21,10 @@
   }
 }
 
+/* Positioned so absolutely positioned descendants (such as .sr-only text in
+   messages) are clipped by the viewport instead of stretching the page. */
 .content {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
