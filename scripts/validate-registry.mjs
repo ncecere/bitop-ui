@@ -12,6 +12,11 @@
  *  - components only use CSS custom properties that core or the theme define,
  *    and never read --palette-* primitives
  *  - public/r/<item>.json exists for every item and embeds current sources
+ *  - every source is a regular file inside registry/bitop (no symlinks, which
+ *    could publish files from outside the checkout)
+ *  - the built items match registry.json exactly in everything an installer
+ *    uses: name, type, dependencies, registryDependencies and the file list
+ *    with each file's type and target (no extra, missing or escaping files)
  *
  * Usage: node scripts/validate-registry.mjs [--skip-build-output]
  */
@@ -37,12 +42,42 @@ for (const item of registry.items) {
 
 const FOUNDATION = new Set(["core", "theme-neutral", "theme-uf"]);
 const shipped = new Map();
+const sourceRoot = fs.realpathSync(path.join(root, "registry/bitop"));
+
+/** A shipped file must be a regular file (not a symlink) that resolves inside registry/bitop. */
+function checkSourceFile(owner, rel) {
+  if (typeof rel !== "string" || !rel.startsWith("registry/bitop/") || rel.split("/").includes("..")) {
+    fail(`${owner}: file path must be inside registry/bitop without "..": ${rel}`);
+    return false;
+  }
+  const abs = path.join(root, rel);
+  let stat;
+  try {
+    stat = fs.lstatSync(abs);
+  } catch {
+    fail(`${owner}: missing file ${rel}`);
+    return false;
+  }
+  if (stat.isSymbolicLink()) {
+    fail(`${owner}: ${rel} is a symlink; registry sources must be regular files`);
+    return false;
+  }
+  if (!stat.isFile()) {
+    fail(`${owner}: ${rel} is not a regular file`);
+    return false;
+  }
+  const real = fs.realpathSync(abs);
+  if (real !== sourceRoot && !real.startsWith(sourceRoot + path.sep)) {
+    fail(`${owner}: ${rel} resolves outside registry/bitop (${real})`);
+    return false;
+  }
+  return true;
+}
 
 for (const item of registry.items) {
   if (!item.title || !item.description) fail(`${item.name}: title and description are required`);
   for (const file of item.files ?? []) {
-    const abs = path.join(root, file.path);
-    if (!fs.existsSync(abs)) fail(`${item.name}: missing file ${file.path}`);
+    checkSourceFile(item.name, file.path);
     if (shipped.has(file.path)) fail(`${file.path} is shipped by both ${shipped.get(file.path)} and ${item.name}`);
     shipped.set(file.path, item.name);
     const rel = file.path.replace(/^registry\/bitop\//, "");
@@ -63,9 +98,18 @@ for (const item of registry.items) {
   }
 }
 
-// Every source file must be shipped.
+// Every source file must be shipped, and the tree may hold only directories and regular files.
 function walk(dir) {
-  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]));
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const abs = path.join(dir, e.name);
+    if (e.isSymbolicLink()) {
+      fail(`${path.relative(root, abs)} is a symlink; registry sources must be regular files`);
+      return [];
+    }
+    if (e.isDirectory()) return walk(abs);
+    if (!e.isFile()) fail(`${path.relative(root, abs)} is not a regular file`);
+    return [abs];
+  });
 }
 for (const abs of walk(path.join(root, "registry/bitop"))) {
   const rel = path.relative(root, abs).split(path.sep).join("/");
@@ -150,8 +194,32 @@ if (!skipBuild) {
   const outDir = path.join(root, "public/r");
   if (!fs.existsSync(outDir)) fail("public/r is missing: run npm run registry:build");
   else {
+    const same = (a, b) => JSON.stringify([...(a ?? [])].sort()) === JSON.stringify([...(b ?? [])].sort());
+    // Built dependencies are either @bitop/<name> or <SITE_URL>/r/<name>.json (one base for all).
+    const depBases = new Set();
+    const depName = (itemName, dep) => {
+      const ns = /^@bitop\/([a-z][a-z0-9-]*)$/.exec(dep);
+      if (ns) return ns[1];
+      let url;
+      try {
+        url = new URL(dep);
+      } catch {
+        url = undefined;
+      }
+      const m = url && /^https?:$/.test(url.protocol) && !url.search && !url.hash && /\/r\/([a-z][a-z0-9-]*)\.json$/.exec(url.pathname);
+      if (!m) {
+        fail(`${itemName}.json: unexpected registry dependency ${dep}`);
+        return dep;
+      }
+      depBases.add(`${url.origin}${url.pathname.slice(0, -m[0].length)}`);
+      return m[1];
+    };
+
     const index = JSON.parse(fs.readFileSync(path.join(outDir, "registry.json"), "utf8"));
-    if (index.items?.length !== registry.items.length) fail("public/r/registry.json is out of date");
+    if (!same(index.items?.map((i) => i.name), registry.items.map((i) => i.name))) fail("public/r/registry.json lists different items than registry.json");
+    const expectedOutputs = new Set(["registry.json", ...registry.items.map((i) => `${i.name}.json`)]);
+    for (const f of fs.readdirSync(outDir)) if (!expectedOutputs.has(f)) fail(`public/r/${f} is not a registry item`);
+
     for (const item of registry.items) {
       const p = path.join(outDir, `${item.name}.json`);
       if (!fs.existsSync(p)) {
@@ -159,18 +227,39 @@ if (!skipBuild) {
         continue;
       }
       const built = JSON.parse(fs.readFileSync(p, "utf8"));
-      if (built.$schema !== "https://ui.shadcn.com/schema/registry-item.json") fail(`${item.name}.json: wrong $schema`);
-      for (const file of item.files ?? []) {
-        const b = built.files?.find((f) => f.path === file.path);
-        if (!b) fail(`${item.name}.json: missing ${file.path}`);
-        else if (b.content !== fs.readFileSync(path.join(root, file.path), "utf8")) fail(`${item.name}.json: ${file.path} is stale`);
+      const where = `public/r/${item.name}.json`;
+      if (built.$schema !== "https://ui.shadcn.com/schema/registry-item.json") fail(`${where}: wrong $schema`);
+      if (built.name !== item.name) fail(`${where}: name is ${built.name}`);
+      if (built.type !== item.type) fail(`${where}: type is ${built.type}, expected ${item.type}`);
+      if (!same(built.dependencies, item.dependencies)) fail(`${where}: dependencies differ from registry.json`);
+      const builtReg = (built.registryDependencies ?? []).map((d) => depName(item.name, d));
+      const srcReg = (item.registryDependencies ?? []).map((d) => d.replace(/^@bitop\//, ""));
+      if (!same(builtReg, srcReg)) fail(`${where}: registryDependencies differ from registry.json`);
+
+      const builtFiles = new Map();
+      for (const b of built.files ?? []) {
+        if (builtFiles.has(b.path)) fail(`${where}: ${b.path} appears twice`);
+        builtFiles.set(b.path, b);
       }
-      for (const dep of built.registryDependencies ?? []) {
-        if (!/^@bitop\/[a-z-]+$/.test(dep) && !/^https?:\/\/.+\/r\/[a-z-]+\.json$/.test(dep)) {
-          fail(`${item.name}.json: unexpected registry dependency ${dep}`);
+      for (const file of item.files ?? []) {
+        const b = builtFiles.get(file.path);
+        builtFiles.delete(file.path);
+        if (!b) {
+          fail(`${where}: missing ${file.path}`);
+          continue;
+        }
+        if (b.type !== file.type) fail(`${where}: ${file.path} has type ${b.type}, expected ${file.type}`);
+        if (b.target !== file.target) fail(`${where}: ${file.path} targets ${b.target}, expected ${file.target}`);
+        if (typeof b.target !== "string" || !/^@(ui|lib)(\/[a-z0-9][a-z0-9.-]*)+$/.test(b.target) || b.target.split("/").includes("..")) {
+          fail(`${where}: unsafe target ${b.target}`);
+        }
+        if (fs.existsSync(path.join(root, file.path)) && b.content !== fs.readFileSync(path.join(root, file.path), "utf8")) {
+          fail(`${where}: ${file.path} is stale`);
         }
       }
+      for (const extra of builtFiles.keys()) fail(`${where}: ships ${extra}, which registry.json does not list`);
     }
+    if (depBases.size > 1) fail(`built registry dependencies point at more than one base URL: ${[...depBases].join(", ")}`);
   }
 }
 

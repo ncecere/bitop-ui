@@ -24,9 +24,28 @@ const siteUrl = (process.env.SITE_URL || process.env.VITE_SITE_URL || "").replac
 const registry = JSON.parse(fs.readFileSync(path.join(root, "registry.json"), "utf8"));
 const names = new Set(registry.items.map((item) => item.name));
 
+// Only regular files inside registry/bitop may be embedded: a symlink would
+// publish whatever it points at (validate-registry.mjs re-checks this).
+const sourceRoot = fs.realpathSync(path.join(root, "registry/bitop"));
+for (const item of registry.items) {
+  for (const file of item.files ?? []) {
+    const abs = path.join(root, file.path);
+    const stat = fs.lstatSync(abs, { throwIfNoEntry: false });
+    const real = stat?.isFile() ? fs.realpathSync(abs) : "";
+    if (!stat || stat.isSymbolicLink() || !stat.isFile() || !real.startsWith(sourceRoot + path.sep)) {
+      console.error(`${item.name}: ${file.path} must be a regular file inside registry/bitop (not a symlink)`);
+      process.exit(1);
+    }
+  }
+}
+
 let registryFile = path.join(root, "registry.json");
 if (siteUrl) {
-  new URL(siteUrl); // throws on an invalid URL
+  const parsed = new URL(siteUrl); // throws on an invalid URL
+  if (!/^https?:$/.test(parsed.protocol) || parsed.search || parsed.hash || parsed.username || parsed.password) {
+    console.error(`SITE_URL must be a plain http(s) URL without credentials, query or fragment: ${siteUrl}`);
+    process.exit(1);
+  }
   const rewritten = {
     ...registry,
     homepage: siteUrl,
