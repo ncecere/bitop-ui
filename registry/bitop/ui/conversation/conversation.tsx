@@ -228,8 +228,10 @@ export function ConversationContent({ className, ...props }: ConversationContent
 export type ConversationEmptyStateProps = Omit<ComponentPropsWithRef<"div">, "title"> & {
   title?: ReactNode;
   description?: ReactNode;
-  /** Decorative icon or logo. */
+  /** Decorative icon, shown in a tinted tile. */
   icon?: ReactNode;
+  /** Decorative media shown as-is above the title instead of the icon tile, e.g. an assistant's MessageAvatar. */
+  media?: ReactNode;
   /** Heading level for the title (default: a paragraph). */
   titleAs?: "h1" | "h2" | "h3" | "p";
 };
@@ -239,6 +241,7 @@ export function ConversationEmptyState({
   title = "How can I help?",
   description,
   icon,
+  media,
   titleAs: Title = "p",
   className,
   children,
@@ -246,10 +249,16 @@ export function ConversationEmptyState({
 }: ConversationEmptyStateProps) {
   return (
     <div {...props} className={cx(styles.empty, className)}>
-      {icon && (
-        <span aria-hidden className={styles.emptyIcon}>
-          {icon}
+      {media ? (
+        <span aria-hidden className={styles.emptyMedia}>
+          {media}
         </span>
+      ) : (
+        icon && (
+          <span aria-hidden className={styles.emptyIcon}>
+            {icon}
+          </span>
+        )
       )}
       <Title className={styles.emptyTitle}>{title}</Title>
       {description && <p className={styles.emptyDescription}>{description}</p>}
@@ -310,19 +319,23 @@ const defaultMessages = {
 export function ConversationAnnouncer({ status, messages }: ConversationAnnouncerProps) {
   const text = useMemo(() => ({ ...defaultMessages, ...messages }), [messages]);
   const prev = useRef<ChatStatus>(status);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState({ text: "", alt: false });
   useEffect(() => {
     const was = prev.current;
     prev.current = status;
     if (was === status) return;
-    if (status === "submitted") setMessage(text.submitted);
-    else if (status === "streaming") setMessage(text.streaming);
-    else if (status === "error") setMessage(text.error);
-    else if (status === "ready" && (was === "streaming" || was === "submitted")) setMessage(text.complete);
+    let next: string | undefined;
+    if (status === "submitted") next = text.submitted;
+    else if (status === "streaming") next = text.streaming;
+    else if (status === "error") next = text.error;
+    else if (status === "ready" && (was === "streaming" || was === "submitted")) next = text.complete;
+    if (next !== undefined) setMessage((m) => ({ text: next, alt: next === m.text ? !m.alt : m.alt }));
   }, [status, text]);
   return (
     <span role="status" className="sr-only">
-      {message}
+      {message.text}
+      {/* The same text twice in a row toggles a trailing no-break space, so the region still changes and is announced again. */}
+      {message.text && message.alt ? "\u00a0" : ""}
     </span>
   );
 }

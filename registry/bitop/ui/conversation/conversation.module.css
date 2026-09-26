@@ -59,6 +59,11 @@
   }
 }
 
+.emptyMedia {
+  display: inline-flex;
+  margin-bottom: var(--space-2);
+}
+
 .emptyTitle {
   color: var(--color-text);
   font-size: var(--font-size-2xl);

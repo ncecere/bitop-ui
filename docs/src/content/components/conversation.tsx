@@ -117,7 +117,8 @@ const doc: ComponentDoc = {
       rows: [
         { name: "title", type: "ReactNode", default: '"How can I help?"', description: "Greeting." },
         { name: "description", type: "ReactNode", description: "Supporting text." },
-        { name: "icon", type: "ReactNode", description: "Decorative icon or logo." },
+        { name: "icon", type: "ReactNode", description: "Decorative icon, shown in a tinted tile." },
+        { name: "media", type: "ReactNode", description: "Decorative media shown as-is instead of the icon tile, e.g. <MessageAvatar name=… color=… size=\"xl\" />." },
         { name: "titleAs", type: '"h1" | "h2" | "h3" | "p"', default: '"p"', description: "Render the title as a heading." },
         { name: "children", type: "ReactNode", description: "Usually Suggestions." },
       ],

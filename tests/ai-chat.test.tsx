@@ -12,6 +12,7 @@ import {
   Conversation,
   ConversationAnnouncer,
   ConversationContent,
+  ConversationEmptyState,
   ConversationScrollButton,
   initialStickState,
   nextStickState,
@@ -153,6 +154,18 @@ describe("ConversationAnnouncer", () => {
     expect(status).toHaveTextContent("Response complete");
     rerender(<ConversationAnnouncer status="error" messages={{ error: "Something went wrong" }} />);
     expect(status).toHaveTextContent("Something went wrong");
+  });
+
+  it("changes the region even when the same message repeats, so it is announced again", () => {
+    const messages = { submitted: "Working on it", streaming: "Working on it" };
+    const { rerender } = render(<ConversationAnnouncer status="ready" messages={messages} />);
+    rerender(<ConversationAnnouncer status="submitted" messages={messages} />);
+    const first = screen.getByRole("status").textContent;
+    rerender(<ConversationAnnouncer status="streaming" messages={messages} />);
+    const second = screen.getByRole("status").textContent;
+    expect(first?.trim()).toBe("Working on it");
+    expect(second?.trim()).toBe("Working on it");
+    expect(second).not.toBe(first);
   });
 });
 
@@ -601,6 +614,19 @@ describe("PromptInputSubmit showLabel", () => {
     expect(stop).toHaveTextContent("Stop");
     await user.click(stop);
     expect(onStop).toHaveBeenCalledOnce();
+  });
+});
+
+describe("ConversationEmptyState media", () => {
+  it("renders decorative media instead of the icon tile", () => {
+    const { container } = render(
+      <ConversationEmptyState title="Registrar assistant" icon={<span>icon</span>} media={<MessageAvatar name="Registrar assistant" size="xl" />}>
+        <p>child</p>
+      </ConversationEmptyState>,
+    );
+    expect(container.querySelector("[aria-hidden]")).toHaveTextContent("RA");
+    expect(screen.queryByText("icon")).not.toBeInTheDocument();
+    expect(screen.getByText("Registrar assistant")).toBeInTheDocument();
   });
 });
 
