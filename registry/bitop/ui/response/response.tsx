@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentPropsWithRef, type ReactNode, memo, useDeferredValue, useMemo } from "react";
+import { type ComponentPropsWithRef, type ReactNode, memo, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import Markdown, { type Components, type ExtraProps } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { CodeBlock, type CodeBlockHighlighter } from "@/registry/bitop/ui/code-block/code-block";
@@ -30,9 +30,13 @@ import styles from "./response.module.css";
  *   - With `citations`, markers like [1] or [1, 3] become InlineCitation
  *     chips for those (1-based) sources. Markers inside code or links, and
  *     numbers with no matching source, stay as text.
- *   - `images="alt"` shows images as "[Image: alt]" text instead of loading
- *     them, so an answer (e.g. one steered by a prompt-injected document)
- *     can't make the browser fetch arbitrary URLs.
+ *   - Images: an answer (e.g. one steered by a prompt-injected document)
+ *     must not make the browser fetch arbitrary URLs, which could track the
+ *     reader or leak data in the query string. So by default
+ *     (`images="click"`) only same-origin, relative, data: and blob: images
+ *     load; any other image is a "Load image from example.com" button (with
+ *     its alt text) that loads it on request. `images="show"` loads every
+ *     image; `images="alt"` never loads any and shows "[Image: alt]" text.
  *
  * To keep react-markdown out of your main bundle, render LazyResponse from
  * ./response-lazy instead: same props, the Markdown engine loads on first
@@ -58,9 +62,19 @@ export type ResponseProps = Omit<ComponentPropsWithRef<"div">, "children"> & {
   skipHtml?: boolean;
   /** Extra remark plugins, after remark-gfm. */
   remarkPlugins?: NonNullable<Parameters<typeof Markdown>[0]["remarkPlugins"]>;
-  /** `show` (default) renders Markdown images (lazy-loaded); `alt` shows their alt text instead of fetching them. */
-  images?: "show" | "alt";
+  /**
+   * How Markdown images load.
+   * - `click` (default): same-origin, relative, data: and blob: images load;
+   *   images from other origins show a "Load image from <host>" button and
+   *   are fetched only when it's pressed. Model-written Markdown can point at
+   *   any URL, and fetching it can track the reader or leak data in the URL.
+   * - `show`: load every image (lazy-loaded). Only for trusted content.
+   * - `alt`: never load images; show "[Image: alt]" text instead.
+   */
+  images?: ResponseImages;
 };
+
+export type ResponseImages = "click" | "show" | "alt";
 
 /* ---------- [n] citation markers: a tiny remark plugin (no unist deps) ---------- */
 
@@ -119,11 +133,67 @@ function hastText(node: HastNode | undefined): string {
 
 const isExternal = (href: string | undefined) => !!href && /^(https?:)?\/\//i.test(href);
 
+/**
+ * The host an image would be fetched from, or null when it is safe to load
+ * without asking: same-origin, relative, data: and blob: URLs. Returns ""
+ * for a cross-origin URL whose host can't be read.
+ */
+export function crossOriginImageHost(src: string | undefined): string | null {
+  if (!src || /^(data|blob):/i.test(src)) return null;
+  const page = typeof window !== "undefined" ? window.location : undefined;
+  try {
+    if (!page) {
+      // Server render: relative URLs are same-origin, absolute ones are not.
+      if (src.startsWith("//")) return new URL(`https:${src}`).host;
+      return new URL(src).host; // throws for relative URLs
+    }
+    const url = new URL(src, page.href);
+    if (url.protocol === "data:" || url.protocol === "blob:" || url.origin === page.origin) return null;
+    return url.host;
+  } catch {
+    return page ? "" : null;
+  }
+}
+
+type ImgProps = ComponentPropsWithRef<"img">;
+
+/** A cross-origin image behind a button: fetched only when the reader asks. */
+function ClickToLoadImage({ host, alt, ...props }: ImgProps & { host: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const frame = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    // The button is replaced by the image: keep focus there, not on <body>.
+    if (loaded) frame.current?.focus();
+  }, [loaded]);
+  if (loaded) {
+    return (
+      <span ref={frame} tabIndex={-1} className={styles.imageFrame}>
+        <img {...props} alt={alt ?? ""} className={styles.image} />
+      </span>
+    );
+  }
+  return (
+    <button
+      type="button"
+      className={styles.imageLoad}
+      onClick={() => setLoaded(true)}
+    >
+      <span>{host ? `Load image from ${host}` : "Load image from another site"}</span>
+      {alt && (
+        <>
+          <span className="sr-only">: </span>
+          <span className={styles.imageLoadAlt}>{alt}</span>
+        </>
+      )}
+    </button>
+  );
+}
+
 function makeComponents(
   headingOffset: number,
   highlight: CodeBlockHighlighter | undefined,
   cite: ((indices: number[]) => ReactNode) | undefined,
-  images: "show" | "alt",
+  images: ResponseImages,
 ): Components {
   const heading = (level: number) => {
     const Tag = `h${Math.min(6, level + headingOffset)}` as "h3";
@@ -178,6 +248,10 @@ function makeComponents(
     },
     img({ node: _node, alt, ...props }) {
       if (images === "alt") return <span className={styles.imageAlt}>{alt ? `[Image: ${alt}]` : "[Image]"}</span>;
+      if (images === "click") {
+        const host = crossOriginImageHost(typeof props.src === "string" ? props.src : undefined);
+        if (host !== null) return <ClickToLoadImage {...props} alt={alt} host={host} />;
+      }
       return <img {...props} alt={alt ?? ""} loading="lazy" className={styles.image} />;
     },
     sup({ node: _node, children, ...props }) {
@@ -203,7 +277,7 @@ function ResponseImpl({
   headingOffset = 2,
   skipHtml = false,
   remarkPlugins,
-  images = "show",
+  images = "click",
   className,
   ...props
 }: ResponseProps) {
