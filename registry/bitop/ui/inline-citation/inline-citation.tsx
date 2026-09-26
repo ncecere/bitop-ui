@@ -2,7 +2,7 @@
 
 import { Popover } from "@base-ui/react/popover";
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { IconButton } from "@/registry/bitop/ui/button/button";
 import popup from "@/registry/bitop/ui/styles/popup.module.css";
 import { cx } from "@/registry/bitop/lib/bitop-utils";
@@ -83,11 +83,18 @@ function accessibleName(sources: CitationSource[], indices: number[], text: stri
 }
 
 export function InlineCitation({ sources, index, label, side = "top", onActivate, className }: InlineCitationProps) {
-  const [page, setPage] = useState(0);
+  const [rawPage, setPage] = useState(0);
+  // The sources list can shrink while the card is open (e.g. a re-streamed
+  // answer): show and page from the last source, and store that page.
+  const last = Math.max(0, sources.length - 1);
+  const page = Math.min(rawPage, last);
+  useEffect(() => {
+    if (rawPage > last) setPage(last);
+  }, [rawPage, last]);
   const indices = index === undefined ? [] : Array.isArray(index) ? index : [index];
   const text = chipText(sources, indices);
   if (sources.length === 0) return null;
-  const current = sources[Math.min(page, sources.length - 1)]!;
+  const current = sources[page]!;
   const multiple = sources.length > 1;
   const site = current.siteName ?? citationHostname(current.href);
 
@@ -123,7 +130,7 @@ export function InlineCitation({ sources, index, label, side = "top", onActivate
                   icon={<ChevronLeft aria-hidden />}
                   label="Previous source"
                   disabled={page === 0}
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  onClick={() => setPage(Math.max(0, page - 1))}
                 />
                 <span className={styles.pageIndex} aria-live="polite">
                   {page + 1} of {sources.length}
@@ -132,8 +139,8 @@ export function InlineCitation({ sources, index, label, side = "top", onActivate
                   size="sm"
                   icon={<ChevronRight aria-hidden />}
                   label="Next source"
-                  disabled={page === sources.length - 1}
-                  onClick={() => setPage((p) => Math.min(sources.length - 1, p + 1))}
+                  disabled={page === last}
+                  onClick={() => setPage(Math.min(last, page + 1))}
                 />
               </div>
             )}
