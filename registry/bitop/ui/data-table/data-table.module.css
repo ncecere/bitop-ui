@@ -104,10 +104,68 @@
 
 .footer > nav {
   width: auto;
+  margin-inline-start: auto;
+}
+
+/* Focus lands on the table when a focused control goes away (see data-table.tsx). */
+.table:focus {
+  outline: none;
+}
+
+.table:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+
+/* Stale rows stay visible, slightly dimmed, while fresh data loads. */
+.table tbody {
+  transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.root[data-stale] .table tbody {
+  opacity: 0.6;
+}
+
+.table tbody tr.skeletonRow:hover {
+  background-color: transparent;
+}
+
+.errorCell {
+  padding: var(--space-4);
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+}
+
+/* CellText: a name over a muted subtitle. */
+.cellText {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.cellPrimary {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.cellSecondary {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-snug);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sort {
+  .sort,
+  .table tbody {
     transition: none;
   }
 }

@@ -951,16 +951,19 @@
       "name": "data-table",
       "type": "registry:ui",
       "title": "Data table",
-      "description": "Typed data table with sortable headers, row selection, a text filter and pagination, built on Table.",
+      "description": "Typed data table with sortable headers, row selection, a text filter, numbered or cursor pagination, load more, loading/error states and row actions, built on Table.",
       "dependencies": [
         "lucide-react@^1.48.0"
       ],
       "registryDependencies": [
         "@bitop/core",
+        "@bitop/alert",
+        "@bitop/button",
         "@bitop/checkbox",
         "@bitop/field",
         "@bitop/input",
         "@bitop/pagination",
+        "@bitop/skeleton",
         "@bitop/table"
       ],
       "files": [
