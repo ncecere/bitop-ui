@@ -181,12 +181,19 @@ export function PromptInput({
     });
   }, []);
 
-  const clear = () => {
-    filesRef.current.forEach((f) => f.url && URL.revokeObjectURL(f.url));
-    setFiles([]);
-    if (!controlled.current && textareaRef.current) {
-      textareaRef.current.value = "";
-      textareaRef.current.dispatchEvent(new Event("bitop:reset"));
+  /**
+   * Clears what was sent, and only that: an async onSubmit can resolve after
+   * the user has started the next message or attached more files, and that
+   * newer draft must survive.
+   */
+  const clearSubmitted = (text: string, fileIds: Set<string>) => {
+    const sent = filesRef.current.filter((f) => fileIds.has(f.id));
+    sent.forEach((f) => f.url && URL.revokeObjectURL(f.url));
+    if (sent.length) setFiles((prev) => prev.filter((f) => !fileIds.has(f.id)));
+    const el = textareaRef.current;
+    if (!controlled.current && el && el.value === text) {
+      el.value = "";
+      el.dispatchEvent(new Event("bitop:reset"));
       setHasText(false);
     }
   };
@@ -195,10 +202,11 @@ export function PromptInput({
     event.preventDefault();
     if (disabled || isBusy(status)) return;
     const text = textareaRef.current?.value ?? "";
-    if (!text.trim() && filesRef.current.length === 0) return;
+    const submitted = filesRef.current;
+    if (!text.trim() && submitted.length === 0) return;
     try {
-      const result = await onSubmit({ text, files: filesRef.current.map((f) => f.file) }, event);
-      if (result !== false) clear();
+      const result = await onSubmit({ text, files: submitted.map((f) => f.file) }, event);
+      if (result !== false) clearSubmitted(text, new Set(submitted.map((f) => f.id)));
     } catch {
       /* keep the draft so the user can retry */
     }

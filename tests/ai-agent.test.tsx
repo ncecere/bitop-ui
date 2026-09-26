@@ -1,7 +1,7 @@
 /*
  * Behaviour tests for the agent UI items and the smaller AI helpers.
  */
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { axe } from "vitest-axe";
@@ -210,6 +210,35 @@ describe("Attachments", () => {
     await user.click(screen.getByRole("button", { name: "Send message" }));
     expect(onSubmit.mock.calls[0]![0].files.map((f: File) => f.name)).toEqual(["a.pdf"]);
     await waitFor(() => expect(screen.queryByRole("list", { name: "Attachments" })).not.toBeInTheDocument());
+  });
+
+  it("PromptInput clears only what was sent when an async send resolves", async () => {
+    const user = userEvent.setup();
+    let resolve!: () => void;
+    const onSubmit = vi.fn(() => new Promise<void>((r) => (resolve = r)));
+    const { container } = render(
+      <PromptInput attachments onSubmit={onSubmit}>
+        <PromptInputAttachments />
+        <PromptInputTextarea />
+        <PromptInputSubmit />
+      </PromptInput>,
+    );
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+    const box = screen.getByRole("textbox", { name: "Message" });
+
+    await user.upload(input, new File(["%PDF"], "sent.pdf", { type: "application/pdf" }));
+    await user.type(box, "first{Enter}");
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+
+    // While the send is pending, the user starts the next message.
+    await user.upload(input, new File(["%PDF"], "next.pdf", { type: "application/pdf" }));
+    await user.type(box, " and more");
+    await act(async () => resolve());
+
+    const list = screen.getByRole("list", { name: "Attachments" });
+    expect(list).toHaveTextContent("next.pdf");
+    expect(list).not.toHaveTextContent("sent.pdf");
+    expect(box).toHaveValue("first and more");
   });
 });
 

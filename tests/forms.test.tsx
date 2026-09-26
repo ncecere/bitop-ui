@@ -109,6 +109,47 @@ describe("Button", () => {
     expect(link).toHaveAttribute("href", "/docs");
     expect(link).not.toHaveAttribute("type");
   });
+
+  it.each([
+    ["disabled", { disabled: true }],
+    ["loading", { loading: true }],
+  ])("a %s rendered link stays focusable but cannot be activated", async (_, state) => {
+    const onButtonClick = vi.fn();
+    const onLinkClick = vi.fn();
+    const onParentClick = vi.fn();
+    render(
+      <div onClick={onParentClick}>
+        <Button {...state} onClick={onButtonClick} render={<a href="/danger" onClick={onLinkClick} />}>
+          Delete
+        </Button>
+      </div>,
+    );
+    const link = screen.getByRole("link", { name: "Delete" });
+    expect(link).toHaveAttribute("aria-disabled", "true");
+
+    // A click whose default was prevented returns false from dispatchEvent.
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+    expect(link.dispatchEvent(click)).toBe(false);
+
+    link.focus();
+    expect(link).toHaveFocus();
+    await userEvent.keyboard("{Enter}");
+    await userEvent.click(link);
+    expect(onButtonClick).not.toHaveBeenCalled();
+    expect(onLinkClick).not.toHaveBeenCalled();
+    expect(onParentClick).not.toHaveBeenCalled();
+  });
+
+  it("an enabled rendered link still runs its handlers", async () => {
+    const onClick = vi.fn((e: { preventDefault: () => void }) => e.preventDefault());
+    render(
+      <Button onClick={onClick} render={<a href="/docs" />}>
+        Docs
+      </Button>,
+    );
+    await userEvent.click(screen.getByRole("link", { name: "Docs" }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("choices", () => {
