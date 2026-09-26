@@ -121,8 +121,8 @@ export function InstallationPage() {
         <CodeBlock code={componentsJson} label="components.json" language="json" />
         <Prose>
           <p>
-            The <C>registries</C> entry enables the <C>@bitop/…</C> names. The <C>ui</C> and <C>lib</C> aliases decide where files go. Set <C>"rsc": true</C>{" "}
-            in a React Server Components app (Next.js App Router) to keep the <C>"use client"</C> directives.
+            The <C>registries</C> entry enables the <C>@bitop/…</C> names. The <C>ui</C> and <C>lib</C> aliases decide where files go: every file uses an{" "}
+            <C>@ui/</C> or <C>@lib/</C> target, so installs follow your folders.
           </p>
         </Prose>
       </DocSection>
@@ -166,7 +166,9 @@ export function InstallationPage() {
           <ul>
             <li>
               <strong>Direct URLs need no configuration.</strong> <C>npx shadcn@latest add {itemUrl("button")}</C> works without the <C>registries</C> entry
-              when the registry was built with <C>SITE_URL</C> set (the published one is), because dependencies are absolute URLs.
+              when the registry was built with <C>SITE_URL</C> set (the published one is), because dependencies are then absolute URLs. A registry built
+              without it declares dependencies as <C>@bitop/…</C>, and installing by URL fails with “add the registry configuration under registries” until
+              you add the entry above.
             </li>
             <li>
               <strong>Helpers live in </strong>
@@ -187,6 +189,10 @@ export function InstallationPage() {
             <li>
               <strong>Updating</strong>: re-run <C>add</C> with <C>--overwrite</C>, or preview changes with <C>--diff</C>. You own the files, so review the diff
               if you changed them.
+            </li>
+            <li>
+              <strong>React Server Components</strong>: components that use hooks or Base UI start with <C>"use client"</C>. The CLI keeps the directive
+              (harmless in Vite). Next.js App Router should work but hasn't been verified yet.
             </li>
             <li>The CLI drops a file's leading comment when it rewrites imports, so component notes sit below the imports.</li>
           </ul>
