@@ -1032,7 +1032,7 @@
       "name": "data-table",
       "type": "registry:ui",
       "title": "Data table",
-      "description": "Typed data table with sortable headers, row selection, a text filter, numbered or cursor pagination, load more, loading/error states and row actions, built on Table.",
+      "description": "Typed data table with sortable headers, row selection and bulk actions, a text filter, faceted filters, a Columns menu, numbered or cursor pagination, load more, loading/error states and row actions, built on Table.",
       "dependencies": [
         "lucide-react@^1.48.0"
       ],
@@ -1045,7 +1045,9 @@
         "@bitop/input",
         "@bitop/pagination",
         "@bitop/skeleton",
-        "@bitop/table"
+        "@bitop/table",
+        "@bitop/filter-bar",
+        "@bitop/menu"
       ],
       "files": [
         {
@@ -1396,6 +1398,38 @@
       ],
       "categories": [
         "ai"
+      ]
+    },
+    {
+      "name": "filter-bar",
+      "type": "registry:ui",
+      "title": "Filter bar",
+      "description": "Faceted filters (toggle group, combobox, date-range presets) with counts, active-filter chips, Clear all and URL helpers.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/calendar",
+        "@bitop/combobox",
+        "@bitop/date-picker",
+        "@bitop/toggle-group"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/filter-bar/filter-bar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/filter-bar/filter-bar.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/filter-bar/filter-bar.module.css",
+          "type": "registry:file",
+          "target": "@ui/filter-bar/filter-bar.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
       ]
     },
     {
