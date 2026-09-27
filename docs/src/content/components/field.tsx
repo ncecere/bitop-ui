@@ -68,6 +68,12 @@ const doc: ComponentDoc = {
         { name: "labelHint", type: "ReactNode", description: 'Muted text after the label, e.g. "Optional".' },
         { name: "description", type: "ReactNode", description: "Help text (aria-describedby)." },
         { name: "error", type: "ReactNode", description: "Marks the control invalid and announces the message." },
+        {
+          name: "validate",
+          type: "(value) => string | string[] | null",
+          description:
+            "Base UI validation. Without `error`, the field shows this message (or the browser's constraint message for required, type, min, pattern…) once it is validated, on submit inside a Form, so an invalid field never shows only a red border.",
+        },
       ],
     },
     {

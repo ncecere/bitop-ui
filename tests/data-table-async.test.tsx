@@ -319,3 +319,56 @@ describe("DataTable row actions", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 });
+
+/* ---------------- row click ---------------- */
+
+describe("DataTable onRowClick", () => {
+  it("opens a row on click or Enter / Space, but not from its own controls", async () => {
+    const user = userEvent.setup();
+    const onRowClick = vi.fn();
+    const onEdit = vi.fn();
+    const { container } = render(
+      <DataTable
+        caption="Files"
+        columns={columns}
+        data={rows.slice(0, 2)}
+        getRowId={getRowId}
+        onRowClick={(r) => onRowClick(r.id)}
+        rowActions={(r) => (
+          <button type="button" onClick={() => onEdit(r.id)}>
+            Edit {r.name}
+          </button>
+        )}
+      />,
+    );
+    await user.click(screen.getByRole("cell", { name: "200 KB" }));
+    expect(onRowClick).toHaveBeenLastCalledWith("r2");
+
+    // The row's own button keeps its behaviour.
+    await user.click(screen.getByRole("button", { name: "Edit beta.pdf" }));
+    expect(onEdit).toHaveBeenCalledWith("r1");
+    expect(onRowClick).toHaveBeenCalledTimes(1);
+
+    // Rows are in the tab order and open with Enter or Space.
+    const row = screen.getByRole("rowheader", { name: "beta.pdf" }).closest("tr")!;
+    expect(row).toHaveAttribute("tabindex", "0");
+    row.focus();
+    await user.keyboard("{Enter}");
+    expect(onRowClick).toHaveBeenLastCalledWith("r1");
+    await user.keyboard(" ");
+    expect(onRowClick).toHaveBeenCalledTimes(3);
+
+    // Enter on the row's button doesn't also open the row.
+    screen.getByRole("button", { name: "Edit alpha.md" }).focus();
+    await user.keyboard("{Enter}");
+    expect(onRowClick).toHaveBeenCalledTimes(3);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("leaves rows alone without onRowClick", () => {
+    render(<DataTable caption="Files" columns={columns} data={rows.slice(0, 1)} getRowId={getRowId} />);
+    const row = screen.getByRole("rowheader", { name: "beta.pdf" }).closest("tr")!;
+    expect(row).not.toHaveAttribute("tabindex");
+    expect(row).not.toHaveAttribute("data-clickable");
+  });
+});

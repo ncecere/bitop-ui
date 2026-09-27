@@ -8,7 +8,9 @@ A copy-and-own React component library. The `bitop` CLI (`packages/cli`) copies 
 - **WCAG 2.1 AA**: contrast is tested for every theme, and every docs page is checked with axe.
 - **Enforced**: `npm run styling:check` (`scripts/check-styling.mjs`) fails the build on Tailwind/Radix/CSS-in-JS/class-name utilities or other component kits, global CSS in a component folder, literal colours or px inline styles, and interactive components that don't build on Base UI.
 
-The registry has 112 items: `core`, two themes (`theme-neutral`, the default, and the opt-in `theme-uf`) and 109 components. They include familiar UI patterns (accordion, calendar, combobox, data-table, dialog, drawer, menubar, navigation-menu, sheet, slider, toggle-group…) plus app-level pieces (`app-shell`, `command-palette`, `page-header`, `stat-card`) and the AI elements below.
+The registry has 124 items: `core`, two themes (`theme-neutral`, the default, and the opt-in `theme-uf`) and 121 components. They include familiar UI patterns (accordion, calendar, combobox, data-table, dialog, drawer, menubar, navigation-menu, sheet, slider, toggle-group…) plus app-level pieces (`app-shell`, `command-palette`, `page-header`, `stat-card`) and the AI elements below.
+
+For list and detail pages and dashboards: `data-table` (sorting, selection with a bulk action bar, a faceted `filter-bar` with chips and URL helpers, a Columns menu, cursor paging), `description-list` (key/value facts and a facts line), `diff-viewer` (text and JSON before/after), `meter` (usage against a limit), `checklist` (onboarding steps), `date-picker` range presets, and dependency-free charts (`bar-chart`, `line-chart`, `sparkline`) sharing the `chart` legend, data table and `--color-chart-*` tokens.
 
 ### AI elements
 

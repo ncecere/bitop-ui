@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { Button } from "@/registry/bitop/ui/button/button";
 import type { DateRange } from "@/registry/bitop/ui/calendar/calendar";
-import { DatePicker } from "@/registry/bitop/ui/date-picker/date-picker";
+import {
+  DatePicker,
+  DateRangePresets,
+  type DateRangeSelection,
+  dateRangePresets,
+  lastDaysPreset,
+  parseDateRangeSelection,
+  serializeDateRangeSelection,
+} from "@/registry/bitop/ui/date-picker/date-picker";
 import { Field } from "@/registry/bitop/ui/field/field";
 import { Stack } from "@/registry/bitop/ui/layout/layout";
 import { type ComponentDoc, examples } from "../types";
@@ -50,6 +58,29 @@ export function RangeWithPresets() {
   );
 }
 
+export function PresetsInThePopup() {
+  const [range, setRange] = useState<DateRange | null>(null);
+  return (
+    <Field label="Analytics period">
+      <DatePicker mode="range" numberOfMonths={2} presets={dateRangePresets} value={range} onValueChange={setRange} max={new Date()} />
+    </Field>
+  );
+}
+
+export function PresetToggleGroup() {
+  const presets = [lastDaysPreset(7, "7 days"), lastDaysPreset(30, "30 days"), lastDaysPreset(90, "90 days")];
+  // As if read from ?range=30d
+  const [period, setPeriod] = useState<DateRangeSelection | null>(() => parseDateRangeSelection("30d", presets));
+  return (
+    <Stack gap={3}>
+      <DateRangePresets aria-label="Analytics range" presets={presets} value={period} onValueChange={setPeriod} pickerProps={{ max: new Date() }} />
+      <p style={{ margin: 0, fontSize: "var(--font-size-sm)", color: "var(--color-text-muted)" }}>
+        URL: <code>?range={serializeDateRangeSelection(period) || "(none)"}</code>
+      </p>
+    </Stack>
+  );
+}
+
 export function DateOfBirth() {
   return (
     <Stack gap={4}>
@@ -77,7 +108,13 @@ const doc: ComponentDoc = {
   baseUi: { name: "Popover", href: "https://base-ui.com/react/components/popover" },
   examples: examples(raw, [
     ["InAField", InAField, { title: "Inside a Field" }],
-    ["RangeWithPresets", RangeWithPresets, { title: "Range with presets (controlled open)" }],
+    ["PresetsInThePopup", PresetsInThePopup, { title: "Range presets in the popup", description: "presets lists Today, Last 7 / 30 / 90 days beside the calendar; the calendar is the custom range." }],
+    [
+      "PresetToggleGroup",
+      PresetToggleGroup,
+      { title: "Preset toggle group with Custom", description: "DateRangePresets keeps the preset id, so a URL can say ?range=30d and stay relative to today.", wide: true },
+    ],
+    ["RangeWithPresets", RangeWithPresets, { title: "Custom footer (controlled open)" }],
     ["DateOfBirth", DateOfBirth, { title: "Month / year selects and another locale" }],
   ]),
   props: [
@@ -98,6 +135,29 @@ const doc: ComponentDoc = {
         { name: "size / block", type: '"sm" | "md" / boolean', default: '"md"', description: "Trigger height / full width." },
         { name: "labels", type: "Partial<CalendarLabels & DatePickerLabels>", description: "Translate the popup name (dialog), range separator and calendar labels." },
         { name: "disabled", type: "boolean", description: "Disables the trigger." },
+        { name: "presets (range)", type: "DateRangePreset[]", description: "Preset buttons beside the calendar (aria-pressed on the matching one); picking one sets the range and closes." },
+        { name: "presetsToday / presetsLabel (range)", type: "Date / string", default: 'now / "Presets"', description: "“Today” for the presets; name of the preset group." },
+      ],
+    },
+    {
+      component: "DateRangePresets",
+      note: "A joined ToggleGroup of presets plus Custom (which shows a range DatePicker). Presets: dateRangePresets (Today, Last 7/30/90 days) or lastDaysPreset(n, label?, id?).",
+      rows: [
+        { name: "aria-label", type: "string", required: true, description: "Names the group (the Custom picker is named “{label}: custom”)." },
+        { name: "value / defaultValue / onValueChange", type: "{ preset: string; range: DateRange | null } | null", description: 'preset is a preset id or "custom"; null = no range.' },
+        { name: "presets", type: "DateRangePreset[]", default: "dateRangePresets", description: "{ id, label, range(today) }." },
+        { name: "allowCustom / customLabel", type: "boolean / string", default: 'true / "Custom"', description: "Offer a custom range." },
+        { name: "clearable", type: "boolean", default: "true", description: "Unpressing the current preset clears the value." },
+        { name: "pickerProps", type: "DatePickerRangeProps", description: "Passed to the custom range picker, e.g. { max: new Date() }." },
+        { name: "today / size", type: 'Date / "sm" | "md"', default: 'now / "sm"', description: "Reference day for presets; control size." },
+      ],
+    },
+    {
+      component: "Helpers",
+      rows: [
+        { name: "serializeDateRangeSelection(value)", type: "string", description: 'For URLs: "30d", or "2026-09-01/2026-09-26" for a custom range.' },
+        { name: "parseDateRangeSelection(text, presets?, today?)", type: "DateRangeSelection | null", description: "Reads it back, recomputing preset ranges from today." },
+        { name: "matchDateRangePreset(range, presets?, today?)", type: "string | null", description: "The preset a range corresponds to, if any." },
       ],
     },
   ],
@@ -106,6 +166,7 @@ const doc: ComponentDoc = {
     'The trigger exposes aria-haspopup and aria-expanded; the popup is a dialog named "Choose date" (or "Choose dates").',
     "Opening moves focus to the selected day, or today. The calendar keeps its full keyboard model (see Calendar).",
     "Picking a date (or finishing a range) and Escape close the popup, and focus returns to the trigger.",
+    "Popup presets are buttons in a named group; the one matching the current range has aria-pressed=\"true\". DateRangePresets is a named toggle group (arrow keys move between presets).",
   ],
 };
 

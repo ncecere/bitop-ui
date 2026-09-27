@@ -48,7 +48,18 @@ const doc: ComponentDoc = {
         { name: "action", type: "{ label, onClick }", description: "A single action, e.g. Undo." },
       ],
     },
-    { component: "Toaster", rows: [{ name: "limit", type: "number", default: "3", description: "Maximum visible toasts." }] },
+    {
+      component: "Toaster",
+      rows: [
+        { name: "limit", type: "number", default: "3", description: "Maximum visible toasts." },
+        {
+          name: "position",
+          type: '"bottom-right" | "bottom-center" | "bottom-left"',
+          default: '"bottom-right"',
+          description: "Where toasts appear. Use bottom-center when pages keep their actions at the bottom right (danger zones, sticky save bars), so toasts don't cover them. bottom-left sits over an AppShell sidebar's footer (sidebar-wide from 48rem), so toasts never cover page content.",
+        },
+      ],
+    },
   ],
   a11y: [
     'Toasts live in a "Notifications" region announced politely; danger toasts are announced assertively.',

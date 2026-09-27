@@ -103,6 +103,7 @@ const doc: ComponentDoc = {
         { name: "open / defaultOpen / onOpenChange", type: "boolean / boolean / (open) => void", description: "Controlled or uncontrolled state." },
         { name: "hideClose", type: "boolean", description: "Hide the × button (Escape still closes)." },
         { name: "initialFocus", type: "Ref | function", description: "Element to focus when opened." },
+        { name: "finalFocus", type: "Ref | function | boolean", description: "Element to focus when closed (default: the trigger or the previously focused element)." },
       ],
     },
     {
@@ -116,12 +117,13 @@ const doc: ComponentDoc = {
         { name: "error", type: "unknown", description: "Shown as a danger alert." },
         { name: "tone", type: '"danger" | "primary"', default: '"danger"', description: "Confirm button variant." },
         { name: "cancelLabel", type: "ReactNode", default: '"Cancel"', description: "Cancel text." },
+        { name: "finalFocus", type: "Ref | function | boolean", description: "Element to focus when closed, e.g. the select whose change asked for confirmation." },
       ],
     },
     { component: "DialogClose", note: "A Button (secondary by default) that closes the surrounding dialog; takes Button props.", rows: [] },
   ],
   a11y: [
-    "Focus is trapped inside and returns to the trigger on close; Escape closes.",
+    "Focus is trapped inside and returns to the trigger on close (or to finalFocus when the dialog was opened by something else, such as a select's change); Escape closes.",
     "The title labels the dialog and the description describes it.",
     'AlertDialog uses role="alertdialog", puts initial focus on Cancel and ignores outside clicks, so Enter never confirms a destructive action by accident.',
     "The × button is last in the DOM so initial focus lands on the first field.",

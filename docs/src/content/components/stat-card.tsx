@@ -1,4 +1,5 @@
-import { Activity, FileText, Globe, Rocket, Timer } from "lucide-react";
+import { Activity, FileText, Globe, MessagesSquare, Rocket, Timer } from "lucide-react";
+import { Sparkline } from "@/registry/bitop/ui/sparkline/sparkline";
 import { StatCard } from "@/registry/bitop/ui/stat-card/stat-card";
 import { type ComponentDoc, examples } from "../types";
 import raw from "./stat-card.tsx?raw";
@@ -35,6 +36,21 @@ export function Linked() {
   );
 }
 
+export function WithSparkline() {
+  return (
+    <div style={{ display: "grid", gap: "var(--space-4)", gridTemplateColumns: "repeat(auto-fit, minmax(13rem, 1fr))" }}>
+      <StatCard
+        label="Answers"
+        value="1,014"
+        icon={<MessagesSquare />}
+        href="#analytics"
+        delta={{ value: "18%", trend: "up", label: "vs last 14 days" }}
+        chart={<Sparkline values={[61, 58, 70, 66, 74, 52, 49, 77, 83, 80, 88, 91, 69, 96]} variant="area" label="Answers per day, last 14 days: rising from 61 to 96" />}
+      />
+    </div>
+  );
+}
+
 const doc: ComponentDoc = {
   slug: "stat-card",
   title: "Stat card",
@@ -44,6 +60,7 @@ const doc: ComponentDoc = {
   examples: examples(raw, [
     ["Metrics", Metrics, { title: "Dashboard metrics", wide: true }],
     ["Linked", Linked, { title: "Linked cards with details", wide: true }],
+    ["WithSparkline", WithSparkline, { title: "With a sparkline", description: "The chart slot sits under the value.", wide: true }],
   ]),
   props: [
     {
@@ -55,6 +72,7 @@ const doc: ComponentDoc = {
         { name: "icon", type: "ReactNode", description: "Decorative icon." },
         { name: "hint", type: "ReactNode", description: "Muted footnote." },
         { name: "details", type: "ReactNode", description: "Block content under the value, such as a breakdown list." },
+        { name: "chart", type: "ReactNode", description: "A small chart under the value, usually a <Sparkline> (see Sparkline for examples)." },
         { name: "href", type: "string", description: "Makes the whole card a link to this URL." },
         { name: "render", type: "useRender.RenderProp", description: "Makes the whole card a link rendered by another element, e.g. a router <Link>." },
       ],

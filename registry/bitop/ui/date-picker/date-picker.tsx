@@ -4,13 +4,19 @@ import { Field as BaseField } from "@base-ui/react/field";
 import { Popover as BasePopover } from "@base-ui/react/popover";
 import { CalendarDays } from "lucide-react";
 import { type ReactNode, type Ref, useId, useMemo, useRef, useState } from "react";
+import { Button } from "@/registry/bitop/ui/button/button";
 import {
+  addDays,
   Calendar,
   type CalendarProps,
   type DateRange,
+  isSameDay,
+  parseISODate,
+  startOfDay,
   toISODate,
 } from "@/registry/bitop/ui/calendar/calendar";
 import popup from "@/registry/bitop/ui/styles/popup.module.css";
+import { ToggleGroup, ToggleGroupItem } from "@/registry/bitop/ui/toggle-group/toggle-group";
 import { cx } from "@/registry/bitop/lib/bitop-utils";
 import styles from "./date-picker.module.css";
 
@@ -28,7 +34,76 @@ import styles from "./date-picker.module.css";
  * focus to the selected day (or today); choosing a date (or finishing a range)
  * closes the popup and focus returns to the trigger. With `name`, the value is
  * submitted as `YYYY-MM-DD` (a range as `YYYY-MM-DD/YYYY-MM-DD`).
+ *
+ * Range presets, two ways:
+ *   - `presets` on a range DatePicker lists preset buttons (Today, Last 7
+ *     days…) beside the calendar; the calendar itself is "custom".
+ *
+ *       <DatePicker mode="range" presets={dateRangePresets} aria-label="Period" />
+ *
+ *   - DateRangePresets is a toggle group of presets plus "Custom", which
+ *     reveals a range DatePicker. Its value keeps the preset id, so a URL can
+ *     say `?range=30d` and stay relative to today (see
+ *     serializeDateRangeSelection / parseDateRangeSelection).
+ *
+ *       <DateRangePresets aria-label="Date range" value={sel} onValueChange={setSel} />
  */
+
+/* ---------------- Range presets ---------------- */
+
+export type DateRangePreset = {
+  /** Stable id, e.g. "7d"; used in URLs. Don't use "custom". */
+  id: string;
+  label: string;
+  /** The range for a given day ("today"). */
+  range: (today: Date) => DateRange;
+};
+
+/** A preset for the last `days` days including today. */
+export function lastDaysPreset(days: number, label = `Last ${days} days`, id = `${days}d`): DateRangePreset {
+  return { id, label, range: (today) => ({ from: addDays(startOfDay(today), -(days - 1)), to: startOfDay(today) }) };
+}
+
+/** Today, Last 7 days, Last 30 days, Last 90 days. */
+export const dateRangePresets: DateRangePreset[] = [
+  { id: "today", label: "Today", range: (today) => ({ from: startOfDay(today), to: startOfDay(today) }) },
+  lastDaysPreset(7),
+  lastDaysPreset(30),
+  lastDaysPreset(90),
+];
+
+/** The id of the preset whose range equals `range` today, if any. */
+export function matchDateRangePreset(range: DateRange | null | undefined, presets: DateRangePreset[] = dateRangePresets, today = new Date()): string | null {
+  if (!range?.to) return null;
+  const hit = presets.find((p) => {
+    const r = p.range(today);
+    return isSameDay(r.from, range.from) && isSameDay(r.to, range.to);
+  });
+  return hit?.id ?? null;
+}
+
+/** A preset id (the range recomputed from today) or "custom" with an explicit range. */
+export type DateRangeSelection = { preset: string; range: DateRange | null };
+
+/** For URLs: the preset id, or "YYYY-MM-DD/YYYY-MM-DD" for a custom range. Null → "". */
+export function serializeDateRangeSelection(value: DateRangeSelection | null | undefined): string {
+  if (!value) return "";
+  if (value.preset !== "custom") return value.preset;
+  if (!value.range) return "";
+  return value.range.to ? `${toISODate(value.range.from)}/${toISODate(value.range.to)}` : toISODate(value.range.from);
+}
+
+/** Reverses serializeDateRangeSelection; unknown or invalid text gives null. */
+export function parseDateRangeSelection(text: string | null | undefined, presets: DateRangePreset[] = dateRangePresets, today = new Date()): DateRangeSelection | null {
+  if (!text) return null;
+  const preset = presets.find((p) => p.id === text);
+  if (preset) return { preset: preset.id, range: preset.range(today) };
+  const [a, b] = text.split("/");
+  const from = a ? parseISODate(a) : null;
+  const to = b ? parseISODate(b) : null;
+  if (!from || (b !== undefined && !to)) return null;
+  return { preset: "custom", range: { from, to: to ?? from } };
+}
 
 type CalendarPassThrough = Pick<
   CalendarProps,
@@ -93,6 +168,12 @@ export type DatePickerRangeProps = DatePickerBaseProps & {
   value?: DateRange | null;
   defaultValue?: DateRange | null;
   onValueChange?: (value: DateRange | null) => void;
+  /** Preset buttons beside the calendar, e.g. `dateRangePresets`. Picking one sets the range and closes. */
+  presets?: DateRangePreset[];
+  /** "Today" for the presets (default: now). */
+  presetsToday?: Date;
+  /** Names the preset list (default "Presets"). */
+  presetsLabel?: string;
 };
 
 export type DatePickerProps = DatePickerSingleProps | DatePickerRangeProps;
@@ -124,8 +205,13 @@ export function DatePicker(props: DatePickerProps) {
     className,
     ref,
     locale,
-    ...calendarProps
+    ...rest
   } = props;
+  const { presets, presetsToday, presetsLabel = "Presets", ...calendarProps } = rest as typeof rest & {
+    presets?: DateRangePreset[];
+    presetsToday?: Date;
+    presetsLabel?: string;
+  };
 
   const [innerValue, setInnerValue] = useState<Value>(defaultValue ?? null);
   const value: Value = valueProp !== undefined ? valueProp : innerValue;
@@ -242,7 +328,35 @@ export function DatePicker(props: DatePickerProps) {
             className={cx(popup.popup, styles.popup)}
             initialFocus={() => popupRef.current?.querySelector<HTMLElement>('[data-day][tabindex="0"]') ?? true}
           >
-            {calendar}
+            {mode === "range" && presets?.length ? (
+              <div className={styles.withPresets}>
+                <div role="group" aria-label={presetsLabel} className={styles.presets}>
+                  {presets.map((p) => {
+                    const r = p.range(presetsToday ?? new Date());
+                    const pressed = Boolean(value && !(value instanceof Date) && value.to && isSameDay(value.from, r.from) && isSameDay(value.to, r.to));
+                    return (
+                      <Button
+                        key={p.id}
+                        size="sm"
+                        variant="ghost"
+                        aria-pressed={pressed}
+                        className={styles.preset}
+                        onClick={() => {
+                          if (valueProp === undefined) setInnerValue(r);
+                          (onValueChange as ((v: Value) => void) | undefined)?.(r);
+                          setOpen(false);
+                        }}
+                      >
+                        {p.label}
+                      </Button>
+                    );
+                  })}
+                </div>
+                {calendar}
+              </div>
+            ) : (
+              calendar
+            )}
             {footer && <div className={styles.footer}>{footer}</div>}
           </BasePopover.Popup>
         </BasePopover.Positioner>
@@ -258,4 +372,100 @@ function mergeRefs<T>(...refs: (Ref<T> | undefined)[]) {
       else if (r) (r as { current: T | null }).current = node;
     }
   };
+}
+
+/* ---------------- DateRangePresets ---------------- */
+
+export type DateRangePresetsProps = {
+  /** Names the preset group, e.g. "Date range". */
+  "aria-label": string;
+  presets?: DateRangePreset[];
+  value?: DateRangeSelection | null;
+  defaultValue?: DateRangeSelection | null;
+  /** Called with the preset and its range, `{ preset: "custom", range }`, or null when cleared. */
+  onValueChange?: (value: DateRangeSelection | null) => void;
+  /** Offer "Custom" (a range DatePicker). Default true. */
+  allowCustom?: boolean;
+  customLabel?: string;
+  /** Allow unpressing the current preset (value becomes null). Default true. */
+  clearable?: boolean;
+  /** "Today" for the presets (default: now). */
+  today?: Date;
+  /** Passed to the custom range DatePicker, e.g. { numberOfMonths: 2, max: new Date() }. */
+  pickerProps?: Omit<DatePickerRangeProps, "mode" | "value" | "defaultValue" | "onValueChange">;
+  size?: "sm" | "md";
+  className?: string;
+};
+
+/**
+ * A toggle group of range presets plus "Custom", which reveals a range
+ * DatePicker. The value keeps the preset id so it can live in a URL.
+ */
+export function DateRangePresets({
+  "aria-label": ariaLabel,
+  presets = dateRangePresets,
+  value: valueProp,
+  defaultValue = null,
+  onValueChange,
+  allowCustom = true,
+  customLabel = "Custom",
+  clearable = true,
+  today,
+  pickerProps,
+  size = "sm",
+  className,
+}: DateRangePresetsProps) {
+  const [inner, setInner] = useState<DateRangeSelection | null>(defaultValue);
+  const value = valueProp !== undefined ? valueProp : inner;
+  const set = (next: DateRangeSelection | null) => {
+    if (valueProp === undefined) setInner(next);
+    onValueChange?.(next);
+  };
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  return (
+    <div className={cx(styles.presetsBar, className)}>
+      <ToggleGroup
+        aria-label={ariaLabel}
+        size={size}
+        variant="outline"
+        joined
+        value={value ? [value.preset] : []}
+        onValueChange={(ids) => {
+          const id = ids[0] as string | undefined;
+          if (!id) {
+            if (clearable) set(null);
+            return;
+          }
+          if (id === "custom") {
+            set({ preset: "custom", range: value?.range ?? null });
+            setPickerOpen(true);
+            return;
+          }
+          const preset = presets.find((p) => p.id === id);
+          if (preset) set({ preset: id, range: preset.range(today ?? new Date()) });
+        }}
+      >
+        {presets.map((p) => (
+          <ToggleGroupItem key={p.id} value={p.id}>
+            {p.label}
+          </ToggleGroupItem>
+        ))}
+        {allowCustom && <ToggleGroupItem value="custom">{customLabel}</ToggleGroupItem>}
+      </ToggleGroup>
+      {allowCustom && value?.preset === "custom" && (
+        <DatePicker
+          numberOfMonths={2}
+          {...pickerProps}
+          mode="range"
+          size={size}
+          aria-label={pickerProps?.["aria-label"] ?? `${ariaLabel}: ${customLabel.toLocaleLowerCase()}`}
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+          value={value.range}
+          onValueChange={(range) => set({ preset: "custom", range })}
+        />
+      )}
+    </div>
+  );
 }

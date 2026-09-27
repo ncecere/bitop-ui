@@ -119,6 +119,19 @@ const pairs: [string, string, number][] = [
   ["--color-text", "--color-warning-subtle", TEXT],
   ["--color-text-muted", "--color-control-hover", TEXT],
   ["--color-focus-ring", "--color-surface-sunken", UI],
+  // Charts (line, area, bar, sparkline series), meter fills and limit markers.
+  ...["primary", "info", "success", "warning", "danger", "neutral"].flatMap((tone): [string, string, number][] => [
+    [`--color-chart-${tone}`, "--color-surface", UI],
+    [`--color-chart-${tone}`, "--color-bg", UI],
+  ]),
+  ["--color-warning", "--color-surface", UI],
+  // Diff viewer: code and line numbers on the added / removed tints, fold links.
+  ["--color-text", "--color-success-subtle", TEXT],
+  ["--color-text", "--color-danger-subtle", TEXT],
+  ["--color-text-muted", "--color-success-subtle", TEXT],
+  ["--color-text-muted", "--color-danger-subtle", TEXT],
+  ["--color-link", "--color-surface-sunken", TEXT],
+  ["--color-danger", "--color-surface", UI],
 ];
 
 const isHex = (v: string) => /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v);

@@ -108,6 +108,7 @@ const doc: ComponentDoc = {
         { name: "aria-label", type: "string", default: '"Conversation"', description: "Accessible name of the log." },
         { name: "live", type: '"off" | "polite"', default: '"off"', description: "aria-live of the log. Keep it off and render ConversationAnnouncer." },
         { name: "threshold", type: "number", default: "64", description: "Pixels from the bottom that still count as “at the bottom”." },
+        { name: "stickToBottom", type: "boolean", default: "true", description: "Follow new content to the bottom. Pass false while the conversation is empty, so a welcome taller than the panel starts at its top; turning it on pins to the bottom." },
         { name: "viewportClassName", type: "string", description: "Class for the inner scrolling element." },
       ],
     },
@@ -134,7 +135,7 @@ const doc: ComponentDoc = {
     {
       component: "useStickToBottom / nextStickState",
       rows: [],
-      note: "The behaviour on its own for custom layouts: useStickToBottom({ threshold }) returns viewportRef, contentRef, atBottom and scrollToBottom(); nextStickState() is the pure reducer it uses.",
+      note: "The behaviour on its own for custom layouts: useStickToBottom({ threshold, enabled }) returns viewportRef, contentRef, atBottom and scrollToBottom(); nextStickState() is the pure reducer it uses.",
     },
   ],
   a11y: [

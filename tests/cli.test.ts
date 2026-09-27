@@ -85,6 +85,54 @@ describe("bitop add from a bitop-ui checkout", () => {
     expect(lock.items.button.files["src/components/ui/button/button.tsx"]).toMatch(/^[0-9a-f]{64}$/);
   });
 
+  it("installs the list-page and chart items (and everything they import) with rewritten imports", async () => {
+    // Items added or extended for the ragd UI review; ragd installs these from a checkout.
+    const names = ["bar-chart", "line-chart", "sparkline", "chart", "stat-card", "description-list", "diff-viewer", "meter", "checklist", "filter-bar", "data-table", "date-picker", "page-header", "app-shell", "sheet"];
+    const dir = viteProject(repo);
+    const { code, stdout, stderr } = await bitop(dir, "add", ...names, "--no-install");
+    expect(stderr).toBe("");
+    expect(code).toBe(0);
+
+    const registry = JSON.parse(read(repo, "registry.json")) as { items: { name: string; registryDependencies?: string[]; files: { target: string }[] }[] };
+    const byName = new Map(registry.items.map((i) => [i.name, i]));
+    const closure = new Set<string>();
+    const visit = (name: string) => {
+      if (closure.has(name)) return;
+      closure.add(name);
+      for (const dep of byName.get(name)!.registryDependencies ?? []) visit(dep.replace(/^@bitop\//, ""));
+    };
+    names.forEach(visit);
+    const lock = JSON.parse(read(dir, "bitop-lock.json"));
+    expect(Object.keys(lock.items).sort()).toEqual([...closure].sort());
+
+    const toDisk = (target: string) => target.replace(/^@ui\//, "src/components/ui/").replace(/^@lib\//, "src/lib/");
+    for (const name of closure) {
+      for (const file of byName.get(name)!.files) {
+        const rel = toDisk(file.target);
+        expect(exists(dir, rel), rel).toBe(true);
+        if (/\.tsx?$/.test(rel)) {
+          const src = read(dir, rel);
+          expect(src, rel).not.toContain("@/registry/bitop");
+          // Every aliased import resolves to an installed file.
+          for (const m of src.matchAll(/from "@\/(components\/ui|lib)\/([^"]+)"/g)) {
+            const base = path.join("src", m[1]!, m[2]!);
+            const found = ["", ".ts", ".tsx"].some((ext) => exists(dir, base + ext));
+            expect(found, `${rel} imports ${m[0]}`).toBe(true);
+          }
+        }
+      }
+    }
+    expect(read(dir, "src/components/ui/data-table/data-table.tsx")).toContain('from "@/components/ui/filter-bar/filter-bar"');
+    expect(read(dir, "src/components/ui/diff-viewer/diff-viewer.tsx")).toContain('from "@/components/ui/diff-viewer/diff"');
+    expect(read(dir, "src/components/ui/themes/neutral.css")).toContain("--color-chart-primary");
+    expect(stdout).toMatch(/0 skipped/);
+
+    const again = await bitop(dir, "add", ...names, "--no-install");
+    expect(again.stdout).toMatch(/ 0 new, 0 updated;.* 0 skipped/);
+    const check = await bitop(dir, "diff", "--check");
+    expect(check.code).toBe(0);
+  }, 60_000);
+
   it("is idempotent, protects local edits, shows diffs and overwrites only when asked", async () => {
     const dir = viteProject(repo);
     await bitop(dir, "add", "button", "--no-install");

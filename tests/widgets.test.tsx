@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { Alert } from "@/registry/bitop/ui/alert/alert";
+import { BarChart } from "@/registry/bitop/ui/bar-chart/bar-chart";
 import { CopyField } from "@/registry/bitop/ui/copy-field/copy-field";
 import { DropZone } from "@/registry/bitop/ui/drop-zone/drop-zone";
 import { Table, Td, Tr } from "@/registry/bitop/ui/table/table";
@@ -176,5 +177,42 @@ describe("Table and Alert", () => {
     );
     expect(screen.getByRole("alert")).toHaveTextContent("Broken");
     expect(screen.getByRole("status")).toHaveTextContent("Saved");
+  });
+});
+
+describe("BarChart", () => {
+  const data = [
+    { label: "2026-09-01", values: { answers: 10, conversations: 4 } },
+    { label: "2026-09-02", values: { answers: 40, conversations: 10 } },
+    { label: "2026-09-03", values: { answers: 0, conversations: 0 } },
+  ];
+  const series = [
+    { key: "answers" as const, label: "Answers", tone: "info" as const },
+    { key: "conversations" as const, label: "Conversations" },
+  ];
+
+  it("is one image named by its summary, with a legend, axis labels and bars scaled to the peak", async () => {
+    const { container } = render(<BarChart data={data} series={series} summary="Answers per day: 50 in total, most on 2 September (40)." />);
+    const img = screen.getByRole("img", { name: "Answers per day: 50 in total, most on 2 September (40)." });
+    expect(within(screen.getByRole("list")).getAllByRole("listitem").map((li) => li.textContent)).toEqual(["Answers", "Conversations"]);
+    expect(within(img).getByText("40")).toBeInTheDocument();
+    expect(container.textContent).toContain("2026-09-01");
+    expect(container.textContent).toContain("2026-09-03");
+    const slots = img.querySelectorAll("[title]");
+    expect(slots).toHaveLength(3);
+    expect(slots[1]).toHaveAttribute("title", "2026-09-02: 40 Answers, 10 Conversations");
+    const bars = slots[0]!.querySelectorAll("span");
+    expect(bars[0]!.style.getPropertyValue("--bar-size")).toBe("25%");
+    expect(bars[1]!.style.getPropertyValue("--bar-size")).toBe("10%");
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("scales stacked series to the largest total and handles an empty chart", () => {
+    const { container, rerender } = render(<BarChart layout="stack" legend={false} axis={false} data={data} series={series} summary="Stacked" />);
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+    const first = container.querySelector("[title]")!.querySelectorAll("span");
+    expect(first[0]!.style.getPropertyValue("--bar-size")).toBe(`${(10 / 50) * 100}%`);
+    rerender(<BarChart data={[]} series={series} summary="No data" formatValue={(v) => `${v} items`} />);
+    expect(screen.getByRole("img", { name: "No data" })).toHaveTextContent("0 items");
   });
 });

@@ -1,6 +1,6 @@
-import { act, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { axe } from "vitest-axe";
 import { Button } from "@/registry/bitop/ui/button/button";
 import { CommandPalette, useCommandPaletteShortcut } from "@/registry/bitop/ui/command-palette/command-palette";
@@ -83,6 +83,35 @@ describe("AlertDialog", () => {
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
   });
 
+  it("returns focus to finalFocus on Cancel when opened by a control's change", async () => {
+    const user = userEvent.setup();
+    function SelectHarness() {
+      const [pending, setPending] = useState(false);
+      const ref = useRef<HTMLSelectElement>(null);
+      return (
+        <>
+          <label>
+            Role
+            <select ref={ref} onChange={() => setPending(true)} defaultValue="none">
+              <option value="none">None</option>
+              <option value="admin">Admin</option>
+            </select>
+          </label>
+          <button type="button">Elsewhere</button>
+          <AlertDialog open={pending} onOpenChange={setPending} title="Make admin?" description="Admins can change everything." confirmLabel="Make admin" onConfirm={() => {}} finalFocus={ref} />
+        </>
+      );
+    }
+    render(<SelectHarness />);
+    // Focus is elsewhere when the change opens the dialog (e.g. a native picker that took focus).
+    screen.getByRole("button", { name: "Elsewhere" }).focus();
+    fireEvent.change(screen.getByRole("combobox", { name: "Role" }), { target: { value: "admin" } });
+    const dialog = await screen.findByRole("alertdialog", { name: "Make admin?" });
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    await waitFor(() => expect(screen.getByRole("combobox", { name: "Role" })).toHaveFocus());
+  });
+
   it("shows busy and error states", async () => {
     const user = userEvent.setup();
     render(<Harness onConfirm={() => {}} busy error={new Error("Detach it from 2 knowledge bases first.")} />);
@@ -137,6 +166,33 @@ describe("Toast", () => {
     expect(region).toHaveAttribute("aria-live", "polite");
     expect(region).toContainElement(title);
     expect(screen.getByText("Policies is ready.")).toBeInTheDocument();
+    act(() => toast.close());
+  });
+
+  it("places the viewport with position (bottom-right by default)", async () => {
+    const { unmount } = render(<Toaster />);
+    act(() => {
+      toast.add({ title: "Saved" });
+    });
+    expect(screen.getByRole("region", { name: "Notifications" })).toHaveAttribute("data-position", "bottom-right");
+    act(() => toast.close());
+    unmount();
+    render(<Toaster position="bottom-center" />);
+    act(() => {
+      toast.add({ title: "Saved again" });
+    });
+    await screen.findByText("Saved again");
+    expect(screen.getByRole("region", { name: "Notifications" })).toHaveAttribute("data-position", "bottom-center");
+    act(() => toast.close());
+  });
+
+  it("can sit over the sidebar footer (bottom-left)", async () => {
+    render(<Toaster position="bottom-left" />);
+    act(() => {
+      toast.add({ title: "Agent created" });
+    });
+    await screen.findByText("Agent created");
+    expect(screen.getByRole("region", { name: "Notifications" })).toHaveAttribute("data-position", "bottom-left");
     act(() => toast.close());
   });
 });

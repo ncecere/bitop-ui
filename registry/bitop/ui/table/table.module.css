@@ -1,4 +1,7 @@
 .wrap {
+  /* Contains absolutely positioned content (visually hidden labels), so a
+     wide table scrolls inside the wrapper and never widens the page. */
+  position: relative;
   width: 100%;
   overflow-x: auto;
 

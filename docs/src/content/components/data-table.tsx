@@ -1,9 +1,13 @@
-import { Download, Pencil, RefreshCw, Trash2, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Download, MoreHorizontal, Pencil, RefreshCw, Tag, Trash2, Users } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { formatBytes } from "@/registry/bitop/lib/bitop-format";
 import { StatusBadge } from "@/registry/bitop/ui/badge/badge";
 import { Button, IconButton } from "@/registry/bitop/ui/button/button";
 import { CellText, DataTable, type DataTableColumn } from "@/registry/bitop/ui/data-table/data-table";
 import { EmptyState } from "@/registry/bitop/ui/empty-state/empty-state";
+import { type Facet, type FilterValues, filterValuesFromSearchParams, filterValuesToSearchParams } from "@/registry/bitop/ui/filter-bar/filter-bar";
+import { Menu, MenuItem, MenuSeparator } from "@/registry/bitop/ui/menu/menu";
+import { Time } from "@/registry/bitop/ui/time/time";
 import { type ComponentDoc, examples } from "../types";
 import raw from "./data-table.tsx?raw";
 
@@ -69,6 +73,104 @@ export function Invoices() {
         </Button>
       }
     />
+  );
+}
+
+export function DocumentsWithFacets() {
+  type Doc = { id: string; title: string; path: string; kind: "PDF" | "HTML" | "Markdown"; size: number; status: "ready" | "failed" | "skipped"; updated: Date };
+  const kinds = ["PDF", "HTML", "Markdown"] as const;
+  const statuses = ["ready", "ready", "ready", "failed", "ready", "skipped"] as const;
+  const now = Date.now();
+  const docs: Doc[] = Array.from({ length: 58 }, (_, i) => ({
+    id: `doc-${i + 1}`,
+    title: ["Registration deadlines", "Transcript requests", "FERPA overview", "Graduation checklist", "Residency for tuition"][i % 5]! + (i >= 5 ? ` (${Math.floor(i / 5) + 1})` : ""),
+    path: `/records/${["deadlines", "transcripts", "ferpa", "graduation", "residency"][i % 5]}-${i + 1}`,
+    kind: kinds[(i + Math.floor(i / 3)) % 3]!,
+    size: 12_000 + ((i * 479_909) % 2_400_000),
+    status: statuses[i % statuses.length]!,
+    updated: new Date(now - i * 31 * 3600_000),
+  }));
+  const tone = { ready: "success", failed: "danger", skipped: "neutral" } as const;
+  const label = { ready: "Ready", failed: "Failed", skipped: "Skipped" } as const;
+  const columns: DataTableColumn<Doc>[] = [
+    { id: "title", header: "Title", accessor: "title", sortable: true, rowHeader: true, cell: (d) => <CellText primary={d.title} secondary={d.path} /> },
+    { id: "kind", header: "Kind · Size", accessor: "kind", label: "Kind and size", cell: (d) => `${d.kind} · ${formatBytes(d.size)}`, muted: true },
+    { id: "status", header: "Status", accessor: "status", sortable: true, cell: (d) => <StatusBadge tone={tone[d.status]}>{label[d.status]}</StatusBadge> },
+    { id: "updated", header: "Updated", accessor: "updated", sortable: true, muted: true, cell: (d) => <Time value={d.updated} format="relative" /> },
+    { id: "id", header: "ID", accessor: "id", defaultHidden: true, muted: true },
+  ];
+  const facets: Facet<Doc>[] = [
+    {
+      id: "status",
+      label: "Status",
+      type: "toggle",
+      allLabel: "All",
+      accessor: (d) => d.status,
+      options: [
+        { value: "ready", label: "Ready" },
+        { value: "failed", label: "Failed" },
+        { value: "skipped", label: "Skipped" },
+      ],
+    },
+    { id: "kind", label: "Kind", type: "select", multiple: true, placeholder: "Any kind", accessor: (d) => d.kind, options: kinds.map((k) => ({ value: k, label: k })) },
+    { id: "updated", label: "Updated", type: "date-range", accessor: (d) => d.updated, pickerProps: { max: new Date() } },
+  ];
+  // Keep the filters in the URL (here a string; in an app, your router's search params).
+  const [search, setSearch] = useState("status=failed");
+  const filters = useMemo(() => filterValuesFromSearchParams(facets, search), [search]);
+  const setFilters = (next: FilterValues) => setSearch(filterValuesToSearchParams(facets, next, search).toString());
+  const [selected, setSelected] = useState<string[]>([]);
+  return (
+    <>
+      <DataTable
+        framed
+        caption="Documents"
+        columns={columns}
+        data={docs}
+        getRowId={(d) => d.id}
+        rowLabel={(d) => d.title}
+        defaultSort={{ columnId: "updated", direction: "descending" }}
+        facets={facets}
+        facetValues={filters}
+        onFacetValuesChange={setFilters}
+        filterable
+        filterLabel="Search documents"
+        filterPlaceholder="Search titles…"
+        columnsMenu
+        columnsStorageKey="docs-example-documents-columns"
+        selectable
+        selectedIds={selected}
+        onSelectionChange={setSelected}
+        bulkActions={(ids, clear) => (
+          <>
+            <Button size="sm" variant="secondary">
+              <Tag aria-hidden /> Tag
+            </Button>
+            <Button size="sm" variant="secondary">
+              <RefreshCw aria-hidden /> Re-fetch
+            </Button>
+            <Button size="sm" variant="danger" onClick={clear}>
+              <Trash2 aria-hidden /> Delete {ids.length}
+            </Button>
+          </>
+        )}
+        rowActions={(d) => (
+          <Menu align="end" trigger={<IconButton size="sm" icon={<MoreHorizontal aria-hidden />} label={`Actions for ${d.title}`} />}>
+            <MenuItem>Open</MenuItem>
+            <MenuItem>Re-fetch</MenuItem>
+            <MenuSeparator />
+            <MenuItem tone="danger">Delete</MenuItem>
+          </Menu>
+        )}
+        pageSize={10}
+        density="compact"
+        stickyHeader
+        maxHeight="28rem"
+      />
+      <p style={{ marginTop: "var(--space-2)", fontSize: "var(--font-size-sm)", color: "var(--color-text-muted)" }}>
+        URL: <code>?{search}</code>
+      </p>
+    </>
   );
 }
 
@@ -300,6 +402,16 @@ const doc: ComponentDoc = {
   imports: `import { CellText, DataTable, type DataTableColumn } from "@/components/ui/data-table/data-table";`,
   examples: examples(raw, [
     ["Invoices", Invoices, { title: "Sort, select, filter and paginate", wide: true }],
+    [
+      "DocumentsWithFacets",
+      DocumentsWithFacets,
+      {
+        title: "Facets, columns menu and bulk actions",
+        description:
+          "Faceted filters with counts, chips and Clear all, synced to the URL; a Columns menu persisted in localStorage (ID starts hidden); a bulk bar while rows are selected; a “…” row menu; compact density and a sticky header.",
+        wide: true,
+      },
+    ],
     ["Empty", Empty, { title: "Empty state", wide: true }],
     [
       "AsyncLoading",
@@ -336,7 +448,7 @@ const doc: ComponentDoc = {
       component: "DataTable<T>",
       note: (
         <>
-          Also accepts Table props (framed, density, stickyHeader, maxHeight, showCaption). <strong>What the body shows:</strong> rows to show always
+          Also accepts Table props (framed, density=&quot;compact&quot;, stickyHeader with maxHeight, showCaption). <strong>What the body shows:</strong> rows to show always
           render (error adds an alert above the table, loading dims them); with no rows to show, error &gt; loading (skeleton rows) &gt; empty (no
           data) &gt; noResults (the filter matched nothing). The toolbar is always rendered.
         </>
@@ -381,6 +493,21 @@ const doc: ComponentDoc = {
         },
         { name: "rowActions", type: "(row) => ReactNode", description: "Trailing, right-aligned, unsortable actions column." },
         { name: "rowActionsLabel", type: "string", default: '"Actions"', description: "Visually hidden header of the actions column." },
+        { name: "onRowClick", type: "(row) => void", description: "The whole row opens the record (e.g. a detail sheet): click anywhere but a control, or Enter / Space on the focused row. Keep a link or row action too." },
+        { name: "rowClickLabel", type: "(row) => string", description: "Optional accessible name of a clickable row (default: its content)." },
+        { name: "columnsMenu", type: "boolean", default: "false", description: "A “Columns” menu of checkbox items to show and hide hideable columns (at least one stays visible)." },
+        { name: "hiddenColumns / defaultHiddenColumns / onHiddenColumnsChange", type: "string[]", description: "Hidden column ids, controlled or not (default: columns with defaultHidden)." },
+        { name: "columnsStorageKey", type: "string", description: "Persist hidden columns in localStorage (uncontrolled only)." },
+        { name: "columnsMenuLabel", type: "string", default: '"Columns"', description: "Text of the menu button." },
+        {
+          name: "facets, facetValues / defaultFacetValues / onFacetValuesChange",
+          type: "Facet<T>[], FilterValues",
+          description: "A FilterBar under the toolbar; rows are filtered in memory with each facet's accessor (not in manual mode). Control the values to sync them to the URL.",
+        },
+        { name: "facetCounts", type: "FacetCounts | false", default: "computed from data", description: "Option counts; pass your own for server data (manual) or false to hide them." },
+        { name: "facetLabels", type: "Partial<FilterBarLabels>", description: "Translate the filter bar." },
+        { name: "bulkActions", type: "(ids, clear) => ReactNode", description: "A bar with “N selected”, your actions and Clear selection, while rows are selected." },
+        { name: "selectedLabel", type: "(count) => string", default: '"N selected"', description: "Text of the bulk bar." },
       ],
     },
     {
@@ -400,6 +527,7 @@ const doc: ComponentDoc = {
         { name: "sortable / sortFn", type: "boolean / (a, b) => number", description: "Enable sorting; custom ascending comparator." },
         { name: "filterable", type: "boolean", default: "true with an accessor", description: "Include in the text filter." },
         { name: "numeric / muted / rowHeader / hideHeader / width", type: "boolean / … / string", description: 'Alignment, secondary text, <th scope="row"> cells, hidden header text, width.' },
+        { name: "hideable / defaultHidden / label", type: "boolean / boolean / string", default: "true (false for rowHeader)", description: "Columns menu: can be hidden, starts hidden, name in the menu." },
       ],
     },
   ],
@@ -414,6 +542,11 @@ const doc: ComponentDoc = {
     "If a focused control disappears or becomes disabled (Load more at the end, Next on the last page, Retry after recovery, a removed row), focus moves to the current page, the other step button or the table instead of the page body.",
     "The cursor range label is a polite live region; the Previous/Next controls are a navigation landmark named like numbered pagination.",
     "The row actions column has a visually hidden header (“Actions”), so every action cell has a column name.",
+    "With onRowClick, rows join the tab order, show a focus ring and open with Enter or Space; clicks on the row's own links and buttons keep their behaviour. Keep a named control (a link or a row action) that does the same, for screen-reader table navigation.",
+    "The table wrapper is position: relative, so visually hidden labels in a wide table stay inside its scroll container and never widen the page.",
+    "The Columns menu is a Base UI Menu of menuitemcheckbox items that stays open while you toggle; the last visible column can't be hidden.",
+    "Facets follow FilterBar: a named group, labelled controls, counts read after options, and removable chips that keep focus in the bar. Filtering announces “N rows match the filters”.",
+    "The bulk bar is a group named “Bulk actions”; its count is text (“3 selected”) and Clear selection is a real button.",
   ],
 };
 

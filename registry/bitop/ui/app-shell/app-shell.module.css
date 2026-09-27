@@ -55,20 +55,25 @@
 }
 
 .sidebarHeader {
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-2) var(--space-2);
 }
 
-.sidebarContent {
-  flex: 1;
+/* The content scrolls in a ScrollArea between the pinned header and footer. */
+.sidebarScroll {
+  flex: 1 1 0;
   min-height: 0;
-  overflow-y: auto;
+}
+
+.sidebarContent {
   padding: var(--space-2);
 }
 
 .sidebarFooter {
+  flex-shrink: 0;
   padding: var(--space-2);
   border-top: 1px solid var(--color-border);
 }

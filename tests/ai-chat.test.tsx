@@ -151,6 +151,29 @@ describe("Conversation", () => {
   });
 });
 
+describe("Conversation stickToBottom", () => {
+  it("keeps a tall empty state at its top, and follows messages once enabled", async () => {
+    const metrics = { scrollHeight: 900, clientHeight: 300 };
+    function Chat({ empty, text = "Welcome" }: { empty: boolean; text?: string }) {
+      return (
+        <Conversation stickToBottom={!empty}>
+          <ConversationContent>{empty ? <p>{text}</p> : <p>First answer</p>}</ConversationContent>
+        </Conversation>
+      );
+    }
+    const { rerender } = render(<Chat empty />);
+    const log = screen.getByRole("log", { name: "Conversation" });
+    Object.defineProperty(log, "scrollHeight", { configurable: true, get: () => metrics.scrollHeight });
+    Object.defineProperty(log, "clientHeight", { configurable: true, get: () => metrics.clientHeight });
+    // The welcome grows (e.g. starter questions arrive): the view stays at the top.
+    rerender(<Chat empty text="Welcome, with starter questions" />);
+    await act(async () => {});
+    expect(log.scrollTop).toBe(0);
+    rerender(<Chat empty={false} />);
+    await waitFor(() => expect(log.scrollTop).toBe(900));
+  });
+});
+
 describe("ConversationAnnouncer", () => {
   it("announces transitions, not tokens", () => {
     const { rerender } = render(<ConversationAnnouncer status="ready" />);
@@ -509,6 +532,27 @@ describe("InlineCitation", () => {
     expect(within(card).getByRole("button", { name: "Next source" })).toBeDisabled();
     await user.click(within(card).getByRole("button", { name: "Previous source" }));
     expect(within(card).getByText("1 of 2")).toBeInTheDocument();
+  });
+});
+
+describe("InlineCitation verification", () => {
+  it("names the verification, marks the chip and heads the card with it", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <p>
+        Claim <InlineCitation index={1} sources={[sources[0]!]} verification="verified" verificationLabel="Verified (97% confidence)" /> and
+        another <InlineCitation index={2} sources={[sources[1]!]} verification="unsupported" />
+      </p>,
+    );
+    const ok = screen.getByRole("button", { name: "Source 1: Leave policy. Verified (97% confidence)" });
+    const warn = screen.getByRole("button", { name: /^Source 2: .*\. Not supported by this source$/ });
+    expect(ok).toHaveAttribute("data-verification", "verified");
+    expect(warn).toHaveAttribute("data-verification", "unsupported");
+    expect(await axe(container)).toHaveNoViolations();
+    await user.click(warn);
+    const card = await screen.findByRole("dialog");
+    expect(within(card).getByText("Not supported by this source")).toBeInTheDocument();
+    expect(await axe(card)).toHaveNoViolations();
   });
 });
 

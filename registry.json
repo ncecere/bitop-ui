@@ -172,7 +172,7 @@
       "name": "app-shell",
       "type": "registry:ui",
       "title": "App shell",
-      "description": "Collapsible sidebar, mode switch, workspace switcher, user menu, top bar and main landmark.",
+      "description": "Collapsible sidebar (an aside landmark whose content scrolls between a pinned header and footer), mode switch, workspace switcher, user menu, top bar and main landmark.",
       "dependencies": [
         "@base-ui/react@^1.8.0",
         "lucide-react@^1.48.0"
@@ -183,7 +183,8 @@
         "@bitop/button",
         "@bitop/layout",
         "@bitop/menu",
-        "@bitop/tooltip"
+        "@bitop/tooltip",
+        "@bitop/scroll-area"
       ],
       "files": [
         {
@@ -359,6 +360,31 @@
           "path": "registry/bitop/ui/badge/badge.module.css",
           "type": "registry:file",
           "target": "@ui/badge/badge.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
+      "name": "bar-chart",
+      "type": "registry:ui",
+      "title": "Bar chart",
+      "description": "CSS bar chart with overlapping or stacked series, shared chart legend and colours, peak line and an optional data table; role=img with a text summary.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/chart"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/bar-chart/bar-chart.tsx",
+          "type": "registry:ui",
+          "target": "@ui/bar-chart/bar-chart.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/bar-chart/bar-chart.module.css",
+          "type": "registry:file",
+          "target": "@ui/bar-chart/bar-chart.module.css"
         }
       ],
       "categories": [
@@ -560,6 +586,32 @@
       ]
     },
     {
+      "name": "chart",
+      "type": "registry:ui",
+      "title": "Chart",
+      "description": "Shared chart pieces: series tones from the --color-chart-* tokens, a legend with line patterns, and a \"Show data\" table disclosure.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/disclosure",
+        "@bitop/table"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/chart/chart.tsx",
+          "type": "registry:ui",
+          "target": "@ui/chart/chart.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/chart/chart.module.css",
+          "type": "registry:file",
+          "target": "@ui/chart/chart.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
       "name": "checkbox",
       "type": "registry:ui",
       "title": "Checkbox",
@@ -585,6 +637,36 @@
       ],
       "categories": [
         "forms"
+      ]
+    },
+    {
+      "name": "checklist",
+      "type": "registry:ui",
+      "title": "Checklist",
+      "description": "Onboarding steps with done states, a link or button action per step, a progress summary and an optional dismiss button.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/progress"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/checklist/checklist.tsx",
+          "type": "registry:ui",
+          "target": "@ui/checklist/checklist.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/checklist/checklist.module.css",
+          "type": "registry:file",
+          "target": "@ui/checklist/checklist.module.css"
+        }
+      ],
+      "categories": [
+        "display"
       ]
     },
     {
@@ -951,7 +1033,7 @@
       "name": "data-table",
       "type": "registry:ui",
       "title": "Data table",
-      "description": "Typed data table with sortable headers, row selection, a text filter, numbered or cursor pagination, load more, loading/error states and row actions, built on Table.",
+      "description": "Typed data table with sortable headers, row selection and bulk actions, a text filter, faceted filters, a Columns menu, numbered or cursor pagination, load more, loading/error states and row actions, built on Table.",
       "dependencies": [
         "lucide-react@^1.48.0"
       ],
@@ -964,7 +1046,9 @@
         "@bitop/input",
         "@bitop/pagination",
         "@bitop/skeleton",
-        "@bitop/table"
+        "@bitop/table",
+        "@bitop/filter-bar",
+        "@bitop/menu"
       ],
       "files": [
         {
@@ -986,14 +1070,16 @@
       "name": "date-picker",
       "type": "registry:ui",
       "title": "Date picker",
-      "description": "A trigger button that opens a Calendar in a popover; single or range, Intl-formatted value, works inside Field.",
+      "description": "A trigger button that opens a Calendar in a popover; single or range, range presets (in the popup or as a toggle group with Custom), Intl-formatted value, works inside Field.",
       "dependencies": [
         "@base-ui/react@^1.8.0",
         "lucide-react@^1.48.0"
       ],
       "registryDependencies": [
         "@bitop/core",
-        "@bitop/calendar"
+        "@bitop/calendar",
+        "@bitop/button",
+        "@bitop/toggle-group"
       ],
       "files": [
         {
@@ -1009,6 +1095,30 @@
       ],
       "categories": [
         "forms"
+      ]
+    },
+    {
+      "name": "description-list",
+      "type": "registry:ui",
+      "title": "Description list",
+      "description": "Key/value facts: a <dl> in a label column or stacked grid, and an inline facts line (a · b · c) for detail-page headers.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/description-list/description-list.tsx",
+          "type": "registry:ui",
+          "target": "@ui/description-list/description-list.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/description-list/description-list.module.css",
+          "type": "registry:file",
+          "target": "@ui/description-list/description-list.module.css"
+        }
+      ],
+      "categories": [
+        "display"
       ]
     },
     {
@@ -1039,6 +1149,37 @@
       ],
       "categories": [
         "overlays"
+      ]
+    },
+    {
+      "name": "diff-viewer",
+      "type": "registry:ui",
+      "title": "Diff viewer",
+      "description": "Before/after for text (line diff) and JSON (structural changes with paths), unified or split, with +/− signs and folded unchanged lines.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/scroll-area",
+        "@bitop/toggle-group"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/diff-viewer/diff-viewer.tsx",
+          "type": "registry:ui",
+          "target": "@ui/diff-viewer/diff-viewer.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/diff-viewer/diff.ts",
+          "type": "registry:ui",
+          "target": "@ui/diff-viewer/diff.ts"
+        },
+        {
+          "path": "registry/bitop/ui/diff-viewer/diff-viewer.module.css",
+          "type": "registry:file",
+          "target": "@ui/diff-viewer/diff-viewer.module.css"
+        }
+      ],
+      "categories": [
+        "display"
       ]
     },
     {
@@ -1258,6 +1399,38 @@
       ],
       "categories": [
         "ai"
+      ]
+    },
+    {
+      "name": "filter-bar",
+      "type": "registry:ui",
+      "title": "Filter bar",
+      "description": "Faceted filters (toggle group, combobox, date-range presets) with counts, active-filter chips, Clear all and URL helpers.",
+      "dependencies": [
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/calendar",
+        "@bitop/combobox",
+        "@bitop/date-picker",
+        "@bitop/toggle-group"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/filter-bar/filter-bar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/filter-bar/filter-bar.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/filter-bar/filter-bar.module.css",
+          "type": "registry:file",
+          "target": "@ui/filter-bar/filter-bar.module.css"
+        }
+      ],
+      "categories": [
+        "forms"
       ]
     },
     {
@@ -1523,6 +1696,31 @@
       ]
     },
     {
+      "name": "line-chart",
+      "type": "registry:ui",
+      "title": "Line chart",
+      "description": "SVG line or area chart with one or more series, legend and peak line; role=img with a text summary and an optional data table.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/chart"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/line-chart/line-chart.tsx",
+          "type": "registry:ui",
+          "target": "@ui/line-chart/line-chart.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/line-chart/line-chart.module.css",
+          "type": "registry:file",
+          "target": "@ui/line-chart/line-chart.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
       "name": "loader",
       "type": "registry:ui",
       "title": "Loader",
@@ -1658,6 +1856,34 @@
       ],
       "categories": [
         "ai"
+      ]
+    },
+    {
+      "name": "meter",
+      "type": "registry:ui",
+      "title": "Meter",
+      "description": "Usage against a limit (role=meter) with warning and critical tones, an optional limit marker and \"X of Y\" text.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/meter/meter.tsx",
+          "type": "registry:ui",
+          "target": "@ui/meter/meter.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/meter/meter.module.css",
+          "type": "registry:file",
+          "target": "@ui/meter/meter.module.css"
+        }
+      ],
+      "categories": [
+        "feedback"
       ]
     },
     {
@@ -1833,7 +2059,7 @@
       "name": "page-header",
       "type": "registry:ui",
       "title": "Page header",
-      "description": "Page title with breadcrumbs, meta, description and actions.",
+      "description": "Page title with breadcrumbs, meta, description and actions; an optional facts line under the title.",
       "registryDependencies": [
         "@bitop/core"
       ],
@@ -2567,6 +2793,30 @@
       ]
     },
     {
+      "name": "sparkline",
+      "type": "registry:ui",
+      "title": "Sparkline",
+      "description": "A tiny inline SVG trend for stat cards and table cells; one image named by its label.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/sparkline/sparkline.tsx",
+          "type": "registry:ui",
+          "target": "@ui/sparkline/sparkline.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/sparkline/sparkline.module.css",
+          "type": "registry:file",
+          "target": "@ui/sparkline/sparkline.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
       "name": "speech-input",
       "type": "registry:ui",
       "title": "Speech input",
@@ -2652,7 +2902,7 @@
       "name": "stat-card",
       "type": "registry:ui",
       "title": "Stat card",
-      "description": "Metric card with icon, delta, hint, details and an optional whole-card link.",
+      "description": "Metric card with icon, delta, hint, details, a chart slot (e.g. a sparkline) and an optional whole-card link.",
       "dependencies": [
         "@base-ui/react@^1.8.0",
         "lucide-react@^1.48.0"

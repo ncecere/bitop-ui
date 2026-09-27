@@ -126,6 +126,16 @@
   opacity: 0.6;
 }
 
+/* onRowClick: the whole row opens the record. */
+.table tbody tr[data-clickable] {
+  cursor: pointer;
+}
+
+.table tbody tr[data-clickable]:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+
 .table tbody tr.skeletonRow:hover {
   background-color: transparent;
 }
@@ -149,10 +159,12 @@
   vertical-align: middle;
 }
 
+/* break-word (not anywhere): long tokens still wrap, but a column is never
+   squeezed below its longest word, so words don't break mid-word. */
 .cellPrimary {
   font-weight: var(--font-weight-medium);
   color: var(--color-text);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .cellSecondary {
@@ -160,7 +172,7 @@
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-snug);
   color: var(--color-text-muted);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -168,4 +180,33 @@
   .table tbody {
     transition: none;
   }
+}
+
+/* Bulk action bar: shown while rows are selected. */
+.bulk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-3);
+  background-color: var(--color-primary-subtle);
+}
+
+.bulkCount {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary-subtle-text);
+}
+
+.bulkActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.bulkClear {
+  margin-inline-start: auto;
 }

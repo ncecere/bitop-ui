@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, ChevronsUpDown, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronsUpDown, Columns3, Search, X } from "lucide-react";
 import {
   useEffect,
   useLayoutEffect,
@@ -9,13 +9,26 @@ import {
   useState,
   type ComponentPropsWithRef,
   type FocusEvent,
+  type KeyboardEvent,
+  type MouseEvent,
   type ReactNode,
 } from "react";
 import { ErrorAlert } from "@/registry/bitop/ui/alert/alert";
 import { Button } from "@/registry/bitop/ui/button/button";
 import { Checkbox } from "@/registry/bitop/ui/checkbox/checkbox";
 import { Field } from "@/registry/bitop/ui/field/field";
+import {
+  activeFilterCount,
+  type Facet,
+  type FacetCounts,
+  facetCounts as countFacets,
+  FilterBar,
+  type FilterBarProps,
+  filterRows,
+  type FilterValues,
+} from "@/registry/bitop/ui/filter-bar/filter-bar";
 import { Input } from "@/registry/bitop/ui/input/input";
+import { Menu, MenuCheckboxItem, MenuGroup } from "@/registry/bitop/ui/menu/menu";
 import {
   Pagination,
   PaginationContent,
@@ -70,6 +83,23 @@ import styles from "./data-table.module.css";
  * disappears or becomes disabled (Load more at the end, Next on the last
  * page, Retry after recovery, a deleted row's action), focus moves to the
  * current page, the remaining step button or the table, instead of <body>.
+ *
+ * Extras for list pages:
+ *   - `columnsMenu`: a "Columns" menu of checkbox items to show and hide
+ *     columns (`hideable: false` keeps one fixed; `defaultHidden` starts it
+ *     hidden). Control it with `hiddenColumns` / `onHiddenColumnsChange`, or
+ *     let `columnsStorageKey` persist the choice in localStorage.
+ *   - `facets`: a FilterBar (toggle / select / date-range facets with
+ *     counts, active-filter chips and "Clear all") under the toolbar. Rows
+ *     are filtered in memory with each facet's accessor unless `manual`.
+ *     Control it with `facetValues` / `onFacetValuesChange` to sync the URL
+ *     (filterValuesToSearchParams / filterValuesFromSearchParams).
+ *   - `bulkActions`: a bar with "N selected", your actions and "Clear
+ *     selection", shown while rows are selected.
+ *   - `onRowClick`: the whole row opens the record (click, or Enter / Space
+ *     on the focused row); clicks on links, buttons and other controls in
+ *     the row keep their own behaviour.
+ *   - Table's `stickyHeader` (with `maxHeight`) and `density` pass through.
  */
 
 export type SortDirection = "ascending" | "descending";
@@ -100,6 +130,12 @@ export type DataTableColumn<T> = {
   width?: string;
   /** Muted secondary text. */
   muted?: boolean;
+  /** Can be hidden from the Columns menu (default: true, except row-header columns). */
+  hideable?: boolean;
+  /** Start hidden (uncontrolled column visibility). */
+  defaultHidden?: boolean;
+  /** Name in the Columns menu when `header` isn't plain text (default: header text, else id). */
+  label?: string;
 };
 
 /** Server-driven Previous / Next paging (APIs that return next/previous cursors). */
@@ -188,8 +224,45 @@ export type DataTableProps<T> = Omit<TableProps, "columns" | "children" | "empty
   loadMore?: DataTableLoadMore;
   /** Per-row actions in a trailing, right-aligned, unsortable column. */
   rowActions?: (row: T) => ReactNode;
+  /**
+   * Makes each row open something (usually the record's detail sheet): a
+   * click anywhere on the row that isn't on a control, or Enter / Space on
+   * the focused row (rows join the tab order). Keep an equivalent link,
+   * button or row action for assistive technology.
+   */
+  onRowClick?: (row: T) => void;
+  /** Optional accessible name of a clickable row, e.g. (r) => `Open ${r.name}` (default: the row's content). */
+  rowClickLabel?: (row: T) => string;
   /** Accessible (visually hidden) header of the actions column (default "Actions"). */
   rowActionsLabel?: string;
+
+  /** Adds a "Columns" menu to show and hide columns. */
+  columnsMenu?: boolean;
+  /** Ids of hidden columns (controlled). */
+  hiddenColumns?: string[];
+  /** Initially hidden columns (default: columns with `defaultHidden`). */
+  defaultHiddenColumns?: string[];
+  onHiddenColumnsChange?: (hidden: string[]) => void;
+  /** Persist hidden columns in localStorage under this key (uncontrolled only). */
+  columnsStorageKey?: string;
+  /** Text of the Columns menu button (default "Columns"). */
+  columnsMenuLabel?: string;
+
+  /** Faceted filters in a FilterBar under the toolbar (in-memory with accessors, or `manual`). */
+  facets?: Facet<T>[];
+  /** Facet values (controlled), e.g. read from the URL. */
+  facetValues?: FilterValues;
+  defaultFacetValues?: FilterValues;
+  onFacetValuesChange?: (values: FilterValues) => void;
+  /** Option counts. Default: computed from `data` (not in `manual` mode); pass your own for server data, or `false` to hide. */
+  facetCounts?: FacetCounts | false;
+  /** Labels of the filter bar (group name, chips, Clear all). */
+  facetLabels?: FilterBarProps<T>["labels"];
+
+  /** Shown in a bar above the table while rows are selected: `(ids, clear) => <Button …>Delete</Button>`. */
+  bulkActions?: (selectedIds: string[], clearSelection: () => void) => ReactNode;
+  /** "3 selected" text of the bulk bar. */
+  selectedLabel?: (count: number) => string;
 };
 
 export type CellTextProps = Omit<ComponentPropsWithRef<"span">, "children"> & {
@@ -254,7 +327,20 @@ export function compareValues(a: Primitive, b: Primitive): number {
   return collator ? collator.compare(sa, sb) : sa < sb ? -1 : sa > sb ? 1 : 0;
 }
 
+const EMPTY_FILTERS: FilterValues = {};
+
 const SKELETON_WIDTHS = ["72%", "48%", "86%", "60%", "40%"];
+
+/** Whether a click started on (or inside) a control of its own: those keep their own behaviour. */
+function fromControl(target: EventTarget | null, row: HTMLElement) {
+  let el = target instanceof Element ? target : null;
+  while (el && el !== row) {
+    if (el.matches('a[href], button, input, select, textarea, label, summary, [role="button"], [role="checkbox"], [role="switch"], [contenteditable="true"]')) return true;
+    el = el.parentElement;
+  }
+  // Clicks inside portals (menus opened from the row) bubble through React, not the DOM tree.
+  return target instanceof Node && !row.contains(target);
+}
 
 function textOf(v: Primitive): string {
   if (v === null || v === undefined) return "";
@@ -300,6 +386,22 @@ export function DataTable<T>({
   loadMore,
   rowActions,
   rowActionsLabel = "Actions",
+  onRowClick,
+  rowClickLabel,
+  columnsMenu = false,
+  hiddenColumns: hiddenProp,
+  defaultHiddenColumns,
+  onHiddenColumnsChange,
+  columnsStorageKey,
+  columnsMenuLabel = "Columns",
+  facets,
+  facetValues: facetValuesProp,
+  defaultFacetValues = EMPTY_FILTERS,
+  onFacetValuesChange,
+  facetCounts: facetCountsProp,
+  facetLabels,
+  bulkActions,
+  selectedLabel = (n) => `${n.toLocaleString()} selected`,
   caption,
   className,
   ...tableProps
@@ -308,6 +410,37 @@ export function DataTable<T>({
   const [selected, setSelected] = useControllable<string[]>(selectedProp, defaultSelectedIds, onSelectionChange);
   const [filter, setFilterValue] = useControllable<string>(filterProp, defaultFilter, onFilterChange);
   const [page, setPage] = useControllable<number>(pageProp, defaultPage, onPageChange);
+  const [facetValues, setFacetValuesState] = useControllable<FilterValues>(facetValuesProp, defaultFacetValues, onFacetValuesChange);
+  // Uncontrolled visibility starts from storage, then defaultHiddenColumns, then `defaultHidden` columns.
+  const [innerHidden, setInnerHidden] = useState<string[]>(() => {
+    if (columnsStorageKey && typeof window !== "undefined") {
+      try {
+        const raw = window.localStorage.getItem(columnsStorageKey);
+        const parsed: unknown = raw ? JSON.parse(raw) : null;
+        if (Array.isArray(parsed) && parsed.every((x) => typeof x === "string")) return parsed as string[];
+      } catch {
+        /* storage unavailable or invalid: fall back to defaults */
+      }
+    }
+    return defaultHiddenColumns ?? columns.filter((c) => c.defaultHidden).map((c) => c.id);
+  });
+  const hidden = hiddenProp ?? innerHidden;
+  function setHidden(next: string[]) {
+    if (hiddenProp === undefined) {
+      setInnerHidden(next);
+      if (columnsStorageKey && typeof window !== "undefined") {
+        try {
+          window.localStorage.setItem(columnsStorageKey, JSON.stringify(next));
+        } catch {
+          /* ignore quota / privacy-mode errors */
+        }
+      }
+    }
+    onHiddenColumnsChange?.(next);
+  }
+  const hiddenSet = new Set(hidden);
+  const isHideable = (c: DataTableColumn<T>) => c.hideable ?? !c.rowHeader;
+  const shownColumns = columns.filter((c) => !(isHideable(c) && hiddenSet.has(c.id)));
   // Cursor paging and numbered paging are mutually exclusive: the cursor wins.
   const pageSize = cursor ? undefined : pageSizeProp;
 
@@ -385,12 +518,24 @@ export function DataTable<T>({
 
   const rows = useMemo(() => data.map((row, index) => ({ row, id: getRowId(row, index) })), [data, getRowId]);
 
+  const faceted = useMemo(() => {
+    if (manual || !facets?.length) return rows;
+    const keep = new Set(filterRows(data, facets, facetValues));
+    return rows.filter(({ row }) => keep.has(row));
+  }, [rows, data, facets, facetValues, manual]);
+
+  const counts = useMemo<FacetCounts | undefined>(() => {
+    if (!facets?.length || facetCountsProp === false) return undefined;
+    if (facetCountsProp) return facetCountsProp;
+    return manual ? undefined : countFacets(data, facets, facetValues);
+  }, [facets, facetCountsProp, manual, data, facetValues]);
+
   const filtered = useMemo(() => {
     const q = filter.trim().toLocaleLowerCase();
-    if (manual || !q) return rows;
+    if (manual || !q) return faceted;
     const searchable = columns.filter((c) => c.filterable ?? c.accessor !== undefined);
-    return rows.filter(({ row }) => searchable.some((c) => textOf(valueOf(row, c)).toLocaleLowerCase().includes(q)));
-  }, [rows, filter, columns, manual]);
+    return faceted.filter(({ row }) => searchable.some((c) => textOf(valueOf(row, c)).toLocaleLowerCase().includes(q)));
+  }, [faceted, filter, columns, manual]);
 
   const sorted = useMemo(() => {
     if (manual || !sort) return filtered;
@@ -427,6 +572,12 @@ export function DataTable<T>({
     if (pageSize && currentPage !== 1) setPage(1);
   }
 
+  function setFacetValues(values: FilterValues) {
+    setFacetValuesState(values);
+    setAnnouncement("");
+    if (pageSize && currentPage !== 1) setPage(1);
+  }
+
   function setFilter(value: string) {
     setFilterValue(value);
     setAnnouncement("");
@@ -460,7 +611,7 @@ export function DataTable<T>({
           },
         ]
       : []),
-    ...columns.map((c) => {
+    ...shownColumns.map((c) => {
       const active = sort?.columnId === c.id ? sort.direction : undefined;
       const label = c.sortable ? (
         <button type="button" className={styles.sort} data-active={active ? "" : undefined} onClick={() => toggleSort(c.id)}>
@@ -487,7 +638,9 @@ export function DataTable<T>({
     ...(rowActions ? [{ label: rowActionsLabel, hideLabel: true, width: "1%" }] : []),
   ];
 
-  const filtering = filter.trim() !== "";
+  const facetsActive = Boolean(facets?.length) && activeFilterCount(facetValues) > 0;
+  const textFiltering = filter.trim() !== "";
+  const filtering = textFiltering || facetsActive;
   const noRows = data.length === 0 && !filtering;
   const hasRows = visible.length > 0;
   const hasError = Boolean(error);
@@ -512,12 +665,16 @@ export function DataTable<T>({
   ) : showSkeleton ? undefined : noRows ? (
     (empty ?? <p className={styles.message}>No rows.</p>)
   ) : (
-    (noResults ?? <p className={styles.message}>No results for “{filter.trim()}”.</p>)
+    (noResults ?? (
+      <p className={styles.message}>
+        {textFiltering ? `No results for “${filter.trim()}”${facetsActive ? " with these filters" : ""}.` : "No rows match these filters."}
+      </p>
+    ))
   );
   const skeletonCount = Math.max(1, loadingRows ?? (pageSize ? Math.min(pageSize, 10) : 5));
   const statusMessage = showSkeleton
     ? loadingLabel
-    : announcement || (filtering ? `${total} ${total === 1 ? "row matches" : "rows match"} the filter` : "");
+    : announcement || (filtering ? `${total} ${total === 1 ? "row matches" : "rows match"} ${textFiltering ? "the filter" : "the filters"}` : "");
 
   const selectedCount = selected.length;
   const firstRow = total === 0 ? 0 : pageSize ? (currentPage - 1) * pageSize + 1 : 1;
@@ -542,7 +699,7 @@ export function DataTable<T>({
       onFocus={trackFocus}
       onBlur={trackBlur}
     >
-      {(filterable || toolbar) && (
+      {(filterable || toolbar || columnsMenu) && (
         <div ref={toolbarRef} className={styles.toolbar}>
           {filterable && (
             <div className={styles.filter}>
@@ -558,7 +715,49 @@ export function DataTable<T>({
               </Field>
             </div>
           )}
-          {toolbar && <div className={styles.actions}>{toolbar}</div>}
+          {(toolbar || columnsMenu) && (
+            <div className={styles.actions}>
+              {toolbar}
+              {columnsMenu && (
+                <Menu
+                  align="end"
+                  trigger={
+                    <Button size="sm" variant="secondary">
+                      <Columns3 aria-hidden /> {columnsMenuLabel}
+                    </Button>
+                  }
+                >
+                  <MenuGroup label="Show columns">
+                    {columns.filter(isHideable).map((c) => {
+                      const visible = !hiddenSet.has(c.id);
+                      // Keep at least one column on screen.
+                      const onlyOne = visible && shownColumns.length === 1;
+                      return (
+                        <MenuCheckboxItem
+                          key={c.id}
+                          checked={visible}
+                          disabled={onlyOne}
+                          onCheckedChange={(checked) => setHidden(checked ? hidden.filter((id) => id !== c.id) : [...hidden.filter((id) => id !== c.id), c.id])}
+                        >
+                          {c.label ?? (typeof c.header === "string" ? c.header : c.id)}
+                        </MenuCheckboxItem>
+                      );
+                    })}
+                  </MenuGroup>
+                </Menu>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+      {facets && facets.length > 0 && <FilterBar facets={facets} value={facetValues} onValueChange={setFacetValues} counts={counts} labels={facetLabels} />}
+      {bulkActions && selected.length > 0 && (
+        <div className={styles.bulk} role="group" aria-label="Bulk actions">
+          <span className={styles.bulkCount}>{selectedLabel(selected.length)}</span>
+          <div className={styles.bulkActions}>{bulkActions(selected, () => setSelected([]))}</div>
+          <Button size="sm" variant="ghost" onClick={() => setSelected([])} className={styles.bulkClear}>
+            <X aria-hidden /> Clear selection
+          </Button>
         </div>
       )}
       {hasError && hasRows && errorAlert}
@@ -582,8 +781,29 @@ export function DataTable<T>({
           ))}
         {visible.map(({ row, id }) => {
           const isSelected = selectedSet.has(id);
+          const clickLabel = onRowClick ? rowClickLabel?.(row) : undefined;
           return (
-            <Tr key={id} selected={isSelected}>
+            <Tr
+              key={id}
+              selected={isSelected}
+              {...(onRowClick && {
+                "data-clickable": "",
+                tabIndex: 0,
+                "aria-label": clickLabel,
+                onClick: (event: MouseEvent<HTMLTableRowElement>) => {
+                  if (fromControl(event.target, event.currentTarget)) return;
+                  // Selecting text in a cell isn't a click on the row.
+                  if (typeof window !== "undefined" && window.getSelection()?.toString()) return;
+                  onRowClick(row);
+                },
+                onKeyDown: (event: KeyboardEvent<HTMLTableRowElement>) => {
+                  if (event.target !== event.currentTarget) return;
+                  if (event.key !== "Enter" && event.key !== " ") return;
+                  event.preventDefault();
+                  onRowClick(row);
+                },
+              })}
+            >
               {selectable && (
                 <Td>
                   <Checkbox
@@ -594,7 +814,7 @@ export function DataTable<T>({
                   />
                 </Td>
               )}
-              {columns.map((c) => {
+              {shownColumns.map((c) => {
                 const content = c.cell ? c.cell(row) : textOf(valueOf(row, c));
                 return c.rowHeader ? (
                   <Th key={c.id}>{content}</Th>

@@ -32,6 +32,12 @@ export type DialogProps = {
   hideClose?: boolean;
   /** Element to focus when opened (default: first focusable). */
   initialFocus?: BaseDialog.Popup.Props["initialFocus"];
+  /**
+   * Element to focus when closed (default: the trigger, or the element that
+   * had focus when it opened). Pass a ref when the dialog is opened from a
+   * control that doesn't keep focus, e.g. a select's change.
+   */
+  finalFocus?: BaseDialog.Popup.Props["finalFocus"];
   className?: string;
   children?: ReactNode;
 };
@@ -47,6 +53,7 @@ export function Dialog({
   size = "md",
   hideClose,
   initialFocus,
+  finalFocus,
   className,
   children,
 }: DialogProps) {
@@ -61,6 +68,7 @@ export function Dialog({
             data-size={size}
             data-closable={hideClose ? undefined : ""}
             initialFocus={initialFocus}
+            finalFocus={finalFocus}
           >
             <div className={styles.header}>
               <div className={styles.heading}>
@@ -107,6 +115,12 @@ export type AlertDialogProps = {
   trigger?: ReactElement;
   /** Extra content between the description and the buttons. */
   children?: ReactNode;
+  /**
+   * Element to focus when closed (default: the trigger, or the element that
+   * had focus when it opened), e.g. a ref to the select whose change asked
+   * for confirmation, so Cancel returns there.
+   */
+  finalFocus?: BaseAlertDialog.Popup.Props["finalFocus"];
   className?: string;
 };
 
@@ -129,6 +143,7 @@ export function AlertDialog({
   tone = "danger",
   trigger,
   children,
+  finalFocus,
   className,
 }: AlertDialogProps) {
   return (
@@ -137,7 +152,7 @@ export function AlertDialog({
       <BaseAlertDialog.Portal>
         <BaseAlertDialog.Backdrop className={styles.backdrop} />
         <BaseAlertDialog.Viewport className={styles.viewport}>
-          <BaseAlertDialog.Popup className={cx(styles.popup, className)} data-size="sm">
+          <BaseAlertDialog.Popup className={cx(styles.popup, className)} data-size="sm" finalFocus={finalFocus}>
             <div className={styles.header}>
               <div className={styles.heading}>
                 <BaseAlertDialog.Title className={styles.title}>{title}</BaseAlertDialog.Title>

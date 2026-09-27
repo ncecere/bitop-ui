@@ -81,10 +81,16 @@ const prefersReducedMotion = () => typeof window !== "undefined" && !!window.mat
 export type UseStickToBottomOptions = {
   /** Distance from the bottom (px) that still counts as "at the bottom". */
   threshold?: number;
+  /**
+   * Follow the content to the bottom (default true). Pass false while an
+   * empty state shows (a welcome taller than the panel stays scrolled to its
+   * top); turning it on pins the view to the bottom once.
+   */
+  enabled?: boolean;
 };
 
 /** The stick-to-bottom behaviour on its own, for custom layouts. */
-export function useStickToBottom({ threshold = 64 }: UseStickToBottomOptions = {}) {
+export function useStickToBottom({ threshold = 64, enabled = true }: UseStickToBottomOptions = {}) {
   const [viewport, setViewport] = useState<HTMLElement | null>(null);
   const [content, setContent] = useState<HTMLElement | null>(null);
   const state = useRef<StickState>(initialStickState);
@@ -152,11 +158,15 @@ export function useStickToBottom({ threshold = 64 }: UseStickToBottomOptions = {
     };
   }, [viewport, sync]);
 
-  // Content growth: follow it while stuck.
+  // Content growth: follow it while stuck (and enabled).
   useLayoutEffect(() => {
     if (!viewport || !content) return;
+    if (!enabled) {
+      viewport.scrollTop = 0;
+      state.current = { ...state.current, stuck: true };
+    }
     const onChange = () => {
-      if (state.current.stuck) pin(viewport);
+      if (enabled && state.current.stuck) pin(viewport);
       sync(viewport);
     };
     onChange();
@@ -169,7 +179,7 @@ export function useStickToBottom({ threshold = 64 }: UseStickToBottomOptions = {
       ro?.disconnect();
       mo?.disconnect();
     };
-  }, [viewport, content, pin, sync]);
+  }, [viewport, content, pin, sync, enabled]);
 
   return { viewportRef: setViewport, contentRef: setContent, viewport, atBottom, scrollToBottom, isStuck: () => state.current.stuck };
 }
@@ -192,6 +202,11 @@ export type ConversationProps = Omit<ComponentPropsWithRef<"div">, "role"> & {
   /** aria-live of the log. Keep "off" and use ConversationAnnouncer (see above). */
   live?: "off" | "polite";
   threshold?: number;
+  /**
+   * Follow new content to the bottom (default true). Pass false while the
+   * conversation is empty, so a tall welcome starts at its top.
+   */
+  stickToBottom?: boolean;
   /** Class for the inner scrolling element. */
   viewportClassName?: string;
 };
@@ -200,12 +215,13 @@ export function Conversation({
   "aria-label": label = "Conversation",
   live = "off",
   threshold,
+  stickToBottom = true,
   className,
   viewportClassName,
   children,
   ...props
 }: ConversationProps) {
-  const stick = useStickToBottom({ threshold });
+  const stick = useStickToBottom({ threshold, enabled: stickToBottom });
   return (
     <ConversationContext.Provider value={stick}>
       <div {...props} className={cx(styles.root, className)}>
