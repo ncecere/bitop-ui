@@ -14,8 +14,9 @@ import styles from "./meter.module.css";
  *   <Meter label="Storage" value={8.6} max={10} formatValue={(v) => `${v} GB`} />
  *   <Meter label="Queries today" value={4120} max={5000} marker={{ value: 4000, label: "Team limit" }} />
  *
- * Tones: at `warningAt` (default 80% of max) the bar turns to the warning
- * colour and "Near limit" is shown; at `criticalAt` (default 100%) it turns
+ * Tones: at `warningAt` (default 80% of the way from `min` to `max`) the bar
+ * turns to the warning colour and "Near limit" is shown; at `criticalAt`
+ * (default 100%) it turns
  * to the danger colour with "At limit" (or "Over limit" above max). The word
  * and an icon always accompany the colour, and are part of the meter's
  * aria-valuetext ("4,120 of 5,000, near limit"). Values above max keep their
@@ -52,9 +53,9 @@ export type MeterProps = {
   /** The limit. `null` means unlimited: no bar, just the value and "No limit". */
   max: number | null;
   min?: number;
-  /** Fraction of max where the warning tone starts (default 0.8). */
+  /** Fraction of the range (min to max) where the warning tone starts (default 0.8). */
   warningAt?: number;
-  /** Fraction of max where the critical tone starts (default 1). */
+  /** Fraction of the range (min to max) where the critical tone starts (default 1). */
   criticalAt?: number;
   /** A tick on the track, e.g. a soft limit below the ceiling. */
   marker?: MeterMarker;
@@ -73,10 +74,13 @@ export type MeterProps = {
 
 const defaultLabels: MeterLabels = { of: "of", warning: "Near limit", critical: "At limit", over: "Over limit", unlimited: "No limit" };
 
-/** The level of `value` against `max` with the given thresholds (fractions of max). */
-export function meterLevel(value: number, max: number | null, warningAt = 0.8, criticalAt = 1): MeterLevel {
-  if (max === null || max <= 0) return "normal";
-  const ratio = value / max;
+/**
+ * The level of `value` against `max` with the given thresholds, as fractions
+ * of the range: (value - min) / (max - min). `min` defaults to 0.
+ */
+export function meterLevel(value: number, max: number | null, warningAt = 0.8, criticalAt = 1, min = 0): MeterLevel {
+  if (max === null || max <= min) return "normal";
+  const ratio = (value - min) / (max - min);
   if (ratio > 1 && criticalAt <= 1) return "over";
   if (ratio >= criticalAt) return "critical";
   if (ratio >= warningAt) return "warning";
@@ -102,7 +106,7 @@ export function Meter({
 }: MeterProps) {
   const labels = { ...defaultLabels, ...labelsProp };
   const descriptionId = useId();
-  const level = meterLevel(value, max, warningAt, criticalAt);
+  const level = meterLevel(value, max, warningAt, criticalAt, min);
   const status = level === "normal" ? null : labels[level];
   const StatusIcon = level === "warning" ? TriangleAlert : CircleAlert;
 

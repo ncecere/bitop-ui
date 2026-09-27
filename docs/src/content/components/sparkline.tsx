@@ -70,7 +70,7 @@ const doc: ComponentDoc = {
       component: "Sparkline",
       note: "Also accepts <span> props. Width follows the container.",
       rows: [
-        { name: "values", type: "number[]", required: true, description: "Values in order, oldest first." },
+        { name: "values", type: "number[]", required: true, description: "Values in order, oldest first. NaN / ±Infinity leave a gap and are left out of the scale." },
         { name: "label", type: "string", required: true, description: "Text alternative: what the trend is. Omit only with decorative." },
         { name: "decorative", type: "boolean", description: "Hide from assistive technology when the trend is written out next to it." },
         { name: "variant", type: '"line" | "area"', default: '"line"', description: "Stroke, or stroke over a soft fill." },

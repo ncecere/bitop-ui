@@ -61,13 +61,13 @@ const doc: ComponentDoc = {
   props: [
     {
       component: "Meter",
-      note: "Use Progress for a task that completes; Meter for an amount within a range. meterLevel(value, max, warningAt, criticalAt) is exported for sorting and badges.",
+      note: "Use Progress for a task that completes; Meter for an amount within a range. meterLevel(value, max, warningAt, criticalAt, min) is exported for sorting and badges.",
       rows: [
         { name: "label", type: "ReactNode", required: true, description: "Visible label and accessible name." },
         { name: "value", type: "number", required: true, description: "Current usage (may exceed max)." },
         { name: "max", type: "number | null", required: true, description: "The limit; null shows “No limit” and no bar." },
         { name: "min", type: "number", default: "0", description: "Start of the range." },
-        { name: "warningAt / criticalAt", type: "number", default: "0.8 / 1", description: "Fractions of max where the warning and critical tones start." },
+        { name: "warningAt / criticalAt", type: "number", default: "0.8 / 1", description: "Fractions of the range, (value - min) / (max - min), where the warning and critical tones start." },
         { name: "marker", type: "{ value, label }", description: "A tick on the track, described under the bar (“Team limit: 5,000”)." },
         { name: "formatValue", type: "(n) => string", default: "toLocaleString", description: "Formats value, max and marker." },
         { name: "valueText", type: "string", description: "Replaces “X of Y”, visible and announced." },

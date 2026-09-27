@@ -35,7 +35,9 @@ import styles from "./filter-bar.module.css";
  * Facet types:
  *   toggle      a ToggleGroup (single, or `multiple`); `allLabel` adds an "All" item
  *   select      a Combobox (single, or `multiple`) for long option lists (people, agents)
- *   date-range  DateRangePresets: Today / 7 / 30 / 90 days / Custom
+ *   date-range  DateRangePresets: Today / 7 / 30 / 90 days / Custom. Pressing
+ *               Custom opens a range picker; the facet filters (and gets a
+ *               chip) once a range is picked. Ranges are whole local days.
  *
  * State is controlled (`value` / `onValueChange`) or not (`defaultValue`).
  * A value is `{ [facetId]: string[] | DateRangeSelection }`; a missing or
@@ -167,7 +169,9 @@ function matchesFacet<T>(row: T, facet: Facet<T>, value: FilterValue | undefined
     const d = toDate(facet.accessor(row));
     if (!d) return false;
     const from = startOfDay(range.from).getTime();
-    const to = startOfDay(range.to ?? range.from).getTime() + 86_400_000;
+    // The start of the next calendar day (not +24h: DST days are 23 or 25 hours long).
+    const last = range.to ?? range.from;
+    const to = new Date(last.getFullYear(), last.getMonth(), last.getDate() + 1).getTime();
     return d.getTime() >= from && d.getTime() < to;
   }
   const raw = facet.accessor(row);

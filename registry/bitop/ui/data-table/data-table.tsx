@@ -95,7 +95,11 @@ import styles from "./data-table.module.css";
  *     Control it with `facetValues` / `onFacetValuesChange` to sync the URL
  *     (filterValuesToSearchParams / filterValuesFromSearchParams).
  *   - `bulkActions`: a bar with "N selected", your actions and "Clear
- *     selection", shown while rows are selected.
+ *     selection", shown while rows are selected. It counts and passes only
+ *     selected rows that pass the facets and text filter (never rows the
+ *     user can't see); selections hidden by a filter are kept and come back
+ *     when it's cleared. "Clear selection" clears all of them. In `manual`
+ *     mode every selected id is passed.
  *   - `onRowClick`: the whole row opens the record (click, or Enter / Space
  *     on the focused row); clicks on links, buttons and other controls in
  *     the row keep their own behaviour.
@@ -243,7 +247,7 @@ export type DataTableProps<T> = Omit<TableProps, "columns" | "children" | "empty
   /** Initially hidden columns (default: columns with `defaultHidden`). */
   defaultHiddenColumns?: string[];
   onHiddenColumnsChange?: (hidden: string[]) => void;
-  /** Persist hidden columns in localStorage under this key (uncontrolled only). */
+  /** Persist hidden columns in localStorage under this key (uncontrolled only; read after mount, so SSR-safe). */
   columnsStorageKey?: string;
   /** Text of the Columns menu button (default "Columns"). */
   columnsMenuLabel?: string;
@@ -259,7 +263,11 @@ export type DataTableProps<T> = Omit<TableProps, "columns" | "children" | "empty
   /** Labels of the filter bar (group name, chips, Clear all). */
   facetLabels?: FilterBarProps<T>["labels"];
 
-  /** Shown in a bar above the table while rows are selected: `(ids, clear) => <Button …>Delete</Button>`. */
+  /**
+   * Shown in a bar above the table while rows are selected: `(ids, clear) => <Button …>Delete</Button>`.
+   * `ids` are the selected rows that pass the current facets and text filter (all selected ids in
+   * `manual` mode); `clear` clears the whole selection.
+   */
   bulkActions?: (selectedIds: string[], clearSelection: () => void) => ReactNode;
   /** "3 selected" text of the bulk bar. */
   selectedLabel?: (count: number) => string;
@@ -411,19 +419,21 @@ export function DataTable<T>({
   const [filter, setFilterValue] = useControllable<string>(filterProp, defaultFilter, onFilterChange);
   const [page, setPage] = useControllable<number>(pageProp, defaultPage, onPageChange);
   const [facetValues, setFacetValuesState] = useControllable<FilterValues>(facetValuesProp, defaultFacetValues, onFacetValuesChange);
-  // Uncontrolled visibility starts from storage, then defaultHiddenColumns, then `defaultHidden` columns.
-  const [innerHidden, setInnerHidden] = useState<string[]>(() => {
-    if (columnsStorageKey && typeof window !== "undefined") {
-      try {
-        const raw = window.localStorage.getItem(columnsStorageKey);
-        const parsed: unknown = raw ? JSON.parse(raw) : null;
-        if (Array.isArray(parsed) && parsed.every((x) => typeof x === "string")) return parsed as string[];
-      } catch {
-        /* storage unavailable or invalid: fall back to defaults */
-      }
+  // Uncontrolled visibility starts from defaultHiddenColumns, then `defaultHidden` columns.
+  const [innerHidden, setInnerHidden] = useState<string[]>(() => defaultHiddenColumns ?? columns.filter((c) => c.defaultHidden).map((c) => c.id));
+  // The saved choice is read after mount, so the server render and the first
+  // client render match (no hydration mismatch); a layout effect applies it
+  // before the browser paints.
+  useLayoutEffect(() => {
+    if (!columnsStorageKey) return;
+    try {
+      const raw = window.localStorage.getItem(columnsStorageKey);
+      const parsed: unknown = raw ? JSON.parse(raw) : null;
+      if (Array.isArray(parsed) && parsed.every((x) => typeof x === "string")) setInnerHidden(parsed as string[]);
+    } catch {
+      /* storage unavailable or invalid: keep the defaults */
     }
-    return defaultHiddenColumns ?? columns.filter((c) => c.defaultHidden).map((c) => c.id);
-  });
+  }, [columnsStorageKey]);
   const hidden = hiddenProp ?? innerHidden;
   function setHidden(next: string[]) {
     if (hiddenProp === undefined) {
@@ -557,6 +567,12 @@ export function DataTable<T>({
 
   const selectedSet = new Set(selected);
   const filteredIds = filtered.map((r) => r.id);
+  // Bulk actions act only on selected rows that pass the facets and the text
+  // filter; selections hidden by a filter stay selected but aren't counted or
+  // passed. In `manual` mode the filtering is the server's, so every selected
+  // id is passed (it may include rows on other pages).
+  const filteredIdSet = new Set(filteredIds);
+  const actionableIds = manual ? selected : selected.filter((id) => filteredIdSet.has(id));
   const selectedInView = filteredIds.filter((id) => selectedSet.has(id)).length;
   const allSelected = filteredIds.length > 0 && selectedInView === filteredIds.length;
   const someSelected = selectedInView > 0 && !allSelected;
@@ -751,10 +767,10 @@ export function DataTable<T>({
         </div>
       )}
       {facets && facets.length > 0 && <FilterBar facets={facets} value={facetValues} onValueChange={setFacetValues} counts={counts} labels={facetLabels} />}
-      {bulkActions && selected.length > 0 && (
+      {bulkActions && actionableIds.length > 0 && (
         <div className={styles.bulk} role="group" aria-label="Bulk actions">
-          <span className={styles.bulkCount}>{selectedLabel(selected.length)}</span>
-          <div className={styles.bulkActions}>{bulkActions(selected, () => setSelected([]))}</div>
+          <span className={styles.bulkCount}>{selectedLabel(actionableIds.length)}</span>
+          <div className={styles.bulkActions}>{bulkActions(actionableIds, () => setSelected([]))}</div>
           <Button size="sm" variant="ghost" onClick={() => setSelected([])} className={styles.bulkClear}>
             <X aria-hidden /> Clear selection
           </Button>

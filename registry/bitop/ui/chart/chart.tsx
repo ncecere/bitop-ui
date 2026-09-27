@@ -22,6 +22,12 @@ import styles from "./chart.module.css";
  *
  *   <ChartLegend series={[{ key: "answers", label: "Answers" }, { key: "chats", label: "Conversations" }]} />
  *   <ChartData caption="Answers per day" series={series} data={points} />
+ *
+ * Values: NaN and ±Infinity are "no data" (see chartValue): charts leave them
+ * out of the scale and draw a gap, and ChartData shows "No data". A missing
+ * key counts as 0. Bar and line charts scale from 0, so negative values are
+ * drawn at 0 (clamped); titles and the data table keep the real number.
+ * Point labels needn't be unique (rows are keyed by position).
  */
 
 export type ChartTone = "primary" | "info" | "success" | "warning" | "danger" | "neutral";
@@ -58,6 +64,29 @@ export function seriesTone(series: { tone?: ChartTone }, index: number): ChartTo
 /** The line pattern of the series at `index`. */
 export function seriesPattern(series: { pattern?: ChartPattern }, index: number): ChartPattern {
   return series.pattern ?? patterns[index % patterns.length]!;
+}
+
+/**
+ * A point's value for a series: the number if it is finite, 0 for a missing
+ * key, and null (no data) for NaN or ±Infinity.
+ */
+export function chartValue<K extends string>(point: ChartPoint<K>, key: K): number | null {
+  const v = point.values[key] ?? 0;
+  return Number.isFinite(v) ? v : null;
+}
+
+/** Runs of consecutive points with data, as [index, value] pairs: a line is drawn per run. */
+export function chartRuns(values: (number | null)[]): [number, number][][] {
+  const runs: [number, number][][] = [];
+  let run: [number, number][] = [];
+  values.forEach((v, i) => {
+    if (v === null) {
+      if (run.length) runs.push(run);
+      run = [];
+    } else run.push([i, v]);
+  });
+  if (run.length) runs.push(run);
+  return runs;
 }
 
 /** Text of a series label for titles and summaries (non-string labels fall back to the key). */
@@ -112,6 +141,8 @@ export type ChartDataProps<K extends string = string> = {
   formatValue?: (value: number) => string;
   /** The disclosure's text (default "Show data"). */
   toggleLabel?: ReactNode;
+  /** Cell text for NaN / ±Infinity values (default "No data"). */
+  missingLabel?: string;
   defaultOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -126,6 +157,7 @@ export function ChartData<K extends string>({
   labelHeader = "Date",
   formatValue = (v) => v.toLocaleString(),
   toggleLabel = "Show data",
+  missingLabel = "No data",
   defaultOpen,
   open,
   onOpenChange,
@@ -140,14 +172,17 @@ export function ChartData<K extends string>({
         stickyHeader
         columns={[{ label: labelHeader }, ...series.map((s) => ({ label: s.label, numeric: true }))]}
       >
-        {data.map((p) => (
-          <Tr key={p.label}>
+        {data.map((p, i) => (
+          <Tr key={i}>
             <Th>{p.label}</Th>
-            {series.map((s) => (
-              <Td key={s.key} numeric>
-                {formatValue(p.values[s.key] ?? 0)}
-              </Td>
-            ))}
+            {series.map((s) => {
+              const v = chartValue(p, s.key);
+              return (
+                <Td key={s.key} numeric>
+                  {v === null ? missingLabel : formatValue(v)}
+                </Td>
+              );
+            })}
           </Tr>
         ))}
       </Table>

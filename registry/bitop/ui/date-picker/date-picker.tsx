@@ -44,7 +44,8 @@ import styles from "./date-picker.module.css";
  *   - DateRangePresets is a toggle group of presets plus "Custom", which
  *     reveals a range DatePicker. Its value keeps the preset id, so a URL can
  *     say `?range=30d` and stay relative to today (see
- *     serializeDateRangeSelection / parseDateRangeSelection).
+ *     serializeDateRangeSelection / parseDateRangeSelection). "Custom" with
+ *     no range yet is `{ preset: "custom", range: null }` (not a filter).
  *
  *       <DateRangePresets aria-label="Date range" value={sel} onValueChange={setSel} />
  */
@@ -382,7 +383,12 @@ export type DateRangePresetsProps = {
   presets?: DateRangePreset[];
   value?: DateRangeSelection | null;
   defaultValue?: DateRangeSelection | null;
-  /** Called with the preset and its range, `{ preset: "custom", range }`, or null when cleared. */
+  /**
+   * Called with the preset and its range, `{ preset: "custom", range }`, or null when cleared.
+   * Pressing "Custom" before a range is picked calls it with `{ preset: "custom", range: null }`;
+   * if the parent stores that as null (as FilterBar does: no range, no filter), Custom stays
+   * pressed and its picker stays open until a range, another preset or clearing.
+   */
   onValueChange?: (value: DateRangeSelection | null) => void;
   /** Offer "Custom" (a range DatePicker). Default true. */
   allowCustom?: boolean;
@@ -416,8 +422,16 @@ export function DateRangePresets({
   className,
 }: DateRangePresetsProps) {
   const [inner, setInner] = useState<DateRangeSelection | null>(defaultValue);
-  const value = valueProp !== undefined ? valueProp : inner;
+  // "Custom" pressed before a range is picked. Parents such as FilterBar
+  // store `{ preset: "custom", range: null }` as "no filter" (null), so keep
+  // the pending choice here; otherwise the picker would never appear.
+  const [customPending, setCustomPending] = useState(false);
+  const given = valueProp !== undefined ? valueProp : inner;
+  // A real value from the parent (e.g. the URL changed) ends the pending state.
+  if (given !== null && customPending) setCustomPending(false);
+  const value: DateRangeSelection | null = given ?? (customPending ? { preset: "custom", range: null } : null);
   const set = (next: DateRangeSelection | null) => {
+    setCustomPending(next?.preset === "custom" && !next.range);
     if (valueProp === undefined) setInner(next);
     onValueChange?.(next);
   };

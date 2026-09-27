@@ -497,7 +497,7 @@ const doc: ComponentDoc = {
         { name: "rowClickLabel", type: "(row) => string", description: "Optional accessible name of a clickable row (default: its content)." },
         { name: "columnsMenu", type: "boolean", default: "false", description: "A “Columns” menu of checkbox items to show and hide hideable columns (at least one stays visible)." },
         { name: "hiddenColumns / defaultHiddenColumns / onHiddenColumnsChange", type: "string[]", description: "Hidden column ids, controlled or not (default: columns with defaultHidden)." },
-        { name: "columnsStorageKey", type: "string", description: "Persist hidden columns in localStorage (uncontrolled only)." },
+        { name: "columnsStorageKey", type: "string", description: "Persist hidden columns in localStorage (uncontrolled only). Read after mount, so server and first client render match." },
         { name: "columnsMenuLabel", type: "string", default: '"Columns"', description: "Text of the menu button." },
         {
           name: "facets, facetValues / defaultFacetValues / onFacetValuesChange",
@@ -506,7 +506,7 @@ const doc: ComponentDoc = {
         },
         { name: "facetCounts", type: "FacetCounts | false", default: "computed from data", description: "Option counts; pass your own for server data (manual) or false to hide them." },
         { name: "facetLabels", type: "Partial<FilterBarLabels>", description: "Translate the filter bar." },
-        { name: "bulkActions", type: "(ids, clear) => ReactNode", description: "A bar with “N selected”, your actions and Clear selection, while rows are selected." },
+        { name: "bulkActions", type: "(ids, clear) => ReactNode", description: "A bar with “N selected”, your actions and Clear selection, while rows are selected. ids are only the selected rows that pass the facets and text filter (all selected ids with manual); hidden selections are kept but never acted on. clear() clears the whole selection." },
         { name: "selectedLabel", type: "(count) => string", default: '"N selected"', description: "Text of the bulk bar." },
       ],
     },

@@ -3,6 +3,7 @@ import {
   ChartData,
   ChartLegend,
   chartToneClass,
+  chartValue,
   seriesName,
   seriesTone,
   type ChartDataOptions,
@@ -19,6 +20,11 @@ import styles from "./bar-chart.module.css";
  * or stacked. To assistive technology the plot is a single image named by
  * `summary`; `dataTable` adds a "Show data" disclosure with the numbers.
  * Colours, legend and data table are shared with LineChart (see chart).
+ *
+ * The scale runs from 0 to the largest finite value (or stack total).
+ * Negative values are drawn as empty bars (clamped to 0); NaN and ±Infinity
+ * are "no data": left out of the scale and drawn as an empty bar marked
+ * `data-missing`. Titles and the data table show the real values.
  */
 
 export type BarChartTone = ChartTone;
@@ -57,10 +63,12 @@ export function BarChart<K extends string>({
   dataTable,
   className,
 }: BarChartProps<K>) {
-  const total = (p: BarChartPoint<K>) => series.reduce((sum, s) => sum + Math.max(0, p.values[s.key] ?? 0), 0);
-  const top = (p: BarChartPoint<K>) => Math.max(0, ...series.map((s) => p.values[s.key] ?? 0));
+  // Non-finite values (null here) are left out of the scale; negatives count as 0.
+  const total = (p: BarChartPoint<K>) => series.reduce((sum, s) => sum + Math.max(0, chartValue(p, s.key) ?? 0), 0);
+  const top = (p: BarChartPoint<K>) => Math.max(0, ...series.map((s) => chartValue(p, s.key) ?? 0));
   const peak = Math.max(0, ...data.map(layout === "stack" ? total : top));
-  const pct = (v: number) => `${peak > 0 ? (Math.max(0, v) / peak) * 100 : 0}%`;
+  const pct = (v: number | null) => `${peak > 0 && v !== null ? (Math.max(0, v) / peak) * 100 : 0}%`;
+  const describe = (s: BarChartSeries<K>, v: number | null) => (v === null ? `${seriesName(s)}: no data` : `${formatValue(v)} ${seriesName(s)}`);
 
   return (
     <figure className={cx(styles.root, className)} data-size={size} data-layout={layout}>
@@ -68,16 +76,20 @@ export function BarChart<K extends string>({
       <div className={styles.plot} role="img" aria-label={summary}>
         {axis && <span className={styles.peak}>{formatValue(peak)}</span>}
         <div className={styles.bars} data-layout={layout}>
-          {data.map((p) => (
-            <div key={p.label} className={styles.slot} title={`${p.label}: ${series.map((s) => `${formatValue(p.values[s.key] ?? 0)} ${seriesName(s)}`).join(", ")}`}>
-              {series.map((s, i) => (
-                <span
-                  key={s.key}
-                  className={cx(chartToneClass, styles.bar)}
-                  data-tone={seriesTone(s, i)}
-                  style={{ "--bar-size": pct(p.values[s.key] ?? 0) } as CSSProperties}
-                />
-              ))}
+          {data.map((p, j) => (
+            <div key={j} className={styles.slot} title={`${p.label}: ${series.map((s) => describe(s, chartValue(p, s.key))).join(", ")}`}>
+              {series.map((s, i) => {
+                const v = chartValue(p, s.key);
+                return (
+                  <span
+                    key={s.key}
+                    className={cx(chartToneClass, styles.bar)}
+                    data-tone={seriesTone(s, i)}
+                    data-missing={v === null ? "" : undefined}
+                    style={{ "--bar-size": pct(v) } as CSSProperties}
+                  />
+                );
+              })}
             </div>
           ))}
         </div>

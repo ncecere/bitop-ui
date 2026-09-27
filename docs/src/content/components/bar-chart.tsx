@@ -58,7 +58,7 @@ const doc: ComponentDoc = {
     {
       component: "BarChart",
       rows: [
-        { name: "data", type: "{ label: string; values: Record<K, number> }[]", required: true, description: "One point per bar slot, in order." },
+        { name: "data", type: "{ label: string; values: Record<K, number> }[]", required: true, description: "One point per bar slot, in order. Negative values draw as 0; NaN / ±Infinity are no data (empty slot, left out of the scale). Labels may repeat." },
         { name: "series", type: "{ key: K; label: ReactNode; tone? }[]", required: true, description: "The series to draw; tone is primary, info, success, warning, danger or neutral." },
         { name: "summary", type: "string", required: true, description: "The chart's text alternative: what it shows and its main finding." },
         { name: "layout", type: '"overlap" | "stack"', default: '"overlap"', description: "Overlap draws series back to front (largest first); stack adds them up." },

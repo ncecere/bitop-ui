@@ -144,7 +144,7 @@ const doc: ComponentDoc = {
       note: "A joined ToggleGroup of presets plus Custom (which shows a range DatePicker). Presets: dateRangePresets (Today, Last 7/30/90 days) or lastDaysPreset(n, label?, id?).",
       rows: [
         { name: "aria-label", type: "string", required: true, description: "Names the group (the Custom picker is named “{label}: custom”)." },
-        { name: "value / defaultValue / onValueChange", type: "{ preset: string; range: DateRange | null } | null", description: 'preset is a preset id or "custom"; null = no range.' },
+        { name: "value / defaultValue / onValueChange", type: "{ preset: string; range: DateRange | null } | null", description: 'preset is a preset id or "custom"; null = no range. Pressing Custom first gives { preset: "custom", range: null }; if the parent stores that as null, Custom stays pressed with its picker until a range is picked.' },
         { name: "presets", type: "DateRangePreset[]", default: "dateRangePresets", description: "{ id, label, range(today) }." },
         { name: "allowCustom / customLabel", type: "boolean / string", default: 'true / "Custom"', description: "Offer a custom range." },
         { name: "clearable", type: "boolean", default: "true", description: "Unpressing the current preset clears the value." },

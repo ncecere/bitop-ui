@@ -94,7 +94,7 @@ const doc: ComponentDoc = {
         { name: "{ id, label }", type: "string", required: true, description: "Key in the value (and URL parameter name) and visible label." },
         { name: 'type: "toggle"', type: "options, multiple?, allLabel?, accessor?", description: "A joined ToggleGroup; allLabel adds an “All” item that clears the facet." },
         { name: 'type: "select"', type: "options, multiple?, placeholder?, accessor?", description: "A Combobox for long lists (people, agents); options may have a group." },
-        { name: 'type: "date-range"', type: "presets?, allowCustom?, pickerProps?, accessor?", description: "DateRangePresets: Today / 7 / 30 / 90 days / Custom." },
+        { name: 'type: "date-range"', type: "presets?, allowCustom?, pickerProps?, accessor?", description: "DateRangePresets: Today / 7 / 30 / 90 days / Custom. Custom opens a range picker; it filters once a range is picked. Ranges cover whole local days." },
         { name: "accessor", type: "(row) => value(s) or date", description: "Used by filterRows and facetCounts (and DataTable's in-memory filtering)." },
       ],
     },

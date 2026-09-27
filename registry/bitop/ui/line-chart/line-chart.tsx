@@ -2,7 +2,9 @@ import type { CSSProperties } from "react";
 import {
   ChartData,
   ChartLegend,
+  chartRuns,
   chartToneClass,
+  chartValue,
   seriesName,
   seriesPattern,
   seriesTone,
@@ -31,7 +33,10 @@ import styles from "./line-chart.module.css";
  * `dataTable` adds a "Show data" disclosure with every number in a table.
  * Series differ by colour and line pattern (solid, dashed, dotted). Colours,
  * legend and data table are shared with BarChart (see chart). The scale
- * starts at 0 and tops out at the largest value, shown as the peak line.
+ * starts at 0 and tops out at the largest finite value, shown as the peak
+ * line. Negative values are drawn at 0 (clamped). NaN and ±Infinity are "no
+ * data": left out of the scale, with a gap in the line (a lone point between
+ * gaps gets a dot). Titles and the data table show the real values.
  */
 
 export type LineChartTone = ChartTone;
@@ -77,11 +82,16 @@ export function LineChart<K extends string>({
   dataTable,
   className,
 }: LineChartProps<K>) {
-  const peak = Math.max(0, ...data.flatMap((p) => series.map((s) => p.values[s.key] ?? 0)));
+  // Non-finite values (null here) are left out of the scale and drawn as gaps.
+  const values = series.map((s) => data.map((p) => chartValue(p, s.key)));
+  const peak = Math.max(0, ...values.flatMap((vs) => vs.map((v) => v ?? 0)));
   const n = data.length;
   const x = (i: number) => (n <= 1 ? W / 2 : (i / (n - 1)) * W);
   const y = (v: number) => (peak > 0 ? H - (Math.max(0, v) / peak) * H : H);
+  const xy = (i: number, v: number) => `${x(i).toFixed(2)},${y(v).toFixed(2)}`;
   const showPoints = points ?? n === 1;
+  const runs = values.map((vs) => chartRuns(vs));
+  const describe = (s: LineChartSeries<K>, v: number | null) => (v === null ? `${seriesName(s)}: no data` : `${formatValue(v)} ${seriesName(s)}`);
 
   return (
     <figure className={cx(styles.root, className)} data-size={size} data-variant={variant}>
@@ -92,35 +102,42 @@ export function LineChart<K extends string>({
           <svg aria-hidden focusable="false" className={styles.svg} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
             {n > 1 &&
               series.map((s, i) => {
-                const line = data.map((p, j) => `${j === 0 ? "M" : "L"}${x(j).toFixed(2)},${y(p.values[s.key] ?? 0).toFixed(2)}`).join(" ");
+                // One subpath per run of points with data, so missing values leave gaps.
+                const line = runs[i]!.map((run) => run.map(([j, v], k) => `${k === 0 ? "M" : "L"}${xy(j, v)}`).join(" ")).join(" ");
+                const fill = runs[i]!
+                  .filter((run) => run.length > 1)
+                  .map((run) => `M${x(run[0]![0]).toFixed(2)},${H} ${run.map(([j, v]) => `L${xy(j, v)}`).join(" ")} L${x(run[run.length - 1]![0]).toFixed(2)},${H} Z`)
+                  .join(" ");
+                if (!line) return null;
                 return (
                   <g key={s.key} className={chartToneClass} data-tone={seriesTone(s, i)}>
-                    {variant === "area" && <path className={styles.fill} d={`${line} L${W},${H} L0,${H} Z`} />}
+                    {variant === "area" && fill && <path className={styles.fill} d={fill} />}
                     <path className={styles.line} data-pattern={seriesPattern(s, i)} d={line} vectorEffect="non-scaling-stroke" />
                   </g>
                 );
               })}
           </svg>
-          {showPoints &&
-            series.map((s, i) =>
-              data.map((p, j) => (
+          {series.map((s, i) =>
+            data.map((_p, j) => {
+              const v = values[i]![j]!;
+              // Dots on every point when asked, and on lone points between gaps (no line to show them).
+              const lone = n > 1 && runs[i]!.some((run) => run.length === 1 && run[0]![0] === j);
+              if (v === null || !(showPoints || lone)) return null;
+              return (
                 <span
-                  key={`${s.key}-${p.label}`}
+                  key={`${s.key}-${j}`}
                   aria-hidden
                   className={cx(chartToneClass, styles.point)}
                   data-tone={seriesTone(s, i)}
-                  style={{ "--x": `${(x(j) / W) * 100}%`, "--y": `${(y(p.values[s.key] ?? 0) / H) * 100}%` } as CSSProperties}
+                  style={{ "--x": `${(x(j) / W) * 100}%`, "--y": `${(y(v) / H) * 100}%` } as CSSProperties}
                 />
-              )),
-            )}
+              );
+            }),
+          )}
           {/* Hover targets: one column per point with its values as a title. */}
           <div className={styles.slots}>
-            {data.map((p) => (
-              <span
-                key={p.label}
-                className={styles.slot}
-                title={`${p.label}: ${series.map((s) => `${formatValue(p.values[s.key] ?? 0)} ${seriesName(s)}`).join(", ")}`}
-              />
+            {data.map((p, j) => (
+              <span key={j} className={styles.slot} title={`${p.label}: ${series.map((s, i) => describe(s, values[i]![j]!)).join(", ")}`} />
             ))}
           </div>
         </div>

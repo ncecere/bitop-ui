@@ -69,7 +69,7 @@ const doc: ComponentDoc = {
   props: [
     {
       component: "LineChart",
-      note: "Same data shape, tones, legend and data table as BarChart (see Chart). The scale runs from 0 to the largest value.",
+      note: "Same data shape, tones, legend and data table as BarChart (see Chart). The scale runs from 0 to the largest finite value; negative values draw at 0, and NaN / ±Infinity leave a gap in the line.",
       rows: [
         { name: "data", type: "{ label: string; values: Record<K, number> }[]", required: true, description: "Points in order (e.g. days)." },
         { name: "series", type: "{ key: K; label; tone?; pattern? }[]", required: true, description: "Lines to draw; pattern defaults to solid, dashed, dotted by position." },
