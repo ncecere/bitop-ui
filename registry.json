@@ -1067,14 +1067,16 @@
       "name": "date-picker",
       "type": "registry:ui",
       "title": "Date picker",
-      "description": "A trigger button that opens a Calendar in a popover; single or range, Intl-formatted value, works inside Field.",
+      "description": "A trigger button that opens a Calendar in a popover; single or range, range presets (in the popup or as a toggle group with Custom), Intl-formatted value, works inside Field.",
       "dependencies": [
         "@base-ui/react@^1.8.0",
         "lucide-react@^1.48.0"
       ],
       "registryDependencies": [
         "@bitop/core",
-        "@bitop/calendar"
+        "@bitop/calendar",
+        "@bitop/button",
+        "@bitop/toggle-group"
       ],
       "files": [
         {
