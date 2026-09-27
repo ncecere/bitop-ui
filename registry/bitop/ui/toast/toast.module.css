@@ -1,4 +1,4 @@
-/* Stacked, bottom-right toasts. Stacking math follows the Base UI Toast demo. */
+/* Stacked toasts, bottom-right or bottom-centre. Stacking math follows the Base UI Toast demo. */
 .viewport {
   position: fixed;
   z-index: var(--z-toast);
@@ -12,6 +12,13 @@
   @media (min-width: 640px) {
     right: var(--space-6);
     bottom: var(--space-6);
+  }
+
+  /* Centred along the bottom edge, clear of right-aligned actions. */
+  &[data-position="bottom-center"] {
+    right: 0;
+    left: 0;
+    margin-inline: auto;
   }
 }
 

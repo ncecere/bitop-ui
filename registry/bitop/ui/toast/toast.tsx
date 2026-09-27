@@ -90,17 +90,24 @@ function ToastList() {
   });
 }
 
+export type ToastPosition = "bottom-right" | "bottom-center";
+
 export type ToasterProps = {
   /** Max visible toasts (default 3). */
   limit?: number;
+  /**
+   * Where toasts appear (default "bottom-right"). "bottom-center" keeps them
+   * clear of right-aligned page actions and sticky save bars.
+   */
+  position?: ToastPosition;
 };
 
-/** Renders the toast viewport (bottom-right). Mount once. */
-export function Toaster({ limit = 3 }: ToasterProps) {
+/** Renders the toast viewport. Mount once. */
+export function Toaster({ limit = 3, position = "bottom-right" }: ToasterProps) {
   return (
     <BaseToast.Provider toastManager={manager} limit={limit}>
       <BaseToast.Portal>
-        <BaseToast.Viewport className={styles.viewport}>
+        <BaseToast.Viewport className={styles.viewport} data-position={position}>
           <ToastList />
         </BaseToast.Viewport>
       </BaseToast.Portal>

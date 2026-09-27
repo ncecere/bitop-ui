@@ -139,6 +139,23 @@ describe("Toast", () => {
     expect(screen.getByText("Policies is ready.")).toBeInTheDocument();
     act(() => toast.close());
   });
+
+  it("places the viewport with position (bottom-right by default)", async () => {
+    const { unmount } = render(<Toaster />);
+    act(() => {
+      toast.add({ title: "Saved" });
+    });
+    expect(screen.getByRole("region", { name: "Notifications" })).toHaveAttribute("data-position", "bottom-right");
+    act(() => toast.close());
+    unmount();
+    render(<Toaster position="bottom-center" />);
+    act(() => {
+      toast.add({ title: "Saved again" });
+    });
+    await screen.findByText("Saved again");
+    expect(screen.getByRole("region", { name: "Notifications" })).toHaveAttribute("data-position", "bottom-center");
+    act(() => toast.close());
+  });
 });
 
 describe("CommandPalette", () => {
