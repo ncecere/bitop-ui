@@ -639,6 +639,36 @@
       ]
     },
     {
+      "name": "checklist",
+      "type": "registry:ui",
+      "title": "Checklist",
+      "description": "Onboarding steps with done states, a link or button action per step, a progress summary and an optional dismiss button.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/button",
+        "@bitop/progress"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/checklist/checklist.tsx",
+          "type": "registry:ui",
+          "target": "@ui/checklist/checklist.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/checklist/checklist.module.css",
+          "type": "registry:file",
+          "target": "@ui/checklist/checklist.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
       "name": "checkpoint",
       "type": "registry:ui",
       "title": "Checkpoint",
@@ -1060,6 +1090,30 @@
       ],
       "categories": [
         "forms"
+      ]
+    },
+    {
+      "name": "description-list",
+      "type": "registry:ui",
+      "title": "Description list",
+      "description": "Key/value facts: a <dl> in a label column or stacked grid, and an inline facts line (a · b · c) for detail-page headers.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/description-list/description-list.tsx",
+          "type": "registry:ui",
+          "target": "@ui/description-list/description-list.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/description-list/description-list.module.css",
+          "type": "registry:file",
+          "target": "@ui/description-list/description-list.module.css"
+        }
+      ],
+      "categories": [
+        "display"
       ]
     },
     {
@@ -1737,6 +1791,34 @@
       ]
     },
     {
+      "name": "meter",
+      "type": "registry:ui",
+      "title": "Meter",
+      "description": "Usage against a limit (role=meter) with warning and critical tones, an optional limit marker and \"X of Y\" text.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "lucide-react@^1.48.0"
+      ],
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/meter/meter.tsx",
+          "type": "registry:ui",
+          "target": "@ui/meter/meter.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/meter/meter.module.css",
+          "type": "registry:file",
+          "target": "@ui/meter/meter.module.css"
+        }
+      ],
+      "categories": [
+        "feedback"
+      ]
+    },
+    {
       "name": "mic-selector",
       "type": "registry:ui",
       "title": "Mic selector",
@@ -1909,7 +1991,7 @@
       "name": "page-header",
       "type": "registry:ui",
       "title": "Page header",
-      "description": "Page title with breadcrumbs, meta, description and actions.",
+      "description": "Page title with breadcrumbs, meta, description and actions; an optional facts line under the title.",
       "registryDependencies": [
         "@bitop/core"
       ],
