@@ -262,6 +262,14 @@ describe("bitop add from a bitop-ui checkout", () => {
     expect(read(outside, "config.json")).toBe("{}");
   });
 
+  it("--version reports the package.json version", async () => {
+    const dir = project({ "package.json": "{}" });
+    const { version } = JSON.parse(read(repo, "packages/cli/package.json"));
+    const result = await bitop(dir, "--version");
+    expect(result.code).toBe(0);
+    expect(result.stdout.trim()).toBe(version);
+  });
+
   it("explains a missing components.json", async () => {
     const dir = project({ "package.json": "{}" });
     const { code, stderr } = await bitop(dir, "add", "button");

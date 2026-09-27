@@ -9,4 +9,4 @@ export const REGISTRY_URL = `${SITE_URL}/r`;
 export const registryTemplate = `${REGISTRY_URL}/{name}.json`;
 
 /** The install command for items (the source comes from components.json). */
-export const addCommand = (names: string[]) => `npx --no-install bitop add ${names.join(" ")}`;
+export const addCommand = (names: string[]) => `npx @bitop/cli add ${names.join(" ")}`;

@@ -2,32 +2,31 @@
 
 Copy bitop-ui components into your React project as source you own. The CLI has no runtime npm dependencies and needs Node 20 (20.19+) or 22.12+. Consumers do not need shadcn or Tailwind; shadcn is only used for registry build/schema validation in the bitop-ui repository.
 
-## Use from a checkout
+## Install
 
-`@bitop/cli` is **not published to npm yet**. With a bitop-ui checkout next to your project, run these commands from your project:
+Add it to your project as a dev dependency, so everyone on the project uses the same version:
 
 ```bash
-npm install -D file:../bitop-ui/packages/cli
-npx --no-install bitop init --registry ../bitop-ui
-npx --no-install bitop add core button dialog
+npm install -D @bitop/cli
+npx @bitop/cli init --registry ../bitop-ui     # or a hosted registry URL, see below
+npx @bitop/cli add core button dialog
 ```
 
-`npx --no-install` uses the installed CLI without downloading an unrelated package. Alternatively, skip installing the CLI and use `node ../bitop-ui/packages/cli/bin/bitop.mjs` with the same arguments.
+`npx @bitop/cli` runs the project's installed copy, or downloads this package for a one-off run. The command it installs is named `bitop`, but run it as `npx @bitop/cli` rather than `npx bitop`: without a local install, `npx bitop` would fetch whatever package is named `bitop` on npm, which isn't this one.
 
 Configure your TypeScript and bundler aliases, then import `@/components/ui/styles/bitop.css` once. See the repository's [installation guide](../../README.md#using-it-in-a-project).
 
 ## Commands
 
-Examples below assume the local CLI is installed:
 
 ```bash
-npx --no-install bitop list                   # available items (* = recorded in lock file)
-npx --no-install bitop add button dialog     # includes transitive registry/npm dependencies
-npx --no-install bitop diff button           # compare to registry; no writes or installs
-npx --no-install bitop diff                  # compare every item recorded in bitop-lock.json
-npx --no-install bitop update                # refresh all recorded items
-npx --no-install bitop update button         # refresh selected item and dependencies
-npx --no-install bitop add button --overwrite # replace differing files, including local edits
+npx @bitop/cli list                   # available items (* = recorded in lock file)
+npx @bitop/cli add button dialog     # includes transitive registry/npm dependencies
+npx @bitop/cli diff button           # compare to registry; no writes or installs
+npx @bitop/cli diff                  # compare every item recorded in bitop-lock.json
+npx @bitop/cli update                # refresh all recorded items
+npx @bitop/cli update button         # refresh selected item and dependencies
+npx @bitop/cli add button --overwrite # replace differing files, including local edits
 ```
 
 - `add` creates missing files and skips differing existing files unless `--overwrite` is set.
@@ -53,7 +52,7 @@ The `--no-install` **before** `bitop` controls npx; the one **after** the comman
 `bitop diff --check` compares every installed item with the registry and exits 1 if anything differs, like `git diff --exit-code`. Run it on a schedule to find out when your copies fall behind the registry or are edited by hand:
 
 ```yaml
-- run: npx --no-install bitop diff --check
+- run: npx @bitop/cli diff --check
 ```
 
 Exit status 1 also means a command failed (the message then starts with `bitop:` on stderr).

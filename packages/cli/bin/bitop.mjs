@@ -30,7 +30,8 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
-const VERSION = "0.1.0";
+// One source of truth for the version: the package's own package.json.
+const VERSION = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
 const NAME_RE = /^[a-z][a-z0-9-]*$/;
 const TARGET_RE = /^@(ui|lib)(\/[a-z0-9][a-z0-9._-]*)+$/;
 const LOCK_FILE = "bitop-lock.json";

@@ -72,6 +72,23 @@ npm run check            # typecheck, styling policy, tests, build, registry val
 npm run smoke:consumer   # optional locally, runs in CI
 ```
 
-The shadcn CLI is used only for development-time registry build/schema validation, not consumer installation. The smoke test installs with the first-party Bitop CLI. See [packages/cli/README.md](./packages/cli/README.md) for local CLI setup and supported configuration; `@bitop/cli` is not published yet.
+The shadcn CLI is used only for development-time registry build/schema validation, not consumer installation. The smoke test installs with the first-party Bitop CLI. See [packages/cli/README.md](./packages/cli/README.md) for its commands and supported configuration.
+
+## Releasing the CLI
+
+`@bitop/cli` is published to npm from `packages/cli` (the version lives only in `packages/cli/package.json`; `bitop --version` reads it).
+
+1. Bump `version` in `packages/cli/package.json` (semver: new command/flag → minor, fix → patch).
+2. `npm run check && npm run smoke:consumer` (the smoke test installs the packed tarball into a fresh Vite app).
+3. Publish with a token kept outside git (`*.env` and `.npmrc` are gitignored), without writing it to your global npm config:
+
+   ```bash
+   cd packages/cli
+   npm publish --dry-run            # check the file list: bin/, README.md, LICENSE, package.json
+   npm publish                      # publishConfig.access is "public"
+   ```
+4. Tag the release and push the tag: `git tag cli-v<version> && git push origin cli-v<version>`.
+
+npm provenance (`--provenance`) needs a public GitHub repository and a CI publish, so it isn't used while this repository is private.
 
 Commit with a message that says what the component does and any decisions worth remembering.

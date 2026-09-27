@@ -6,16 +6,15 @@ import { Link } from "../router";
 import { registryTemplate } from "../site";
 import styles from "./pages.module.css";
 
-const cliInstall = `# bitop-ui checked out next to your project (until @bitop/cli is on npm):
-npm install -D file:../bitop-ui/packages/cli
+const cliInstall = `npm install -D @bitop/cli
 
 # check it works
-npx --no-install bitop --help`;
+npx @bitop/cli --help`;
 
 const initCommand = `# Choose ONE source:
-npx --no-install bitop init --registry "${registryTemplate}"
+npx @bitop/cli init --registry "${registryTemplate}"
 # OR a checkout (nothing to build or serve):
-npx --no-install bitop init --registry ../bitop-ui`;
+npx @bitop/cli init --registry ../bitop-ui`;
 
 const componentsJson = `{
   "aliases": {
@@ -27,10 +26,10 @@ const componentsJson = `{
   }
 }`;
 
-const updating = `npx --no-install bitop diff button             # compare without writing
-npx --no-install bitop update                  # refresh installed items; skip local edits
-npx --no-install bitop add button --overwrite  # replace even your edits
-npx --no-install bitop list                    # registry items (* = installed)`;
+const updating = `npx @bitop/cli diff button             # compare without writing
+npx @bitop/cli update                  # refresh installed items; skip local edits
+npx @bitop/cli add button --overwrite  # replace even your edits
+npx @bitop/cli list                    # registry items (* = installed)`;
 
 const tsconfig = `// tsconfig.json (and tsconfig.app.json in the Vite template)
 {
@@ -113,13 +112,13 @@ export function InstallationPage() {
         <CodeBlock code={viteConfig} label="Vite config" language="ts" />
       </DocSection>
 
-      <DocSection id="cli" title="2. Add the bitop CLI" description="A small Node script with no runtime npm dependencies. @bitop/cli is not published to npm yet; install it from a checkout.">
+      <DocSection id="cli" title="2. Add the bitop CLI" description="A small Node script with no runtime npm dependencies, published as @bitop/cli. Add it as a dev dependency so the whole project uses the same version.">
         <CodeBlock code={cliInstall} label="install the CLI" language="bash" />
         <Prose>
           <p>
-            <C>npx --no-install bitop</C> uses your installed CLI without downloading another package. Alternatively, run{" "}
-            <C>node ../bitop-ui/packages/cli/bin/bitop.mjs</C> from your project with the same arguments. Commands below assume the CLI is installed locally.
-            Consumers need neither shadcn nor Tailwind; shadcn is only used for development-time registry build/schema validation.
+            <C>npx @bitop/cli</C> runs your project's copy, or downloads the package for a one-off run. Use it rather than <C>npx bitop</C>: without a
+            local install, that would fetch whatever npm package is named <C>bitop</C>. Consumers need neither shadcn nor Tailwind; shadcn is only used for
+            development-time registry build/schema validation.
           </p>
         </Prose>
       </DocSection>

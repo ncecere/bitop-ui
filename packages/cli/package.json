@@ -2,7 +2,24 @@
   "name": "@bitop/cli",
   "version": "0.1.0",
   "description": "Copy bitop-ui components (Base UI + CSS Modules + CSS variables) into your project as source you own.",
+  "keywords": [
+    "bitop",
+    "bitop-ui",
+    "react",
+    "components",
+    "base-ui",
+    "css-modules",
+    "copy-and-own",
+    "registry",
+    "cli"
+  ],
+  "author": "Nicholas Cecere",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ncecere/bitop-ui.git",
+    "directory": "packages/cli"
+  },
   "type": "module",
   "bin": {
     "bitop": "bin/bitop.mjs"
@@ -13,5 +30,8 @@
   ],
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
