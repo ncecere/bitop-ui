@@ -9,6 +9,8 @@ import {
   useState,
   type ComponentPropsWithRef,
   type FocusEvent,
+  type KeyboardEvent,
+  type MouseEvent,
   type ReactNode,
 } from "react";
 import { ErrorAlert } from "@/registry/bitop/ui/alert/alert";
@@ -94,6 +96,9 @@ import styles from "./data-table.module.css";
  *     (filterValuesToSearchParams / filterValuesFromSearchParams).
  *   - `bulkActions`: a bar with "N selected", your actions and "Clear
  *     selection", shown while rows are selected.
+ *   - `onRowClick`: the whole row opens the record (click, or Enter / Space
+ *     on the focused row); clicks on links, buttons and other controls in
+ *     the row keep their own behaviour.
  *   - Table's `stickyHeader` (with `maxHeight`) and `density` pass through.
  */
 
@@ -219,6 +224,15 @@ export type DataTableProps<T> = Omit<TableProps, "columns" | "children" | "empty
   loadMore?: DataTableLoadMore;
   /** Per-row actions in a trailing, right-aligned, unsortable column. */
   rowActions?: (row: T) => ReactNode;
+  /**
+   * Makes each row open something (usually the record's detail sheet): a
+   * click anywhere on the row that isn't on a control, or Enter / Space on
+   * the focused row (rows join the tab order). Keep an equivalent link,
+   * button or row action for assistive technology.
+   */
+  onRowClick?: (row: T) => void;
+  /** Optional accessible name of a clickable row, e.g. (r) => `Open ${r.name}` (default: the row's content). */
+  rowClickLabel?: (row: T) => string;
   /** Accessible (visually hidden) header of the actions column (default "Actions"). */
   rowActionsLabel?: string;
 
@@ -317,6 +331,17 @@ const EMPTY_FILTERS: FilterValues = {};
 
 const SKELETON_WIDTHS = ["72%", "48%", "86%", "60%", "40%"];
 
+/** Whether a click started on (or inside) a control of its own: those keep their own behaviour. */
+function fromControl(target: EventTarget | null, row: HTMLElement) {
+  let el = target instanceof Element ? target : null;
+  while (el && el !== row) {
+    if (el.matches('a[href], button, input, select, textarea, label, summary, [role="button"], [role="checkbox"], [role="switch"], [contenteditable="true"]')) return true;
+    el = el.parentElement;
+  }
+  // Clicks inside portals (menus opened from the row) bubble through React, not the DOM tree.
+  return target instanceof Node && !row.contains(target);
+}
+
 function textOf(v: Primitive): string {
   if (v === null || v === undefined) return "";
   if (v instanceof Date) return v.toLocaleDateString();
@@ -361,6 +386,8 @@ export function DataTable<T>({
   loadMore,
   rowActions,
   rowActionsLabel = "Actions",
+  onRowClick,
+  rowClickLabel,
   columnsMenu = false,
   hiddenColumns: hiddenProp,
   defaultHiddenColumns,
@@ -754,8 +781,29 @@ export function DataTable<T>({
           ))}
         {visible.map(({ row, id }) => {
           const isSelected = selectedSet.has(id);
+          const clickLabel = onRowClick ? rowClickLabel?.(row) : undefined;
           return (
-            <Tr key={id} selected={isSelected}>
+            <Tr
+              key={id}
+              selected={isSelected}
+              {...(onRowClick && {
+                "data-clickable": "",
+                tabIndex: 0,
+                "aria-label": clickLabel,
+                onClick: (event: MouseEvent<HTMLTableRowElement>) => {
+                  if (fromControl(event.target, event.currentTarget)) return;
+                  // Selecting text in a cell isn't a click on the row.
+                  if (typeof window !== "undefined" && window.getSelection()?.toString()) return;
+                  onRowClick(row);
+                },
+                onKeyDown: (event: KeyboardEvent<HTMLTableRowElement>) => {
+                  if (event.target !== event.currentTarget) return;
+                  if (event.key !== "Enter" && event.key !== " ") return;
+                  event.preventDefault();
+                  onRowClick(row);
+                },
+              })}
+            >
               {selectable && (
                 <Td>
                   <Checkbox

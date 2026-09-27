@@ -90,14 +90,16 @@ function ToastList() {
   });
 }
 
-export type ToastPosition = "bottom-right" | "bottom-center";
+export type ToastPosition = "bottom-right" | "bottom-center" | "bottom-left";
 
 export type ToasterProps = {
   /** Max visible toasts (default 3). */
   limit?: number;
   /**
    * Where toasts appear (default "bottom-right"). "bottom-center" keeps them
-   * clear of right-aligned page actions and sticky save bars.
+   * clear of right-aligned page actions and sticky save bars. "bottom-left"
+   * sits over an AppShell sidebar's footer (sidebar-wide on screens wide
+   * enough for a sidebar), so toasts cover navigation, not page content.
    */
   position?: ToastPosition;
 };

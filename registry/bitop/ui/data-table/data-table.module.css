@@ -126,6 +126,16 @@
   opacity: 0.6;
 }
 
+/* onRowClick: the whole row opens the record. */
+.table tbody tr[data-clickable] {
+  cursor: pointer;
+}
+
+.table tbody tr[data-clickable]:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+
 .table tbody tr.skeletonRow:hover {
   background-color: transparent;
 }
@@ -149,10 +159,12 @@
   vertical-align: middle;
 }
 
+/* break-word (not anywhere): long tokens still wrap, but a column is never
+   squeezed below its longest word, so words don't break mid-word. */
 .cellPrimary {
   font-weight: var(--font-weight-medium);
   color: var(--color-text);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .cellSecondary {
@@ -160,7 +172,7 @@
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-snug);
   color: var(--color-text-muted);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 @media (prefers-reduced-motion: reduce) {
