@@ -7,9 +7,12 @@
 #   3. install core, theme-uf and half the components from the served registry
 #      (npm dependencies are installed by the CLI)
 #   4. install the rest straight from this checkout, then check a re-run is a no-op
-#   5. render AppShell + Dialog + Table + CommandPalette and a small AI chat
+#   5. render AppShell + Dialog + Table + CommandPalette, a small AI chat
 #      (Conversation, Message, Response, Reasoning, Tool, Sources, PromptInput,
-#      ModelSelector) and run `npm run build`
+#      ModelSelector) and a list/detail page (DataTable with facets, columns
+#      menu and bulk actions, FactsLine, DescriptionList, DiffViewer, Meter,
+#      Checklist, LineChart, BarChart, Sparkline in a StatCard, date range
+#      presets), and run `npm run build`
 #
 # Usage: scripts/consumer-smoke.sh [workdir]   (needs network for npm)
 set -euo pipefail
@@ -100,6 +103,18 @@ import { Field } from "@/components/ui/field/field";
 import { TagInput } from "@/components/ui/tag-input/tag-input";
 import { Source, Sources, SourcesContent, SourcesTrigger } from "@/components/ui/sources/sources";
 import { Tool, ToolContent, ToolHeader, ToolInput } from "@/components/ui/tool/tool";
+import { BarChart } from "@/components/ui/bar-chart/bar-chart";
+import { Checklist } from "@/components/ui/checklist/checklist";
+import { DataTable, type DataTableColumn } from "@/components/ui/data-table/data-table";
+import { DateRangePresets, type DateRangeSelection } from "@/components/ui/date-picker/date-picker";
+import { DescriptionList, FactsLine } from "@/components/ui/description-list/description-list";
+import { DiffViewer } from "@/components/ui/diff-viewer/diff-viewer";
+import { type Facet, type FilterValues, filterValuesToSearchParams } from "@/components/ui/filter-bar/filter-bar";
+import { LineChart } from "@/components/ui/line-chart/line-chart";
+import { Meter } from "@/components/ui/meter/meter";
+import { PageHeader } from "@/components/ui/page-header/page-header";
+import { Sparkline } from "@/components/ui/sparkline/sparkline";
+import { StatCard } from "@/components/ui/stat-card/stat-card";
 
 const sources = [{ title: "Policy", href: "https://example.com/policy" }];
 
@@ -167,6 +182,55 @@ function Forms() {
   );
 }
 
+type Doc = { id: string; title: string; status: string; updated: Date };
+const docs: Doc[] = [
+  { id: "1", title: "Deadlines", status: "ready", updated: new Date() },
+  { id: "2", title: "Transcripts", status: "failed", updated: new Date() },
+];
+const docColumns: DataTableColumn<Doc>[] = [
+  { id: "title", header: "Title", accessor: "title", rowHeader: true },
+  { id: "status", header: "Status", accessor: "status" },
+];
+const docFacets: Facet<Doc>[] = [
+  { id: "status", label: "Status", type: "toggle", allLabel: "All", accessor: (d) => d.status, options: [{ value: "ready", label: "Ready" }, { value: "failed", label: "Failed" }] },
+  { id: "updated", label: "Updated", type: "date-range", accessor: (d) => d.updated },
+];
+const points = [
+  { label: "Sep 1", values: { answers: 3 } },
+  { label: "Sep 2", values: { answers: 5 } },
+];
+
+function ListAndDetail() {
+  const [filters, setFilters] = useState<FilterValues>({});
+  const [range, setRange] = useState<DateRangeSelection | null>(null);
+  return (
+    <>
+      <PageHeader title="Registrar website" titleAs="h2" facts={<FactsLine items={[{ label: "Type", value: "Website" }, { value: "58 documents" }]} />} />
+      <DataTable
+        caption="Documents"
+        columns={docColumns}
+        data={docs}
+        getRowId={(d) => d.id}
+        facets={docFacets}
+        facetValues={filters}
+        onFacetValuesChange={(v) => setFilters(v)}
+        columnsMenu
+        selectable
+        bulkActions={(ids, clear) => <Button onClick={clear}>Delete {ids.length}</Button>}
+      />
+      <p>{filterValuesToSearchParams(docFacets, filters).toString()}</p>
+      <DescriptionList items={[{ label: "Mode", value: "Crawl" }]} />
+      <DiffViewer label="Changes" format="json" before={{ a: 1 }} after={{ a: 2 }} />
+      <Meter label="Storage" value={8} max={10} marker={{ value: 9, label: "Soft limit" }} />
+      <Checklist title="Get started" steps={[{ id: "a", title: "Add a source", done: true }, { id: "b", title: "Create a KB", done: false, action: { label: "Create", href: "/kbs" } }]} />
+      <LineChart data={points} series={[{ key: "answers", label: "Answers" }]} summary="Answers: 3 then 5" dataTable={{ caption: "Answers" }} />
+      <BarChart data={points} series={[{ key: "answers", label: "Answers" }]} summary="Answers: 3 then 5" />
+      <StatCard label="Answers" value="8" chart={<Sparkline values={[3, 5]} label="Rising from 3 to 5" />} />
+      <DateRangePresets aria-label="Range" value={range} onValueChange={setRange} />
+    </>
+  );
+}
+
 export default function App() {
   const [open, setOpen] = useState(false);
   return (
@@ -197,6 +261,7 @@ export default function App() {
         </Table>
         <Chat />
         <Forms />
+        <ListAndDetail />
         <CommandPalette open={open} onOpenChange={setOpen} groups={[{ label: "Go", items: [{ id: "home", label: "Home", onSelect: () => {} }] }]} />
       </Main>
     </AppShell>
