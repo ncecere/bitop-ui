@@ -6,7 +6,7 @@ import { Button, IconButton } from "@/registry/bitop/ui/button/button";
 import { Checkbox, CheckboxGroup } from "@/registry/bitop/ui/checkbox/checkbox";
 import { ColorField, contrastRatio, formatRatio, normalizeHex } from "@/registry/bitop/ui/color-field/color-field";
 import { Disclosure } from "@/registry/bitop/ui/disclosure/disclosure";
-import { Field } from "@/registry/bitop/ui/field/field";
+import { Field, Form } from "@/registry/bitop/ui/field/field";
 import { Input, NativeSelect, Textarea } from "@/registry/bitop/ui/input/input";
 import { RadioGroup } from "@/registry/bitop/ui/radio-group/radio-group";
 import { Switch } from "@/registry/bitop/ui/switch/switch";
@@ -23,6 +23,31 @@ describe("Field", () => {
     expect(input.tagName).toBe("INPUT");
     expect(input).toHaveAttribute("aria-invalid", "true");
     expect(input).toHaveAccessibleDescription("Include /v1 Invalid URL");
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("shows the validation message on submit when there's no error prop (no red border alone)", async () => {
+    const onSubmit = vi.fn();
+    const { container } = render(
+      <Form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit();
+        }}
+      >
+        <Field label="Slug" validate={(v) => (/^[a-z0-9-]+$/.test(String(v ?? "")) ? null : "Use lowercase letters, digits and hyphens.")}>
+          <Input name="slug" defaultValue="Not OK" />
+        </Field>
+        <Button type="submit">Save</Button>
+      </Form>,
+    );
+    const input = screen.getByRole("textbox", { name: "Slug" });
+    expect(screen.queryByText("Use lowercase letters, digits and hyphens.")).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(await screen.findByText("Use lowercase letters, digits and hyphens.")).toBeInTheDocument();
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAccessibleDescription("Use lowercase letters, digits and hyphens.");
+    expect(onSubmit).not.toHaveBeenCalled();
     expect(await axe(container)).toHaveNoViolations();
   });
 
