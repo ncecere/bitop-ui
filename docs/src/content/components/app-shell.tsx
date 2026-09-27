@@ -33,7 +33,7 @@ export function Dashboard() {
         skipTo={null}
         className={styles.shell}
         sidebar={
-          <Sidebar className={styles.sidebar}>
+          <Sidebar label="App sidebar (example)" className={styles.sidebar}>
             <SidebarHeader>
               <Brand name="Acme Cloud" href="#dashboard" />
               <SidebarModeSwitch
@@ -138,6 +138,14 @@ const doc: ComponentDoc = {
       ],
     },
     {
+      component: "Sidebar / SidebarContent",
+      note: "Sidebar is an <aside> with SidebarHeader, SidebarContent and SidebarFooter. SidebarContent scrolls in a ScrollArea, so the header and the footer's account menu stay pinned at short heights.",
+      rows: [
+        { name: "label (Sidebar)", type: "string", default: '"Sidebar"', description: "Names the complementary landmark; give each sidebar on a page its own name." },
+        { name: "scrollLabel (SidebarContent)", type: "string", default: '"Sidebar navigation"', description: "Names the scroll region when the content overflows (it then becomes focusable)." },
+      ],
+    },
+    {
       component: "SidebarItem",
       rows: [
         { name: "label", type: "ReactNode", required: true, description: "Text; becomes a tooltip when collapsed." },
@@ -190,7 +198,8 @@ const doc: ComponentDoc = {
   ],
   a11y: [
     "A skip link to #main is the first focusable element; Main is focusable (tabIndex -1) so the skip lands there.",
-    "The sidebar navigation is a named <nav>; sections are labelled lists and the current page has aria-current=\"page\".",
+    "The sidebar is an <aside> landmark named by label (default “Sidebar”); inside it, the navigation is a named <nav>, sections are labelled lists and the current page has aria-current=\"page\".",
+    "The sidebar content scrolls on its own (a ScrollArea that becomes a focusable, named region only when it overflows), so the account menu in the footer is always reachable.",
     "The collapse toggle has aria-expanded and aria-controls; collapsed labels stay in the accessibility tree and show as tooltips.",
     "The workspace switcher and user menu announce their purpose (“Current workspace: …”, “Account: …”).",
   ],

@@ -172,7 +172,7 @@
       "name": "app-shell",
       "type": "registry:ui",
       "title": "App shell",
-      "description": "Collapsible sidebar, mode switch, workspace switcher, user menu, top bar and main landmark.",
+      "description": "Collapsible sidebar (an aside landmark whose content scrolls between a pinned header and footer), mode switch, workspace switcher, user menu, top bar and main landmark.",
       "dependencies": [
         "@base-ui/react@^1.8.0",
         "lucide-react@^1.48.0"
@@ -183,7 +183,8 @@
         "@bitop/button",
         "@bitop/layout",
         "@bitop/menu",
-        "@bitop/tooltip"
+        "@bitop/tooltip",
+        "@bitop/scroll-area"
       ],
       "files": [
         {

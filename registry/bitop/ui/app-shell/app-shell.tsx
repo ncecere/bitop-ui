@@ -7,6 +7,7 @@ import { Avatar } from "@/registry/bitop/ui/avatar/avatar";
 import { IconButton } from "@/registry/bitop/ui/button/button";
 import { Container } from "@/registry/bitop/ui/layout/layout";
 import { Menu } from "@/registry/bitop/ui/menu/menu";
+import { ScrollArea } from "@/registry/bitop/ui/scroll-area/scroll-area";
 import { Tooltip } from "@/registry/bitop/ui/tooltip/tooltip";
 import { cx, dataFlag } from "@/registry/bitop/lib/bitop-utils";
 import styles from "./app-shell.module.css";
@@ -19,8 +20,11 @@ import styles from "./app-shell.module.css";
  *   </AppShell>
  *
  * - AppShell renders a skip link to #main and owns the sidebar collapsed state.
- * - Sidebar: SidebarHeader (Brand, WorkspaceSwitcher), SidebarContent
- *   (SidebarNav > SidebarSection > SidebarItem), SidebarFooter (SidebarUser).
+ * - Sidebar: an <aside> (complementary landmark, named by `label`) with
+ *   SidebarHeader (Brand, WorkspaceSwitcher), SidebarContent
+ *   (SidebarNav > SidebarSection > SidebarItem) and SidebarFooter
+ *   (SidebarUser). SidebarContent scrolls in a ScrollArea, so the header and
+ *   the footer's account menu stay pinned at short window heights.
  * - SidebarItem marks the current page with aria-current="page" (router
  *   links set it automatically). When collapsed, labels become visually
  *   hidden (still announced) and show as tooltips.
@@ -99,14 +103,20 @@ export function SkipLink({ href = "#main", children = "Skip to content" }: SkipL
 
 /* ---------------- Sidebar ---------------- */
 
-export type SidebarProps = { children: ReactNode; className?: string };
+export type SidebarProps = {
+  children: ReactNode;
+  /** Names the sidebar landmark (default "Sidebar"). Give each sidebar on a page its own name. */
+  label?: string;
+  className?: string;
+};
 
-export function Sidebar({ children, className }: SidebarProps) {
+/** The app sidebar: an <aside> landmark holding the header, scrolling content and footer. */
+export function Sidebar({ children, label = "Sidebar", className }: SidebarProps) {
   const shell = useAppShell();
   return (
-    <div id={shell?.sidebarId} className={cx(styles.sidebar, className)} data-collapsed={dataFlag(shell?.collapsed)}>
+    <aside id={shell?.sidebarId} aria-label={label} className={cx(styles.sidebar, className)} data-collapsed={dataFlag(shell?.collapsed)}>
       {children}
-    </div>
+    </aside>
   );
 }
 
@@ -114,8 +124,20 @@ export function SidebarHeader({ children, className }: { children: ReactNode; cl
   return <div className={cx(styles.sidebarHeader, className)}>{children}</div>;
 }
 
-export function SidebarContent({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cx(styles.sidebarContent, className)}>{children}</div>;
+export type SidebarContentProps = {
+  children: ReactNode;
+  /** Names the scroll region when the content overflows (default "Sidebar navigation"). */
+  scrollLabel?: string;
+  className?: string;
+};
+
+/** The sidebar's middle part: grows to fill the sidebar and scrolls on its own. */
+export function SidebarContent({ children, scrollLabel = "Sidebar navigation", className }: SidebarContentProps) {
+  return (
+    <ScrollArea label={scrollLabel} className={styles.sidebarScroll} contentClassName={cx(styles.sidebarContent, className)}>
+      {children}
+    </ScrollArea>
+  );
 }
 
 export function SidebarFooter({ children, className }: { children: ReactNode; className?: string }) {
