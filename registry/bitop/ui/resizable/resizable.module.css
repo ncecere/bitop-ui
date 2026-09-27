@@ -16,6 +16,12 @@
   min-width: 0;
   min-height: 0;
   overflow: auto;
+
+  /* Before the first layout: the default size as a share of the group; panels
+     without one grow into the rest. */
+  &[data-size-pending] {
+    flex: 0 1 calc(var(--panel-default-size, 50) * 1%);
+  }
 }
 
 /* A 1px line with a wider invisible hit area. */

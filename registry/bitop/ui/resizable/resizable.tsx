@@ -213,8 +213,18 @@ export function ResizablePanel({ defaultSize, minSize = 0, maxSize = 100, id, cl
 
   useLayoutEffect(() => register(panelId, { minSize, maxSize, defaultSize }), [register, panelId, minSize, maxSize, defaultSize]);
 
-  const size = sizes?.[panelId] ?? defaultSize;
-  const sizeStyle = size !== undefined ? ({ "--panel-size": size } as CSSProperties) : undefined;
+  // Until the group has laid out (first render, server render), a panel with
+  // a defaultSize takes that percentage and panels without one share what's
+  // left. Flex weights alone can't do this: "30" beside a default weight of 1
+  // would give the other panel ~3% instead of 70%.
+  const size = sizes?.[panelId];
+  const pendingDefault = size === undefined && defaultSize !== undefined;
+  const sizeStyle =
+    size !== undefined
+      ? ({ "--panel-size": size } as CSSProperties)
+      : pendingDefault
+        ? ({ "--panel-default-size": defaultSize } as CSSProperties)
+        : undefined;
 
   return useRender({
     render,
@@ -225,6 +235,7 @@ export function ResizablePanel({ defaultSize, minSize = 0, maxSize = 100, id, cl
       className: cx(styles.panel, className),
       style: { ...sizeStyle, ...style },
       "data-panel-id": panelId,
+      "data-size-pending": pendingDefault ? "" : undefined,
     } as ComponentPropsWithRef<"div">),
   });
 }

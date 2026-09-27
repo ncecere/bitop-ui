@@ -2,7 +2,7 @@
 
 import { Input as BaseInput } from "@base-ui/react/input";
 import { Check, CircleAlert } from "lucide-react";
-import { useId } from "react";
+import { type CSSProperties, useId } from "react";
 import { cx } from "@/registry/bitop/lib/bitop-utils";
 import styles from "./color-field.module.css";
 
@@ -104,6 +104,9 @@ export function ColorField({
   const text = normalizeHex(contrastWith);
   // Light text needs a darker background to pass, dark text a lighter one.
   const lightText = text ? luminance(text) > 0.18 : true;
+  const placeholder = `${fallback} (default)`;
+  // Wide enough for the placeholder or a full "#rrggbb" (the font is monospace, so 1ch is one character).
+  const hexChars = Math.max(7, placeholder.length);
 
   return (
     <div className={cx(styles.root, className)}>
@@ -121,12 +124,13 @@ export function ColorField({
         <BaseInput
           value={value}
           disabled={disabled}
-          placeholder={`${fallback} (default)`}
+          placeholder={placeholder}
           spellCheck={false}
           autoComplete="off"
           maxLength={7}
           aria-describedby={`${id}-contrast`}
           className={styles.hex}
+          style={{ "--color-field-hex-chars": hexChars } as CSSProperties}
           onValueChange={(v) => onValueChange(v.trim().toLowerCase())}
         />
         <span aria-hidden className={styles.sample} style={{ backgroundColor: shown, color: contrastWith }}>

@@ -40,8 +40,11 @@
   }
 }
 
+/* Sized in ch (the font is monospace) to fit the placeholder, e.g. "#1d4ed8 (default)". */
 .hex {
-  width: 9rem;
+  width: calc(var(--color-field-hex-chars, 7) * 1ch + 2 * var(--space-3) + 2px);
+  min-width: 0;
+  max-width: 100%;
   height: var(--control-height-md);
   padding: 0 var(--space-3);
   border: 1px solid var(--color-border-strong);

@@ -58,7 +58,18 @@ export function ScrollArea({
           <div {...viewportProps} {...(state.hasOverflowX || state.hasOverflowY ? { role: "region", "aria-label": label } : {})} />
         )}
       >
-        <BaseScrollArea.Content className={cx(styles.content, contentClassName)}>{children}</BaseScrollArea.Content>
+        {/*
+          Base UI sizes the content to fit (inline min-width: fit-content) so it
+          can scroll sideways. Without a horizontal scrollbar that only lets
+          long lines widen the content past the viewport, where they're clipped
+          and never ellipsised (e.g. sidebar labels), so keep it viewport-wide.
+        */}
+        <BaseScrollArea.Content
+          className={cx(styles.content, contentClassName)}
+          style={orientation === "vertical" ? { minWidth: 0 } : undefined}
+        >
+          {children}
+        </BaseScrollArea.Content>
       </BaseScrollArea.Viewport>
       {orientation !== "horizontal" && <ScrollBar orientation="vertical" />}
       {orientation !== "vertical" && <ScrollBar orientation="horizontal" />}
