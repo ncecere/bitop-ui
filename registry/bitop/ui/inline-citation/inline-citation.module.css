@@ -39,6 +39,60 @@
     outline: 2px solid var(--color-focus-ring);
     outline-offset: 1px;
   }
+
+  /* A checked claim: a check when verified, a warning otherwise. */
+  &[data-verification="unsupported"] {
+    background-color: var(--color-warning-subtle);
+    color: var(--color-warning-text);
+  }
+
+  &[data-verification="contradicted"] {
+    background-color: var(--color-danger-subtle);
+    color: var(--color-danger-text);
+  }
+}
+
+.mark {
+  width: 0.625rem;
+  height: 0.625rem;
+  margin-inline-start: 0.125rem;
+  stroke-width: 3;
+
+  [data-verification="verified"] > & {
+    color: var(--color-success-text);
+  }
+}
+
+.verification {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-start;
+  margin-bottom: var(--space-1);
+  padding: 0.125rem var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+
+  &[data-verification="verified"] {
+    background-color: var(--color-success-subtle);
+    color: var(--color-success-text);
+  }
+
+  &[data-verification="unsupported"] {
+    background-color: var(--color-warning-subtle);
+    color: var(--color-warning-text);
+  }
+
+  &[data-verification="contradicted"] {
+    background-color: var(--color-danger-subtle);
+    color: var(--color-danger-text);
+  }
+}
+
+.verificationIcon {
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .card {
