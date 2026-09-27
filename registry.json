@@ -1147,6 +1147,37 @@
       ]
     },
     {
+      "name": "diff-viewer",
+      "type": "registry:ui",
+      "title": "Diff viewer",
+      "description": "Before/after for text (line diff) and JSON (structural changes with paths), unified or split, with +/− signs and folded unchanged lines.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/scroll-area",
+        "@bitop/toggle-group"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/diff-viewer/diff-viewer.tsx",
+          "type": "registry:ui",
+          "target": "@ui/diff-viewer/diff-viewer.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/diff-viewer/diff.ts",
+          "type": "registry:ui",
+          "target": "@ui/diff-viewer/diff.ts"
+        },
+        {
+          "path": "registry/bitop/ui/diff-viewer/diff-viewer.module.css",
+          "type": "registry:file",
+          "target": "@ui/diff-viewer/diff-viewer.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
       "name": "direction",
       "type": "registry:ui",
       "title": "Direction",
