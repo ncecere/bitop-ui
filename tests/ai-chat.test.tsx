@@ -512,6 +512,27 @@ describe("InlineCitation", () => {
   });
 });
 
+describe("InlineCitation verification", () => {
+  it("names the verification, marks the chip and heads the card with it", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <p>
+        Claim <InlineCitation index={1} sources={[sources[0]!]} verification="verified" verificationLabel="Verified (97% confidence)" /> and
+        another <InlineCitation index={2} sources={[sources[1]!]} verification="unsupported" />
+      </p>,
+    );
+    const ok = screen.getByRole("button", { name: "Source 1: Leave policy. Verified (97% confidence)" });
+    const warn = screen.getByRole("button", { name: /^Source 2: .*\. Not supported by this source$/ });
+    expect(ok).toHaveAttribute("data-verification", "verified");
+    expect(warn).toHaveAttribute("data-verification", "unsupported");
+    expect(await axe(container)).toHaveNoViolations();
+    await user.click(warn);
+    const card = await screen.findByRole("dialog");
+    expect(within(card).getByText("Not supported by this source")).toBeInTheDocument();
+    expect(await axe(card)).toHaveNoViolations();
+  });
+});
+
 /* ---------------- Message, tool, copy ---------------- */
 
 describe("Message", () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpRight, Check, ChevronLeft, ChevronRight, TriangleAlert } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
 import { IconButton } from "@/registry/bitop/ui/button/button";
 import popup from "@/registry/bitop/ui/styles/popup.module.css";
@@ -23,7 +23,26 @@ import styles from "./inline-citation.module.css";
  * With `onActivate`, a click / Enter / Space calls it instead of opening
  * the card (hover still previews it). Use it when the full sources are
  * listed below the answer: jump to and focus the matching Source there.
+ *
+ * With `verification` (the claim was checked against its source), the chip
+ * carries a small check (verified) or a warning (unsupported,
+ * contradicted); the explanation is part of the chip's accessible name and
+ * heads the card, so it works as the icon's tooltip.
  */
+
+/** The outcome of checking a claim against its source. */
+export type CitationVerification = "verified" | "unsupported" | "contradicted";
+
+const verificationText: Record<CitationVerification, string> = {
+  verified: "Verified: the source supports this",
+  unsupported: "Not supported by this source",
+  contradicted: "Contradicted by this source",
+};
+
+/** The default explanation of a verification ("Not supported by this source"). */
+export function citationVerificationText(v: CitationVerification): string {
+  return verificationText[v];
+}
 
 export type CitationSource = {
   title: string;
@@ -55,6 +74,10 @@ export type InlineCitationProps = {
    * previews it), e.g. to scroll to and focus the full source in a list.
    */
   onActivate?: () => void;
+  /** The claim was checked against the source: a check (verified) or a warning (unsupported, contradicted). */
+  verification?: CitationVerification;
+  /** Explains the verification in the card and the chip's name; defaults per status, e.g. "Not supported by this source". */
+  verificationLabel?: string;
   className?: string;
 };
 
@@ -82,7 +105,12 @@ function accessibleName(sources: CitationSource[], indices: number[], text: stri
   return `${text}: ${first}${more}`;
 }
 
-export function InlineCitation({ sources, index, label, side = "top", onActivate, className }: InlineCitationProps) {
+function VerificationIcon({ verification, className }: { verification: CitationVerification; className?: string }) {
+  const Icon = verification === "verified" ? Check : TriangleAlert;
+  return <Icon aria-hidden className={className} />;
+}
+
+export function InlineCitation({ sources, index, label, side = "top", onActivate, verification, verificationLabel, className }: InlineCitationProps) {
   const [rawPage, setPage] = useState(0);
   // The sources list can shrink while the card is open (e.g. a re-streamed
   // answer): show and page from the last source, and store that page.
@@ -97,6 +125,8 @@ export function InlineCitation({ sources, index, label, side = "top", onActivate
   const current = sources[page]!;
   const multiple = sources.length > 1;
   const site = current.siteName ?? citationHostname(current.href);
+  const note = verification ? (verificationLabel ?? verificationText[verification]) : undefined;
+  const name = accessibleName(sources, indices, text) + (note ? `. ${note}` : "");
 
   return (
     <Popover.Root
@@ -114,11 +144,13 @@ export function InlineCitation({ sources, index, label, side = "top", onActivate
         delay={150}
         closeDelay={150}
         className={cx(styles.chip, className)}
-        aria-label={accessibleName(sources, indices, text)}
+        data-verification={verification}
+        aria-label={name}
         // Pressing jumps elsewhere instead of opening a popup: don't announce one.
         {...(onActivate ? { "aria-haspopup": undefined, "aria-expanded": undefined } : {})}
       >
         {label ?? text}
+        {verification && <VerificationIcon verification={verification} className={styles.mark} />}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner className={popup.positioner} side={side} sideOffset={6} collisionPadding={8}>
@@ -145,6 +177,12 @@ export function InlineCitation({ sources, index, label, side = "top", onActivate
               </div>
             )}
             <div className={styles.source}>
+              {verification && (
+                <p className={styles.verification} data-verification={verification}>
+                  <VerificationIcon verification={verification} className={styles.verificationIcon} />
+                  {note}
+                </p>
+              )}
               {(site || current.icon) && (
                 <span className={styles.site}>
                   {current.icon && (
