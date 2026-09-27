@@ -16,52 +16,9 @@
   }
 }
 
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-}
-
-.legendItem {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.swatch {
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: var(--radius-1);
-}
-
-.swatch,
+/* Series colours come from chart (--chart-color, the --color-chart-* tokens). */
 .bar {
-  background-color: var(--bar-color, var(--color-primary));
-
-  &[data-tone="info"] {
-    --bar-color: var(--color-info-dot);
-  }
-
-  &[data-tone="success"] {
-    --bar-color: var(--color-success-dot);
-  }
-
-  &[data-tone="warning"] {
-    --bar-color: var(--color-warning-dot);
-  }
-
-  &[data-tone="danger"] {
-    --bar-color: var(--color-danger-dot);
-  }
-
-  &[data-tone="neutral"] {
-    --bar-color: var(--color-neutral-dot);
-  }
+  background-color: var(--chart-color, var(--color-chart-primary));
 }
 
 .plot {
@@ -108,8 +65,9 @@
   inset: auto 0 0;
 }
 
+/* The back series is paler, in the plot and in its legend swatch. */
 .bars[data-layout="overlap"] .bar:first-child,
-.root[data-layout="overlap"] .legendItem:first-child .swatch {
+.root[data-layout="overlap"] .legend > li:first-child > span {
   opacity: 0.55;
 }
 

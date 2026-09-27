@@ -25,6 +25,7 @@
   --palette-uf-blue-700: #001b8a; /* white text 13.78:1; on blue-50 12.32:1 */
   --palette-uf-blue-800: #00156b;
   --palette-uf-orange-500: #fa4616; /* UF orange: 3.53:1 on white, NOT for text */
+  --palette-uf-orange-700: #c2410c; /* 5.18:1 on white, 4.87:1 on neutral-50 */
 
   --color-primary: var(--palette-uf-blue-600); /* white text 11.93:1; as text on bg 11.22:1 */
   --color-primary-hover: var(--palette-uf-blue-700);
@@ -43,6 +44,10 @@
   --color-info-text: var(--palette-uf-blue-700); /* 12.32:1 on info-subtle */
   --color-info-dot: var(--palette-uf-blue-500);
   --color-info-border: rgba(0, 33, 165, 0.18);
+
+  /* Chart series: the first two follow the brand (blue, then orange). */
+  --color-chart-primary: var(--color-primary); /* 11.93:1 on surface */
+  --color-chart-info: var(--palette-uf-orange-700); /* 5.18:1 on surface, 4.87:1 on bg */
 
   --color-focus-ring: var(--palette-uf-blue-600); /* 11.22:1 on bg */
   --color-focus-halo: rgba(0, 33, 165, 0.2);
@@ -73,6 +78,9 @@
   --color-info-text: #a8baff; /* 8.86:1 on info-subtle */
   --color-info-dot: #7c95ff;
   --color-info-border: rgba(168, 186, 255, 0.2);
+
+  --color-chart-primary: #7c95ff; /* 6.72:1 on surface, 7.03:1 on bg */
+  --color-chart-info: #fa6a3c; /* 6.36:1 / 6.66:1 */
 
   --color-focus-ring: #7c95ff; /* 6.30:1 on raised, 7.03:1 on bg */
   --color-focus-halo: rgba(124, 149, 255, 0.28);

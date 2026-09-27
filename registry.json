@@ -369,9 +369,10 @@
       "name": "bar-chart",
       "type": "registry:ui",
       "title": "Bar chart",
-      "description": "CSS bar chart with overlapping or stacked series, legend and peak line; role=img with a text summary.",
+      "description": "CSS bar chart with overlapping or stacked series, shared chart legend and colours, peak line and an optional data table; role=img with a text summary.",
       "registryDependencies": [
-        "@bitop/core"
+        "@bitop/core",
+        "@bitop/chart"
       ],
       "files": [
         {
@@ -581,6 +582,32 @@
       ],
       "categories": [
         "ai"
+      ]
+    },
+    {
+      "name": "chart",
+      "type": "registry:ui",
+      "title": "Chart",
+      "description": "Shared chart pieces: series tones from the --color-chart-* tokens, a legend with line patterns, and a \"Show data\" table disclosure.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/disclosure",
+        "@bitop/table"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/chart/chart.tsx",
+          "type": "registry:ui",
+          "target": "@ui/chart/chart.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/chart/chart.module.css",
+          "type": "registry:file",
+          "target": "@ui/chart/chart.module.css"
+        }
+      ],
+      "categories": [
+        "display"
       ]
     },
     {
@@ -1544,6 +1571,31 @@
       ],
       "categories": [
         "layout"
+      ]
+    },
+    {
+      "name": "line-chart",
+      "type": "registry:ui",
+      "title": "Line chart",
+      "description": "SVG line or area chart with one or more series, legend and peak line; role=img with a text summary and an optional data table.",
+      "registryDependencies": [
+        "@bitop/core",
+        "@bitop/chart"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/line-chart/line-chart.tsx",
+          "type": "registry:ui",
+          "target": "@ui/line-chart/line-chart.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/line-chart/line-chart.module.css",
+          "type": "registry:file",
+          "target": "@ui/line-chart/line-chart.module.css"
+        }
+      ],
+      "categories": [
+        "display"
       ]
     },
     {
@@ -2591,6 +2643,30 @@
       ]
     },
     {
+      "name": "sparkline",
+      "type": "registry:ui",
+      "title": "Sparkline",
+      "description": "A tiny inline SVG trend for stat cards and table cells; one image named by its label.",
+      "registryDependencies": [
+        "@bitop/core"
+      ],
+      "files": [
+        {
+          "path": "registry/bitop/ui/sparkline/sparkline.tsx",
+          "type": "registry:ui",
+          "target": "@ui/sparkline/sparkline.tsx"
+        },
+        {
+          "path": "registry/bitop/ui/sparkline/sparkline.module.css",
+          "type": "registry:file",
+          "target": "@ui/sparkline/sparkline.module.css"
+        }
+      ],
+      "categories": [
+        "display"
+      ]
+    },
+    {
       "name": "speech-input",
       "type": "registry:ui",
       "title": "Speech input",
@@ -2676,7 +2752,7 @@
       "name": "stat-card",
       "type": "registry:ui",
       "title": "Stat card",
-      "description": "Metric card with icon, delta, hint, details and an optional whole-card link.",
+      "description": "Metric card with icon, delta, hint, details, a chart slot (e.g. a sparkline) and an optional whole-card link.",
       "dependencies": [
         "@base-ui/react@^1.8.0",
         "lucide-react@^1.48.0"

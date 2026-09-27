@@ -1,5 +1,4 @@
 import { BarChart } from "@/registry/bitop/ui/bar-chart/bar-chart";
-import { Table, Td, Tr } from "@/registry/bitop/ui/table/table";
 import { type ComponentDoc, examples } from "../types";
 import raw from "./bar-chart.tsx?raw";
 
@@ -11,25 +10,15 @@ const visits = [42, 58, 51, 77, 96, 64, 38, 45, 70, 88, 91, 73, 40, 36].map((vie
 export function Daily() {
   const total = visits.reduce((sum, d) => sum + d.values.views, 0);
   return (
-    <div style={{ display: "grid", gap: "var(--space-4)" }}>
-      <BarChart
-        data={visits}
-        series={[
-          { key: "views", label: "Views", tone: "info" },
-          { key: "signups", label: "Sign-ups" },
-        ]}
-        summary={`Views per day, 1 to 14 September: ${total} in total, most on 5 September (96).`}
-      />
-      <Table caption="Views and sign-ups per day" columns={["Day", { label: "Views", numeric: true }, { label: "Sign-ups", numeric: true }]} maxHeight="10rem" stickyHeader>
-        {visits.map((d) => (
-          <Tr key={d.label}>
-            <Td>{d.label}</Td>
-            <Td numeric>{d.values.views}</Td>
-            <Td numeric>{d.values.signups}</Td>
-          </Tr>
-        ))}
-      </Table>
-    </div>
+    <BarChart
+      data={visits}
+      series={[
+        { key: "views", label: "Views", tone: "info" },
+        { key: "signups", label: "Sign-ups" },
+      ]}
+      summary={`Views per day, 1 to 14 September: ${total} in total, most on 5 September (96).`}
+      dataTable={{ caption: "Views and sign-ups per day", labelHeader: "Day" }}
+    />
   );
 }
 
@@ -59,10 +48,10 @@ const doc: ComponentDoc = {
   slug: "bar-chart",
   title: "Bar chart",
   category: "Display",
-  description: "A lightweight bar chart drawn with CSS, for dashboards: overlapping or stacked series, a legend and a peak line. No chart library.",
+  description: "A lightweight bar chart drawn with CSS, for dashboards: overlapping or stacked series, a legend, a peak line and a “Show data” table. Shares colours and legend with Line chart. No chart library.",
   imports: `import { BarChart } from "@/components/ui/bar-chart/bar-chart";`,
   examples: examples(raw, [
-    ["Daily", Daily, { title: "Daily series with a data table", wide: true }],
+    ["Daily", Daily, { title: "Daily series with a data table", description: "dataTable adds a “Show data” disclosure with the numbers.", wide: true }],
     ["Stacked", Stacked, { title: "Stacked series", wide: true }],
   ]),
   props: [
@@ -77,13 +66,15 @@ const doc: ComponentDoc = {
         { name: "formatValue", type: "(value: number) => string", description: "Formats the peak label and hover titles." },
         { name: "legend", type: "boolean", default: "true", description: "Show the legend." },
         { name: "axis", type: "boolean", default: "true", description: "Show the first and last labels and the peak value." },
+        { name: "dataTable", type: "{ caption; labelHeader?; defaultOpen? }", description: "Adds a “Show data” disclosure with the values in a table (ChartData from chart)." },
       ],
+      note: "Series colours come from the --color-chart-* tokens and the legend from chart, shared with LineChart and Sparkline.",
     },
   ],
   a11y: [
     'The plot is one image (role="img") named by summary; bars are not announced one by one.',
-    "Pair the chart with a table of the same data (as in the first example) so every value is available as text.",
-    "The legend is a plain list, so series names are readable; colours are never the only way to tell series apart when a table is present.",
+    "dataTable adds a “Show data” disclosure with every value in a real table (or render your own table next to the chart).",
+    "The legend is a plain list, so series names are readable; series colours are >= 3:1 against the background in every theme, and the data table names every value.",
   ],
 };
 

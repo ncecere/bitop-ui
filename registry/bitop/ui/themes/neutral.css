@@ -60,19 +60,23 @@
   /* Status hues */
   --palette-blue-50: #eff5ff;
   --palette-blue-500: #3b82f6;
+  --palette-blue-600: #1d6fd8; /* 4.86:1 on white, 4.58:1 on neutral-50 */
   --palette-blue-700: #1d55c9; /* on blue-50 6.00:1 */
 
   --palette-red-50: #fef2f2;
   --palette-red-500: #e5484d;
+  --palette-red-600: #d1352b; /* 4.94:1 on white, 4.64:1 on neutral-50 */
   --palette-red-700: #b42318; /* white text 6.57:1 */
   --palette-red-800: #8f1d16; /* on red-50 8.15:1 */
 
   --palette-green-50: #edfbf3;
   --palette-green-500: #22a06b;
+  --palette-green-600: #16834f; /* 4.78:1 on white, 4.50:1 on neutral-50 */
   --palette-green-700: #0e6b3f; /* on green-50 6.17:1 */
 
   --palette-amber-50: #fff8eb;
   --palette-amber-500: #f5a524;
+  --palette-amber-600: #b0690b; /* 4.31:1 on white, 4.06:1 on neutral-50 */
   --palette-amber-700: #92560a;
   --palette-amber-800: #7a4508; /* on amber-50 7.41:1 */
 
@@ -143,6 +147,18 @@
   --color-neutral-subtle: var(--palette-neutral-100);
   --color-neutral-text: var(--palette-neutral-700); /* 9.0:1 on neutral-100 */
   --color-neutral-dot: var(--palette-neutral-400);
+
+  /*
+   * Chart series (line, area, bar, sparkline). Graphical objects: >= 3:1 on
+   * surface and bg (WCAG 1.4.11), so a line or bar is visible without its
+   * legend. Charts also carry a text summary and never rely on colour alone.
+   */
+  --color-chart-primary: var(--color-primary); /* 6.20:1 on surface, 5.83:1 on bg */
+  --color-chart-info: var(--palette-blue-600); /* 4.86:1 / 4.58:1 */
+  --color-chart-success: var(--palette-green-600); /* 4.78:1 / 4.50:1 */
+  --color-chart-warning: var(--palette-amber-600); /* 4.31:1 / 4.06:1 */
+  --color-chart-danger: var(--palette-red-600); /* 4.94:1 / 4.64:1 */
+  --color-chart-neutral: var(--palette-neutral-500); /* 5.29:1 / 4.97:1 */
 
   --color-focus-ring: var(--palette-accent-600); /* 5.83:1 on bg: always >= 3:1 */
   --color-focus-halo: rgba(75, 79, 214, 0.2); /* soft glow around the solid ring (decorative) */
@@ -237,6 +253,14 @@
   --color-neutral-subtle: #1c2029;
   --color-neutral-text: #c4cad4;
   --color-neutral-dot: #6b7383;
+
+  /* Chart series: >= 3:1 on surface and bg. */
+  --color-chart-primary: #7f86f2; /* 5.83:1 on surface, 6.10:1 on bg */
+  --color-chart-info: #5b9cf8; /* 6.68:1 / 6.99:1 */
+  --color-chart-success: #3fbf86; /* 7.96:1 / 8.34:1 */
+  --color-chart-warning: #f5a524; /* 9.10:1 / 9.52:1 */
+  --color-chart-danger: #f06a6a; /* 6.17:1 / 6.45:1 */
+  --color-chart-neutral: #8a92a0; /* 5.92:1 / 6.20:1 */
 
   --color-focus-ring: #8f95f5; /* 6.45:1 on raised, 7.21:1 on bg */
   --color-focus-halo: rgba(143, 149, 245, 0.28);

@@ -44,7 +44,6 @@ const DISPLAY_ONLY = new Set([
   "alert", // text + optional native dismiss <button>
   "aspect-ratio", // a CSS aspect-ratio box around media
   "badge",
-  "bar-chart", // CSS bars in one role="img"; no interaction
   "card",
   "empty-state",
   "image", // <img> with loading / error presentation; no interaction
@@ -55,6 +54,7 @@ const DISPLAY_ONLY = new Set([
   "page-header",
   "save-bar", // sticky container for a form's buttons and a status message
   "skeleton",
+  "sparkline", // one SVG trend in a role="img"; no interaction
   "spinner",
   "stat-card", // metric tile; `render`/`href` only turn the label into a link
   "table",
