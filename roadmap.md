@@ -102,7 +102,7 @@ This is the strongest evidence: both apps rebuild these patterns themselves. The
 ## E. CLI
 
 - [x] ⭐ **E1. `bitop diff --check` (exit 1 on drift).** Lets CI in each app detect stale copies. `diff` currently always exits 0. **S**
-- [ ] ⭐ **E2. Publish `@bitop-dev/cli` to npm**, from a tagged release with provenance. Define the version in one place; it's currently hard-coded in the script and in `package.json`. Needs decision **K2**. **S**
+- [x] ⭐ **E2. Publish `@bitop-dev/cli` to npm**, from a tagged release with provenance. Define the version in one place; it's currently hard-coded in the script and in `package.json`. Needs decision **K2**. **S** → **Published `@bitop-dev/cli@0.1.0` (tag `cli-v0.1.0`). Provenance is waiting on a public repo (K1).**
 - [ ] **E3. `bitop remove <item>`, and pruning obsolete files on `update`.** Skip files you've edited; the lock already records what was installed. **M**
 - [ ] **E4. Three-way merge on `update`.** Keep the originally installed content so `update` can merge upstream changes into edited files (with conflict markers) instead of skipping them. This also makes local patches like GW's `className` change survive updates. **M–L**
 - [ ] **E5. `init` sets up the project:** tsconfig `paths`, the Vite alias and the `bitop.css` import, each shown as a diff before writing. The smoke test currently does this by hand. **M**
@@ -154,11 +154,11 @@ This is the strongest evidence: both apps rebuild these patterns themselves. The
 
 These changes happen in the app repos.
 
-- [x] ⭐ **I1. RAG: move to the Bitop CLI.** → **PR [open-rag-system#1](https://github.com/ncecere/open-rag-system/pull/1), awaiting merge.**
+- [x] ⭐ **I1. RAG: move to the Bitop CLI.** → **PR [open-rag-system#1](https://github.com/ncecere/open-rag-system/pull/1), merged (`7d9601d`).**
   - Run `bitop init --overwrite` and `add` to create a lock file; its `components.json` points at `http://127.0.0.1:4180`.
   - This picks up the fixes it lacks: the prompt-input submit race, the number-input precision fix, the menu checkbox/radio parts and command-palette `finalFocus`.
   - Update its README, which still says "shadcn CLI". **S**
-- [x] ⭐ **I2. GW: move to the Bitop CLI and drop `scripts/vendor-bitop.mjs`.** → **PR [open-model-gateway#1](https://github.com/ncecere/open-model-gateway/pull/1), awaiting merge.**
+- [x] ⭐ **I2. GW: move to the Bitop CLI and drop `scripts/vendor-bitop.mjs`.** → **PR [open-model-gateway#1](https://github.com/ncecere/open-model-gateway/pull/1), merged (`74aef55`).**
   - The script hard-codes `/Users/nicholascecere/...` and hand-patches `CommandPalette`; upstream now has that `className` prop (`717dd5f`).
   - Take the newer `stat-card`. **S**
 - [ ] **I3. GW: drop Tailwind.** It's installed, with `@import "tailwindcss"`, but used for only about 3 utility classes. GW also hand-builds its dialog, toast, pagination and 27 `className="button"` elements; vendoring Bitop's versions removes both. **M**
@@ -173,7 +173,7 @@ These changes happen in the app repos.
   - keep using local checkouts
 
   This blocks E2, F1 (the published part), I4 and URL-based installs.
-- [ ] **K2. npm scope.** Is `@bitop` available to you on npm, and should the CLI be public, or live in a private registry?
+- [x] **K2. npm scope.** → **Decided: npm org `bitop-dev`, public package `@bitop-dev/cli`.** Is `@bitop` available to you on npm, and should the CLI be public, or live in a private registry?
 - [ ] **K3. Deferred components:**
   - `chart` (B9 proposes dependency-free SVG)
   - `persona` (would add the Rive runtime)
