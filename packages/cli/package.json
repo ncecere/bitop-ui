@@ -1,5 +1,5 @@
 {
-  "name": "@bitop/cli",
+  "name": "@bitop-dev/cli",
   "version": "0.1.0",
   "description": "Copy bitop-ui components (Base UI + CSS Modules + CSS variables) into your project as source you own.",
   "keywords": [

@@ -76,7 +76,7 @@ The shadcn CLI is used only for development-time registry build/schema validatio
 
 ## Releasing the CLI
 
-`@bitop/cli` is published to npm from `packages/cli` (the version lives only in `packages/cli/package.json`; `bitop --version` reads it).
+`@bitop-dev/cli` is published to npm from `packages/cli` (the version lives only in `packages/cli/package.json`; `bitop --version` reads it).
 
 1. Bump `version` in `packages/cli/package.json` (semver: new command/flag → minor, fix → patch).
 2. `npm run check && npm run smoke:consumer` (the smoke test installs the packed tarball into a fresh Vite app).

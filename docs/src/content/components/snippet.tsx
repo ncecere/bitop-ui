@@ -6,7 +6,7 @@ import raw from "./snippet.tsx?raw";
 export function Commands() {
   return (
     <div className={styles.stack}>
-      <Snippet code="npx @bitop/cli add conversation prompt-input" />
+      <Snippet code="npx @bitop-dev/cli add conversation prompt-input" />
       <Snippet code="SELECT count(*) FROM tickets WHERE status = 'open';" prefix=">" label="query" />
     </div>
   );

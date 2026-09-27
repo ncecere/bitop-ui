@@ -25,22 +25,22 @@ Components for chat and agent UIs (docs: the **AI** section and the full **Chat 
 Full guide: the docs site's **Installation** page and the [CLI reference](./packages/cli/README.md). In short, for a Vite + React 19 + TypeScript app with Node 20 (20.19+) or 22.12+:
 
 1. Add an `@/*` path alias to `tsconfig.json`/`tsconfig.app.json` and to `vite.config.ts`.
-2. Add the CLI ([`@bitop/cli`](https://www.npmjs.com/package/@bitop/cli) on npm) as a dev dependency:
+2. Add the CLI ([`@bitop-dev/cli`](https://www.npmjs.com/package/@bitop-dev/cli) on npm) as a dev dependency:
 
    ```bash
-   npm install -D @bitop/cli
+   npm install -D @bitop-dev/cli
    ```
 3. Point it at a registry. Choose **one** command; it writes `components.json`. If you already have a shadcn-style config, add `registries["@bitop"]` instead of replacing it.
 
    ```bash
-   npx @bitop/cli init --registry ../bitop-ui # checkout: nothing to build or serve
+   npx @bitop-dev/cli init --registry ../bitop-ui # checkout: nothing to build or serve
    # OR use a hosted registry:
-   npx @bitop/cli init --registry "https://OWNER.github.io/bitop-ui/r/{name}.json"
+   npx @bitop-dev/cli init --registry "https://OWNER.github.io/bitop-ui/r/{name}.json"
    ```
 4. Install the core (tokens, base styles, font, helpers; pulls in the neutral theme) and components:
 
    ```bash
-   npx @bitop/cli add core button dialog
+   npx @bitop-dev/cli add core button dialog
    ```
 5. Import the styles once: `import "@/components/ui/styles/bitop.css";` (and `themes/uf.css` after it for the UF brand, with `<html data-brand="uf">`).
 
@@ -51,10 +51,10 @@ Files land in your `ui` alias (`src/components/ui/<name>/<name>.tsx` + `<name>.m
 ### Keeping components up to date
 
 ```bash
-npx @bitop/cli diff button             # compare without writing
-npx @bitop/cli update                  # refresh installed items; skip local edits
-npx @bitop/cli add button --overwrite  # replace even your edits
-npx @bitop/cli list                    # registry items (* = installed)
+npx @bitop-dev/cli diff button             # compare without writing
+npx @bitop-dev/cli update                  # refresh installed items; skip local edits
+npx @bitop-dev/cli add button --overwrite  # replace even your edits
+npx @bitop-dev/cli list                    # registry items (* = installed)
 ```
 
 `bitop-lock.json` records file hashes, which is how `update` tells your edits apart from upstream changes. Commit it. Updates do not merge edits or delete obsolete files. Use `--dry-run` to preview without writing files or installing packages.
@@ -118,7 +118,7 @@ The registry is static JSON, so any static host works. The docs build (`dist/`) 
 
 - **`SITE_URL`** (or `VITE_SITE_URL`) is the absolute URL the site is served from, e.g. `https://OWNER.github.io/bitop-ui`. It sets the Vite base path, the registry URL shown in the docs and, for `registry:build`, turns `@bitop/*` dependencies into absolute URLs. Bitop resolves both namespaced and URL-form (`…/r/<name>.json`) dependencies by item name through the configured registry source; it does **not** fetch those dependencies from external origins.
 - **GitHub Pages**: `.github/workflows/ci.yml` builds with `SITE_URL` from the repository variable of that name (default: the Pages project URL) and has a `deploy` job that is skipped until you set the repository variable `DEPLOY_PAGES=true` and select "GitHub Actions" as the Pages source. `404.html` is a copy of `index.html` so client-side routes work on Pages.
-- Consumers compare with `npx @bitop/cli diff <item>` and refresh with `npx @bitop/cli update`. The lock file tracks file hashes, not pinned registry versions; `--overwrite` explicitly replaces local edits.
+- Consumers compare with `npx @bitop-dev/cli diff <item>` and refresh with `npx @bitop-dev/cli update`. The lock file tracks file hashes, not pinned registry versions; `--overwrite` explicitly replaces local edits.
 
 ## Contributing
 

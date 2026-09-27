@@ -102,7 +102,7 @@ This is the strongest evidence: both apps rebuild these patterns themselves. The
 ## E. CLI
 
 - [x] ⭐ **E1. `bitop diff --check` (exit 1 on drift).** Lets CI in each app detect stale copies. `diff` currently always exits 0. **S**
-- [ ] ⭐ **E2. Publish `@bitop/cli` to npm**, from a tagged release with provenance. Define the version in one place; it's currently hard-coded in the script and in `package.json`. Needs decision **K2**. **S**
+- [ ] ⭐ **E2. Publish `@bitop-dev/cli` to npm**, from a tagged release with provenance. Define the version in one place; it's currently hard-coded in the script and in `package.json`. Needs decision **K2**. **S**
 - [ ] **E3. `bitop remove <item>`, and pruning obsolete files on `update`.** Skip files you've edited; the lock already records what was installed. **M**
 - [ ] **E4. Three-way merge on `update`.** Keep the originally installed content so `update` can merge upstream changes into edited files (with conflict markers) instead of skipping them. This also makes local patches like GW's `className` change survive updates. **M–L**
 - [ ] **E5. `init` sets up the project:** tsconfig `paths`, the Vite alias and the `bitop.css` import, each shown as a diff before writing. The smoke test currently does this by hand. **M**
