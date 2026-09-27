@@ -151,6 +151,29 @@ describe("Conversation", () => {
   });
 });
 
+describe("Conversation stickToBottom", () => {
+  it("keeps a tall empty state at its top, and follows messages once enabled", async () => {
+    const metrics = { scrollHeight: 900, clientHeight: 300 };
+    function Chat({ empty, text = "Welcome" }: { empty: boolean; text?: string }) {
+      return (
+        <Conversation stickToBottom={!empty}>
+          <ConversationContent>{empty ? <p>{text}</p> : <p>First answer</p>}</ConversationContent>
+        </Conversation>
+      );
+    }
+    const { rerender } = render(<Chat empty />);
+    const log = screen.getByRole("log", { name: "Conversation" });
+    Object.defineProperty(log, "scrollHeight", { configurable: true, get: () => metrics.scrollHeight });
+    Object.defineProperty(log, "clientHeight", { configurable: true, get: () => metrics.clientHeight });
+    // The welcome grows (e.g. starter questions arrive): the view stays at the top.
+    rerender(<Chat empty text="Welcome, with starter questions" />);
+    await act(async () => {});
+    expect(log.scrollTop).toBe(0);
+    rerender(<Chat empty={false} />);
+    await waitFor(() => expect(log.scrollTop).toBe(900));
+  });
+});
+
 describe("ConversationAnnouncer", () => {
   it("announces transitions, not tokens", () => {
     const { rerender } = render(<ConversationAnnouncer status="ready" />);
