@@ -8,5 +8,7 @@ coverage/
 .DS_Store
 .env
 .env.*
+*.env
+.npmrc
 !.env.example
 screenshots/
