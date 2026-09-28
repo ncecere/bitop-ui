@@ -193,6 +193,11 @@
   overflow-wrap: break-word;
 }
 
+/* wrap="anywhere": long ids and URLs break instead of widening the column. */
+.cellText[data-wrap="anywhere"] :is(.cellPrimary, .cellSecondary) {
+  overflow-wrap: anywhere;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sort,
   .table tbody {

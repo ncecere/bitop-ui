@@ -516,6 +516,7 @@ const doc: ComponentDoc = {
       rows: [
         { name: "primary", type: "ReactNode", required: true, description: "The main line." },
         { name: "secondary", type: "ReactNode", description: "The smaller, muted second line." },
+        { name: "wrap", type: '"word" | "anywhere"', default: '"word"', description: "anywhere lets long unbroken values (ids, URLs) break, so they never set the column width." },
       ],
     },
     {

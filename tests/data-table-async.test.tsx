@@ -316,6 +316,9 @@ describe("DataTable row actions", () => {
     expect(screen.getByText("ada@example.com")).toBeInTheDocument();
     render(<CellText primary="Only" />);
     expect(screen.getByText("Only").parentElement?.childElementCount).toBe(1);
+    expect(screen.getByText("Only").parentElement).toHaveAttribute("data-wrap", "word");
+    render(<CellText primary="run_01J9ZQ8Y3C7M2" secondary="https://example.com/a/very/long/path" wrap="anywhere" />);
+    expect(screen.getByText("run_01J9ZQ8Y3C7M2").parentElement).toHaveAttribute("data-wrap", "anywhere");
     expect(await axe(container)).toHaveNoViolations();
   });
 });

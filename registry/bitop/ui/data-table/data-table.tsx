@@ -282,6 +282,12 @@ export type CellTextProps = Omit<ComponentPropsWithRef<"span">, "children"> & {
   primary: ReactNode;
   /** A smaller, muted second line, e.g. an email or id. */
   secondary?: ReactNode;
+  /**
+   * How long words break: `word` (default) wraps at spaces and breaks a word
+   * only if it can't fit; `anywhere` also lets long unbroken values (ids,
+   * URLs, hashes) break so they never set the column's width.
+   */
+  wrap?: "word" | "anywhere";
 };
 
 /**
@@ -291,9 +297,9 @@ export type CellTextProps = Omit<ComponentPropsWithRef<"span">, "children"> & {
  *
  * A space separates the lines for assistive technology and copy/paste.
  */
-export function CellText({ primary, secondary, className, ...props }: CellTextProps) {
+export function CellText({ primary, secondary, wrap = "word", className, ...props }: CellTextProps) {
   return (
-    <span {...props} className={cx(styles.cellText, className)}>
+    <span {...props} className={cx(styles.cellText, className)} data-wrap={wrap}>
       <span className={styles.cellPrimary}>{primary}</span>
       {secondary !== undefined && secondary !== null && secondary !== "" && (
         <>
