@@ -1,5 +1,5 @@
 /*
- * WCAG 2.1 AA contrast checks for every theme (neutral/uf × light/dark).
+ * WCAG 2.1 AA contrast checks for the theme (neutral × light/dark); a brand theme can reuse them.
  * Parses the theme CSS, resolves var() chains the way the cascade would for
  * <html data-theme=… data-brand=…>, and checks the documented token pairs.
  */
@@ -25,10 +25,9 @@ function parseBlocks(css: string): Block[] {
 }
 
 const neutral = parseBlocks(read("registry/bitop/ui/themes/neutral.css"));
-const uf = parseBlocks(read("registry/bitop/ui/themes/uf.css"));
 
 /** Declarations that apply to <html> with the given attributes, in cascade order. */
-function tokensFor(theme: "light" | "dark", brand: "neutral" | "uf") {
+function tokensFor(theme: "light" | "dark", brand: "neutral") {
   const applies = (sel: string) => {
     if (sel === ":root") return true;
     if (sel.includes(" ")) return false; // descendant selectors target subtrees
@@ -38,7 +37,7 @@ function tokensFor(theme: "light" | "dark", brand: "neutral" | "uf") {
   const specificity = (sel: string) => (sel === ":root" ? 1 : (sel.match(/\[/g) ?? []).length);
   const rules: { spec: number; order: number; decls: Map<string, string> }[] = [];
   let order = 0;
-  for (const block of [...neutral, ...uf]) {
+  for (const block of neutral) {
     const matching = block.selectors.filter(applies);
     order++;
     if (matching.length) rules.push({ spec: Math.max(...matching.map(specificity)), order, decls: block.decls });
@@ -139,8 +138,6 @@ const isHex = (v: string) => /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v);
 describe.each([
   ["neutral", "light"],
   ["neutral", "dark"],
-  ["uf", "light"],
-  ["uf", "dark"],
 ] as const)("%s theme, %s", (brand, theme) => {
   const token = tokensFor(theme, brand);
   it.each(pairs)("%s on %s ≥ %d:1", (fg, bg, min) => {
@@ -152,8 +149,6 @@ describe.each([
   });
 });
 
-test("the uf theme really overrides the brand tokens", () => {
-  expect(tokensFor("light", "uf")("--color-primary")).toBe("#0021a5");
+test("the neutral theme's brand tokens", () => {
   expect(tokensFor("light", "neutral")("--color-primary")).toBe("#4b4fd6");
-  expect(tokensFor("dark", "uf")("--color-primary")).toBe("#3358f0");
 });

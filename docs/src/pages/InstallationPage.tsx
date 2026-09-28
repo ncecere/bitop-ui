@@ -50,7 +50,7 @@ export default defineConfig({
 
 const mainTsx = `// src/main.tsx
 import "@/components/ui/styles/bitop.css"; // font, tokens, neutral theme, base styles
-import "@/components/ui/themes/uf.css";    // optional brand theme, after bitop.css`;
+import "@/components/ui/themes/acme.css";  // optional: your own brand theme, after bitop.css`;
 
 const noFlash = `<!-- index.html, inside <head>: apply the saved colour mode before first paint -->
 <script>
@@ -75,7 +75,7 @@ export function NewProject() {
 const tree = `src/
 ├─ components/ui/
 │  ├─ styles/     bitop.css, tokens.css, global.css, popup.module.css   (core)
-│  ├─ themes/     neutral.css (theme-neutral), uf.css (theme-uf)
+│  ├─ themes/     neutral.css (theme-neutral)
 │  ├─ button/     button.tsx, button.module.css
 │  └─ dialog/     dialog.tsx, dialog.module.css
 └─ lib/
@@ -144,8 +144,8 @@ export function InstallationPage() {
       <DocSection id="core" title="4. Add the core and a theme">
         <Prose>
           <p>
-            <C>core</C> installs the tokens, base styles, Inter font and helpers, and pulls in the default neutral theme. Add <C>theme-uf</C> as well if you
-            want the UF brand.
+            <C>core</C> installs the tokens, base styles, Inter font and helpers, and pulls in the default neutral theme. For your own brand colours, add
+            a brand theme (see Theming).
           </p>
         </Prose>
         <InstallCommand items={["core"]} label="core install command" />

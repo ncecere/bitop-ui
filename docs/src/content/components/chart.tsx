@@ -74,7 +74,7 @@ const doc: ComponentDoc = {
     },
   ],
   a11y: [
-    "Tokens --color-chart-primary … --color-chart-neutral are >= 3:1 on surface and background in all four theme/mode combinations (tests/contrast.test.ts). In the uf theme the first two series are UF blue and orange.",
+    "Tokens --color-chart-primary … --color-chart-neutral are >= 3:1 on surface and background in light and dark mode (tests/contrast.test.ts). In the uf theme the first two series are UF blue and orange.",
     "Line swatches repeat the series' dash pattern, so series differ by more than hue.",
     "ChartData is a Disclosure (button with aria-expanded) around a captioned table with row headers.",
   ],

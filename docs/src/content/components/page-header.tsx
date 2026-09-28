@@ -48,7 +48,7 @@ export function DetailWithFacts() {
         <FactsLine
           items={[
             { label: "Type", value: "Website", icon: <Globe /> },
-            { value: "registrar.ufl.edu · crawl, depth 2, ≤60 pages" },
+            { value: "registrar.example.edu · crawl, depth 2, ≤60 pages" },
             { value: "weekly · next Oct 3" },
             { value: "58 documents" },
             { value: "used by 2 agents", icon: <Bot /> },

@@ -1,7 +1,7 @@
 import { PageHeader } from "@/registry/bitop/ui/page-header/page-header";
 import { Table, Td, Tr } from "@/registry/bitop/ui/table/table";
 import { TextLink } from "@/registry/bitop/ui/text-link/text-link";
-import { C, CodeBlock, DocSection, InstallCommand, Prose } from "../kit/kit";
+import { C, CodeBlock, DocSection, Prose } from "../kit/kit";
 import { Link } from "../router";
 import styles from "./pages.module.css";
 
@@ -62,7 +62,7 @@ const customTheme = `/* src/components/ui/themes/acme.css: import it after bitop
 
 const darkSnippet = `<html data-theme="dark">                 <!-- whole page -->
 <section data-theme="dark">…</section>    <!-- or just a subtree -->
-<html data-brand="uf" data-theme="dark">  <!-- brand + mode -->`;
+<html data-brand="acme" data-theme="dark">  <!-- brand + mode -->`;
 
 export function ThemingPage() {
   return (
@@ -131,25 +131,11 @@ export function ThemingPage() {
         </Prose>
       </DocSection>
 
-      <DocSection id="uf" title="UF theme">
-        <Prose>
-          <p>
-            <C>theme-uf</C> reproduces the University of Florida palette (blue <C>#0021A5</C>, orange <C>#FA4616</C>) by overriding the brand tokens
-            only. It is opt-in: import it after <C>bitop.css</C> and set <C>data-brand="uf"</C>.
-          </p>
-        </Prose>
-        <InstallCommand items={["theme-uf"]} label="UF theme install command" />
-        <CodeBlock code={`import "@/components/ui/themes/uf.css";\n\n<html data-brand="uf">`} label="UF theme usage" language="tsx" />
-        <Prose>
-          <p>UF orange is 3.53:1 on white, so it is used for decorative marks only, never for text or control boundaries.</p>
-        </Prose>
-      </DocSection>
-
       <DocSection id="custom" title="Make your own theme">
         <Prose>
           <ol>
             <li>
-              Copy <C>themes/uf.css</C> to <C>themes/acme.css</C> and change the selector to <C>[data-brand="acme"]</C>. Override only semantic tokens.
+              Create <C>themes/acme.css</C> with the selectors shown above (<C>[data-brand="acme"]</C> and its dark block). Override only semantic tokens.
             </li>
             <li>Give every token you override a dark value too, in the dark selector block.</li>
             <li>

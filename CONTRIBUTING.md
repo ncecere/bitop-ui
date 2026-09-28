@@ -26,7 +26,7 @@ Create `registry/bitop/ui/date-field/date-field.tsx` and `date-field.module.css`
   - shared popup styles: `import popup from "@/registry/bitop/ui/styles/popup.module.css";`
   - helpers: `import { cx, dataFlag } from "@/registry/bitop/lib/bitop-utils";`
   - never a relative import into another item's folder. Keep registry imports under `@/registry/bitop/ui/` or `@/registry/bitop/lib/` so Bitop can rewrite them to consumer aliases; avoid other `/ui` paths for compatibility with the registry validator.
-- If you need a new colour, add a semantic token to **both** blocks of `themes/neutral.css` (and `themes/uf.css` if it's a brand colour), with its contrast ratio in a comment, and add the pair to `tests/contrast.test.ts`.
+- If you need a new colour, add a semantic token to **both** blocks of `themes/neutral.css`, with its contrast ratio in a comment, and add the pair to `tests/contrast.test.ts`.
 
 ### 2. Registry entry
 

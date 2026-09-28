@@ -13,11 +13,11 @@ export function SourceDetails() {
     <DescriptionList
       dividers
       items={[
-        { label: "Start URL", value: <TextLink href="https://registrar.ufl.edu" external>registrar.ufl.edu</TextLink> },
+        { label: "Start URL", value: <TextLink href="https://registrar.example.edu" external>registrar.example.edu</TextLink> },
         { label: "Mode", value: "Crawl, depth 2, up to 60 pages" },
         { label: "Schedule", value: <>Weekly · next run <Time value={new Date(2026, 9, 3, 2)} format="date" /></> },
         { label: "Status", value: <StatusBadge tone="success">Ready</StatusBadge> },
-        { label: "Embedding profile", value: "Nomic 768 (NaviGator)" },
+        { label: "Embedding profile", value: "Nomic 768 (campus gateway)" },
         { label: "Description", value: null },
       ]}
     />

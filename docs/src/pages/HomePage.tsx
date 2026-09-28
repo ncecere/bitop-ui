@@ -20,7 +20,7 @@ const features = [
   { icon: <Layers aria-hidden />, title: "Base UI behaviour", text: "Focus management, keyboard interaction and ARIA come from Base UI. We add the styling and sensible APIs." },
   { icon: <Palette aria-hidden />, title: "CSS variables + CSS Modules", text: "No Tailwind and no runtime styling. Semantic tokens drive every component, so a theme is a small CSS file." },
   { icon: <Accessibility aria-hidden />, title: "WCAG 2.1 AA", text: "Contrast is checked for every theme in CI, and every docs page is tested with axe." },
-  { icon: <Moon aria-hidden />, title: "Dark mode and brands", text: "A neutral default theme with dark mode, plus an opt-in UF theme. Add your own brand the same way." },
+  { icon: <Moon aria-hidden />, title: "Dark mode and brands", text: "A neutral default theme with dark mode. Add your own brand as a small override of the semantic tokens." },
   { icon: <Terminal aria-hidden />, title: "One command per component", text: "bitop add dialog pulls the component, its dependencies and the core styles. bitop update refreshes files you haven't edited." },
 ];
 

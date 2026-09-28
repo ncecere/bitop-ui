@@ -40,7 +40,7 @@ for (const item of registry.items) {
   items.set(item.name, item);
 }
 
-const FOUNDATION = new Set(["core", "theme-neutral", "theme-uf"]);
+const FOUNDATION = new Set(["core", "theme-neutral"]);
 const shipped = new Map();
 const sourceRoot = fs.realpathSync(path.join(root, "registry/bitop"));
 

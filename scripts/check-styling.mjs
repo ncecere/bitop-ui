@@ -140,7 +140,7 @@ function checkColours(file, src, css) {
     fail(
       `${rel(file)}:${lineOf(code, m.index)}`,
       `literal colour "${m[0].replace(/\($/, "(…)")}"`,
-      "use a semantic token such as var(--color-text-muted); add a new token to themes/neutral.css (and uf.css) with its contrast ratio if none fits",
+      "use a semantic token such as var(--color-text-muted); add a new token to themes/neutral.css with its contrast ratio if none fits",
     );
   }
   if (css && /@tailwind\b|@apply\b/.test(code)) fail(rel(file), "Tailwind directive (@tailwind/@apply)", "write plain CSS in the module");

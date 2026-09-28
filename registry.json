@@ -63,26 +63,6 @@
       ]
     },
     {
-      "name": "theme-uf",
-      "type": "registry:theme",
-      "title": "UF theme",
-      "description": "Opt-in University of Florida brand override (blue #0021A5, orange #FA4616) for light and dark. Apply with data-brand=\"uf\".",
-      "registryDependencies": [
-        "@bitop/core"
-      ],
-      "files": [
-        {
-          "path": "registry/bitop/ui/themes/uf.css",
-          "type": "registry:file",
-          "target": "@ui/themes/uf.css"
-        }
-      ],
-      "categories": [
-        "theme"
-      ],
-      "docs": "bitop-ui: import \"@/components/ui/themes/uf.css\" after bitop.css and set data-brand=\"uf\" on <html>."
-    },
-    {
       "name": "accordion",
       "type": "registry:ui",
       "title": "Accordion",

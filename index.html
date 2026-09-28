@@ -7,14 +7,12 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>bitop-ui</title>
     <script>
-      // Apply the saved colour mode and brand before first paint (no flash).
+      // Apply the saved colour mode before first paint (no flash).
       (function () {
         try {
           var m = localStorage.getItem("bitop-color-mode");
           var d = m === "dark" || (m !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
           document.documentElement.dataset.theme = d ? "dark" : "light";
-          var b = localStorage.getItem("bitop-docs-brand");
-          if (b === "uf") document.documentElement.dataset.brand = "uf";
         } catch (e) {}
       })();
     </script>

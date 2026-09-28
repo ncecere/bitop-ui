@@ -4,7 +4,7 @@
 #
 #   1. build the registry and docs for http://127.0.0.1:$PORT and serve them
 #   2. create a Vite react-ts app, add the @/ alias, `bitop init` components.json
-#   3. install core, theme-uf and half the components from the served registry
+#   3. install core and half the components from the served registry
 #      (npm dependencies are installed by the CLI)
 #   4. install the rest straight from this checkout, then check a re-run is a no-op
 #   5. render AppShell + Dialog + Table + CommandPalette, a small AI chat
@@ -63,8 +63,8 @@ BITOP=("$APP/node_modules/.bin/bitop")
 ITEMS=()
 while IFS= read -r name; do ITEMS+=("$name"); done < <(node -e 'for (const i of require(process.argv[1]).items) if (i.type === "registry:ui") console.log(i.name)' "$ROOT/registry.json")
 HALF=$(( ${#ITEMS[@]} / 2 ))
-echo "Installing core, theme-uf and ${HALF} components from the hosted registry ($BASE)…"
-"${BITOP[@]}" add core theme-uf "${ITEMS[@]:0:$HALF}"
+echo "Installing core and ${HALF} components from the hosted registry ($BASE)…"
+"${BITOP[@]}" add core "${ITEMS[@]:0:$HALF}"
 echo "Installing the other $(( ${#ITEMS[@]} - HALF )) components straight from the checkout…"
 "${BITOP[@]}" add theme-neutral "${ITEMS[@]:$HALF}" --registry "$ROOT"
 # A second run must be a no-op.
@@ -75,7 +75,6 @@ cat > src/main.tsx <<'EOF'
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "@/components/ui/styles/bitop.css";
-import "@/components/ui/themes/uf.css";
 import App from "./App.tsx";
 
 createRoot(document.getElementById("root")!).render(

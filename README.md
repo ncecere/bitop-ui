@@ -8,7 +8,7 @@ A copy-and-own React component library. The `bitop` CLI (`packages/cli`) copies 
 - **WCAG 2.1 AA**: contrast is tested for every theme, and every docs page is checked with axe.
 - **Enforced**: `npm run styling:check` (`scripts/check-styling.mjs`) fails the build on Tailwind/Radix/CSS-in-JS/class-name utilities or other component kits, global CSS in a component folder, literal colours or px inline styles, and interactive components that don't build on Base UI.
 
-The registry has 124 items: `core`, two themes (`theme-neutral`, the default, and the opt-in `theme-uf`) and 121 components. They include familiar UI patterns (accordion, calendar, combobox, data-table, dialog, drawer, menubar, navigation-menu, sheet, slider, toggle-group…) plus app-level pieces (`app-shell`, `command-palette`, `page-header`, `stat-card`) and the AI elements below.
+The registry has 123 items: `core`, the `theme-neutral` theme and 121 components. They include familiar UI patterns (accordion, calendar, combobox, data-table, dialog, drawer, menubar, navigation-menu, sheet, slider, toggle-group…) plus app-level pieces (`app-shell`, `command-palette`, `page-header`, `stat-card`) and the AI elements below.
 
 For list and detail pages and dashboards: `data-table` (sorting, selection with a bulk action bar, a faceted `filter-bar` with chips and URL helpers, a Columns menu, cursor paging), `description-list` (key/value facts and a facts line), `diff-viewer` (text and JSON before/after), `meter` (usage against a limit), `checklist` (onboarding steps), `date-picker` range presets, and dependency-free charts (`bar-chart`, `line-chart`, `sparkline`) sharing the `chart` legend, data table and `--color-chart-*` tokens.
 
@@ -44,7 +44,7 @@ Full guide: the docs site's **Installation** page and the [CLI reference](./pack
    ```bash
    npx @bitop-dev/cli add core button dialog
    ```
-5. Import the styles once: `import "@/components/ui/styles/bitop.css";` (and `themes/uf.css` after it for the UF brand, with `<html data-brand="uf">`).
+5. Import the styles once: `import "@/components/ui/styles/bitop.css";`. For your own brand colours, add a small theme override after it (see the Theming docs).
 
 Alternatively, run `node ../bitop-ui/packages/cli/bin/bitop.mjs` from your project with the same arguments, without installing the CLI. `npx --no-install` uses the locally installed CLI rather than downloading an unrelated package.
 
@@ -88,7 +88,7 @@ The shadcn CLI is a **development-only** dependency for registry build/schema va
 registry.json                 registry source of truth (items, files, dependencies)
 registry/bitop/ui/<name>/     component source: <name>.tsx + <name>.module.css
 registry/bitop/ui/styles/     core: bitop.css (entry), tokens.css, global.css, popup.module.css
-registry/bitop/ui/themes/     neutral.css (default, light + dark), uf.css (opt-in brand)
+registry/bitop/ui/themes/     neutral.css (default, light + dark)
 registry/bitop/lib/           core: bitop-utils.ts (cx, dataFlag, Tone)
 docs/src/                     docs site (Vite + React), dogfooding the registry
 docs/src/content/components/  one docs file per component (examples, props, a11y notes)
@@ -132,4 +132,4 @@ MIT, see [LICENSE](./LICENSE). The AI elements' design credit to Vercel's AI Ele
 
 ## Origin
 
-The components were extracted from the UI library of the Open RAG System project and generalised (brand wording removed, the UF palette moved into the opt-in `theme-uf`).
+The components were extracted from the UI library of the Grounded project and generalised (brand wording and institution colours removed).

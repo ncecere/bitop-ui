@@ -159,7 +159,7 @@ These changes happen in the app repos.
   - This picks up the fixes it lacks: the prompt-input submit race, the number-input precision fix, the menu checkbox/radio parts and command-palette `finalFocus`.
   - Update its README, which still says "shadcn CLI". **S**
 - [x] ⭐ **I2. GW: move to the Bitop CLI and drop `scripts/vendor-bitop.mjs`.** → **PR [open-model-gateway#1](https://github.com/ncecere/open-model-gateway/pull/1), merged (`74aef55`).**
-  - The script hard-codes `/Users/nicholascecere/...` and hand-patches `CommandPalette`; upstream now has that `className` prop (`717dd5f`).
+  - The script hard-codes an absolute local path and hand-patches `CommandPalette`; upstream now has that `className` prop (`717dd5f`).
   - Take the newer `stat-card`. **S**
 - [ ] **I3. GW: drop Tailwind.** It's installed, with `@import "tailwindcss"`, but used for only about 3 utility classes. GW also hand-builds its dialog, toast, pagination and 27 `className="button"` elements; vendoring Bitop's versions removes both. **M**
 - [ ] **I4. Automated drift checks in each app:** a scheduled CI job runs `bitop diff --check` (E1), and later a bot runs `bitop update` and opens a PR. **M**

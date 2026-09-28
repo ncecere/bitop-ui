@@ -1,6 +1,6 @@
 /*
  * The docs site shell. It is built entirely from bitop-ui components
- * (AppShell, CommandPalette, Select, ColorModeToggle, Toaster…).
+ * (AppShell, CommandPalette, ColorModeToggle, Toaster…).
  */
 import { ArrowRight, BookOpen, Box, Download, Home, MessagesSquare, Moon, Palette } from "lucide-react";
 import { type ComponentType, lazy, type LazyExoticComponent, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -18,7 +18,6 @@ import {
 } from "@/registry/bitop/ui/app-shell/app-shell";
 import { ColorModeToggle, setColorMode, useColorMode } from "@/registry/bitop/ui/color-mode/color-mode";
 import type { CommandGroup } from "@/registry/bitop/ui/command-palette/command-palette";
-import { Select } from "@/registry/bitop/ui/select/select";
 import { Toaster } from "@/registry/bitop/ui/toast/toast";
 import { TooltipProvider } from "@/registry/bitop/ui/tooltip/tooltip";
 import { docsByCategory, findDoc } from "./content";
@@ -30,29 +29,6 @@ import { NotFoundPage } from "./pages/NotFoundPage";
 import { PageLoadError, PageLoading } from "./pages/PageLoading";
 import { Link, RouterProvider, routeFocusTarget, useRouter } from "./router";
 import styles from "./App.module.css";
-
-export type BrandTheme = "neutral" | "uf";
-const BRAND_KEY = "bitop-docs-brand";
-
-function readBrand(): BrandTheme {
-  if (typeof document === "undefined") return "neutral";
-  return document.documentElement.dataset.brand === "uf" ? "uf" : "neutral";
-}
-
-export function useBrand() {
-  const [brand, setBrand] = useState<BrandTheme>(readBrand);
-  useEffect(() => {
-    const root = document.documentElement;
-    if (brand === "uf") root.dataset.brand = "uf";
-    else delete root.dataset.brand;
-    try {
-      localStorage.setItem(BRAND_KEY, brand);
-    } catch {
-      /* ignore */
-    }
-  }, [brand]);
-  return [brand, setBrand] as const;
-}
 
 const pages = [
   { to: "/", label: "Introduction", icon: <Home aria-hidden /> },
@@ -152,7 +128,6 @@ function DocsShell() {
     paletteNavigated.current = false;
     return routeFocusTarget() ?? true;
   };
-  const [brand, setBrand] = useBrand();
   const { resolved } = useColorMode();
   const togglePalette = useCallback(() => setPaletteOpen((o) => !o), [setPaletteOpen]);
   useCommandPaletteShortcut(togglePalette);
@@ -188,7 +163,6 @@ function DocsShell() {
       label: "Preferences",
       items: [
         { id: "dark", label: resolved === "dark" ? "Switch to light mode" : "Switch to dark mode", icon: <Moon aria-hidden />, keywords: ["theme", "dark", "light"], onSelect: () => setColorMode(resolved === "dark" ? "light" : "dark") },
-        { id: "brand", label: brand === "uf" ? "Use the neutral theme" : "Use the UF theme", icon: <Palette aria-hidden />, keywords: ["theme", "brand", "uf", "neutral"], onSelect: () => setBrand(brand === "uf" ? "neutral" : "uf") },
       ],
     },
   ];
@@ -224,18 +198,6 @@ function DocsShell() {
           start={<CommandPaletteTrigger onClick={() => setPaletteOpen(true)} label="Search docs…" className={styles.search} />}
           end={
             <>
-              <Select
-                label="Theme"
-                hideLabel
-                size="sm"
-                value={brand}
-                onValueChange={(v) => v && setBrand(v)}
-                items={[
-                  { value: "neutral", label: "Neutral theme" },
-                  { value: "uf", label: "UF theme" },
-                ]}
-                className={styles.brandSelect}
-              />
               <ColorModeToggle />
             </>
           }

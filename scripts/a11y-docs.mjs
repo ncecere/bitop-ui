@@ -21,8 +21,6 @@ const pages = ["/", "/installation", "/theming", "/components", "/examples/chat"
 const modes = [
   ["light", "neutral"],
   ["dark", "neutral"],
-  ["light", "uf"],
-  ["dark", "uf"],
 ];
 
 const ab = (...args) => execFileSync("agent-browser", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
