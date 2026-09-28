@@ -122,6 +122,9 @@ const pairs: [string, string, number][] = [
   ...["primary", "info", "success", "warning", "danger", "neutral"].flatMap((tone): [string, string, number][] => [
     [`--color-chart-${tone}`, "--color-surface", UI],
     [`--color-chart-${tone}`, "--color-bg", UI],
+    // The paler variant: the back series of an overlapping bar chart and its legend swatch.
+    [`--color-chart-${tone}-soft`, "--color-surface", UI],
+    [`--color-chart-${tone}-soft`, "--color-bg", UI],
   ]),
   ["--color-warning", "--color-surface", UI],
   // Diff viewer: code and line numbers on the added / removed tints, fold links.

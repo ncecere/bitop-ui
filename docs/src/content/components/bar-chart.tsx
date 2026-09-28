@@ -75,6 +75,7 @@ const doc: ComponentDoc = {
     'The plot is one image (role="img") named by summary; bars are not announced one by one.',
     "dataTable adds a “Show data” disclosure with every value in a real table (or render your own table next to the chart).",
     "The legend is a plain list, so series names are readable; series colours are >= 3:1 against the background in every theme, and the data table names every value.",
+    "In the overlap layout the back series is drawn in a paler token (--color-chart-*-soft), not with opacity, so it stays >= 3:1 and differs from the front series by lightness as well as hue.",
   ],
 };
 
