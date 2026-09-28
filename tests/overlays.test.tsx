@@ -7,7 +7,7 @@ import { CommandPalette, useCommandPaletteShortcut } from "@/registry/bitop/ui/c
 import { AlertDialog, Dialog, DialogClose } from "@/registry/bitop/ui/dialog/dialog";
 import { Field } from "@/registry/bitop/ui/field/field";
 import { Input } from "@/registry/bitop/ui/input/input";
-import { Menu, MenuItem, MenuSeparator } from "@/registry/bitop/ui/menu/menu";
+import { Menu, MenuItem, MenuLinkItem, MenuSeparator } from "@/registry/bitop/ui/menu/menu";
 import { Toaster, toast } from "@/registry/bitop/ui/toast/toast";
 
 describe("Dialog", () => {
@@ -151,6 +151,25 @@ describe("Menu", () => {
 
     expect(onDelete).toHaveBeenCalledTimes(1);
     expect(onRename).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+
+  it("closes after a link item is clicked (client-side routes don't unload the page)", async () => {
+    const user = userEvent.setup();
+    const onNavigate = vi.fn((e: { preventDefault: () => void }) => e.preventDefault());
+    render(
+      <Menu trigger={<Button variant="secondary">Account</Button>}>
+        <MenuLinkItem href="/settings" onClick={onNavigate}>
+          Settings
+        </MenuLinkItem>
+        <MenuLinkItem href="/help" closeOnClick={false}>
+          Help
+        </MenuLinkItem>
+      </Menu>,
+    );
+    await user.click(screen.getByRole("button", { name: "Account" }));
+    await user.click(within(await screen.findByRole("menu")).getByRole("menuitem", { name: "Settings" }));
+    expect(onNavigate).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
   });
 });
