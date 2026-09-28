@@ -21,7 +21,7 @@ git tag v1.4.0 && git push --tags
 | Step | Owner | Status |
 | --- | --- | --- |
 | Tests | CI | ✅ |
-| Changelog | Docs team | In review |
+| Changelog | Docs team | In review<br>Due Friday |
 
 - [x] Draft notes
 - [ ] Announce in \`#releases\`
@@ -134,7 +134,7 @@ import { closeMarkdown } from "@/components/ui/response/close-markdown";`,
         { name: "components", type: "Components", description: "react-markdown element overrides, merged over the defaults." },
         { name: "highlight", type: "(code, lang) => ReactNode", description: "Syntax highlighter for fenced code (see Code block)." },
         { name: "headingOffset", type: "number", default: "2", description: "Levels added to Markdown headings (# → h3), so answers never compete with the page's h1/h2." },
-        { name: "skipHtml", type: "boolean", default: "false", description: "Drop raw HTML instead of showing it as text." },
+        { name: "skipHtml", type: "boolean", default: "false", description: "Drop raw HTML instead of showing it as text. A bare <br> in a table cell is always a line break." },
         { name: "remarkPlugins", type: "PluggableList", description: "Extra remark plugins after remark-gfm." },
         {
           name: "images",
@@ -160,7 +160,7 @@ import { closeMarkdown } from "@/components/ui/response/close-markdown";`,
     "Links to other sites open in a new tab with rel=\"noreferrer noopener\" and say “(opens in a new tab)”.",
     "Headings are demoted by two levels by default, keeping the page outline intact.",
     "Wide tables and code blocks scroll horizontally and are keyboard-focusable.",
-    "Raw HTML is shown as text (or dropped with skipHtml), and unsafe URLs such as javascript: are removed.",
+    "Raw HTML is shown as text (or dropped with skipHtml), and unsafe URLs such as javascript: are removed. The one exception is a bare <br> (<br/>, <br />) inside a table cell, which becomes a line break.",
     "Citation chips are named after their source (“Source 1: Parental leave policy (2025)”).",
     "A cross-origin image's placeholder is a real button named “Load image from <host>: <alt text>”; once pressed, focus moves to the loaded image instead of being lost.",
   ],

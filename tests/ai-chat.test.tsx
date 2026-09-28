@@ -432,6 +432,35 @@ describe("Response", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
+  it("renders <br> in table cells as a line break, and no other raw HTML", async () => {
+    const md = [
+      "| Step | Notes |",
+      "| - | - |",
+      "| One | first<br>second<br/>third<br />fourth<BR> |",
+      "| Two | *a<br>b* `c<br>d` <br onclick=\"x\"> <b>bold</b> |",
+      "",
+      "Outside<br>a table.",
+    ].join("\n");
+    const { container } = render(<Response>{md}</Response>);
+    const [one, two] = screen.getAllByRole("cell").filter((_c, i) => i % 2 === 1);
+    expect(one!.querySelectorAll("br")).toHaveLength(4);
+    expect(one!.textContent).not.toMatch(/</);
+    expect(one).toHaveTextContent("first second third fourth");
+    // Inside emphasis too; not in code, and never a br with attributes or other tags.
+    expect(two!.querySelector("em br")).not.toBeNull();
+    expect(two!.querySelectorAll("br")).toHaveLength(1);
+    expect(two).toHaveTextContent('c<br>d <br onclick="x"> <b>bold</b>');
+    expect(container.querySelector("b, [onclick]")).toBeNull();
+    expect(screen.getByText(/Outside/)).toHaveTextContent("Outside<br>a table.");
+    expect(container.querySelectorAll("br")).toHaveLength(5);
+    expect(await axe(container)).toHaveNoViolations();
+
+    // skipHtml drops other raw HTML but keeps the cell breaks.
+    const { container: skipped } = render(<Response skipHtml>{md}</Response>);
+    expect(skipped.querySelectorAll("td br")).toHaveLength(5);
+    expect(skipped).not.toHaveTextContent("<b>");
+  });
+
   it("closes an open code fence while streaming", () => {
     render(<Response streaming>{"Here:\n\n```ts\nconst a = **1"}</Response>);
     expect(screen.getByRole("button", { name: "Copy TypeScript code" })).toBeInTheDocument();
