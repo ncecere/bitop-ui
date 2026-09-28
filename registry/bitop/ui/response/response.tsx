@@ -28,8 +28,11 @@ import styles from "./response.module.css";
  *   - Markdown headings are demoted (# → h3 by default) so an answer never
  *     competes with the page's own h1/h2.
  *   - With `citations`, markers like [1] or [1, 3] become InlineCitation
- *     chips for those (1-based) sources. Markers inside code or links, and
- *     numbers with no matching source, stay as text.
+ *     chips for those (1-based) sources. Markers inside code (inline or
+ *     block) or links, brackets attached to an identifier (a[3], m[i][2],
+ *     [3]int) or starting a link ([1](url)), and numbers with no matching
+ *     source, stay as text: the same rules as the server's
+ *     (internal/agents/markers.go).
  *   - Images: an answer (e.g. one steered by a prompt-injected document)
  *     must not make the browser fetch arbitrary URLs, which could track the
  *     reader or leak data in the query string. So by default
@@ -81,12 +84,27 @@ export type ResponseImages = "click" | "show" | "alt";
 type MdNode = { type: string; value?: string; children?: MdNode[]; data?: Record<string, unknown> };
 
 const MARKER = /\[(\d{1,3}(?:\s*,\s*\d{1,3})*)\]/g;
+const IDENT = /[A-Za-z0-9_]/;
 const SKIP = new Set(["link", "linkReference", "inlineCode", "code", "definition", "html", "image", "imageReference"]);
+
+/**
+ * Whether the marker at value[start, end) is attached to an identifier or a
+ * link rather than being a citation: a[3], arr_2[0], m[i][2] (after a "]"
+ * that doesn't end a marker), [3]int, [1](url).
+ */
+function attached(value: string, start: number, end: number, lastEnd: number): boolean {
+  const before = value[start - 1] ?? "";
+  const after = value[end] ?? "";
+  return IDENT.test(before) || (before === "]" && lastEnd !== start) || IDENT.test(after) || after === "(";
+}
 
 function splitMarkers(value: string): MdNode[] | null {
   const out: MdNode[] = [];
   let last = 0;
+  let lastEnd = -1; // end of the last marker
   for (const m of value.matchAll(MARKER)) {
+    if (attached(value, m.index, m.index + m[0].length, lastEnd)) continue;
+    lastEnd = m.index + m[0].length;
     if (m.index > last) out.push({ type: "text", value: value.slice(last, m.index) });
     const numbers = m[1]!.split(/\s*,\s*/).join(",");
     out.push({
