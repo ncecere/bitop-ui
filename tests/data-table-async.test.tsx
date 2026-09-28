@@ -349,20 +349,81 @@ describe("DataTable onRowClick", () => {
     expect(onEdit).toHaveBeenCalledWith("r1");
     expect(onRowClick).toHaveBeenCalledTimes(1);
 
-    // Rows are in the tab order and open with Enter or Space.
+    // The row itself isn't a tab stop: its row header's content is a button, opened with Enter or Space.
     const row = screen.getByRole("rowheader", { name: "beta.pdf" }).closest("tr")!;
-    expect(row).toHaveAttribute("tabindex", "0");
-    row.focus();
+    expect(row).not.toHaveAttribute("tabindex");
+    const open = within(screen.getByRole("rowheader", { name: "beta.pdf" })).getByRole("button", { name: "beta.pdf" });
+    open.focus();
     await user.keyboard("{Enter}");
     expect(onRowClick).toHaveBeenLastCalledWith("r1");
     await user.keyboard(" ");
     expect(onRowClick).toHaveBeenCalledTimes(3);
+    // A click on the button opens the row once, not twice.
+    await user.click(open);
+    expect(onRowClick).toHaveBeenCalledTimes(4);
 
     // Enter on the row's button doesn't also open the row.
     screen.getByRole("button", { name: "Edit alpha.md" }).focus();
     await user.keyboard("{Enter}");
-    expect(onRowClick).toHaveBeenCalledTimes(3);
+    expect(onRowClick).toHaveBeenCalledTimes(4);
     expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("has one tab stop per row (the row header's button), plus the row's own controls", async () => {
+    const user = userEvent.setup();
+    const onRowClick = vi.fn();
+    render(
+      <DataTable
+        caption="Files"
+        columns={columns}
+        data={rows.slice(0, 2)}
+        getRowId={getRowId}
+        selectable
+        rowLabel={(r) => r.name}
+        onRowClick={(r) => onRowClick(r.id)}
+        rowClickLabel={(r) => `Open ${r.name}`}
+        rowActions={(r) => (
+          <span role="menuitem" tabIndex={-1}>
+            More for {r.name}
+          </span>
+        )}
+      />,
+    );
+    const table = screen.getByRole("table", { name: "Files" });
+    const stops: string[] = [];
+    screen.getByRole("checkbox", { name: "Select beta.pdf" }).focus();
+    for (let i = 0; i < 4; i++) {
+      const el = document.activeElement as HTMLElement;
+      stops.push(el.getAttribute("aria-label") ?? el.getAttribute("role") ?? el.tagName);
+      await user.tab();
+    }
+    // No stop on the <tr>: each row has its checkbox, then its open button.
+    expect(table.querySelectorAll("tr[tabindex]")).toHaveLength(0);
+    expect(stops).toEqual(["checkbox", "Open beta.pdf", "checkbox", "Open alpha.md"]);
+    // Named with rowClickLabel; the row header still contains the visible name.
+    expect(screen.getByRole("button", { name: "Open alpha.md" })).toHaveTextContent("alpha.md");
+
+    // Checkboxes and menu items in the row keep their own behaviour.
+    await user.click(screen.getByRole("checkbox", { name: "Select alpha.md" }));
+    await user.click(screen.getByText("More for alpha.md"));
+    expect(onRowClick).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Open alpha.md" }));
+    expect(onRowClick).toHaveBeenCalledTimes(1);
+    expect(onRowClick).toHaveBeenLastCalledWith("r2");
+  });
+
+  it("puts the open button in the first column when no column is a row header", () => {
+    render(
+      <DataTable
+        caption="Files"
+        columns={columns.map((c) => ({ ...c, rowHeader: false }))}
+        data={rows.slice(0, 1)}
+        getRowId={getRowId}
+        onRowClick={() => {}}
+      />,
+    );
+    expect(within(screen.getByRole("cell", { name: "beta.pdf" })).getByRole("button", { name: "beta.pdf" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /beta|KB/ })).toHaveLength(1);
   });
 
   it("leaves rows alone without onRowClick", () => {
@@ -370,5 +431,6 @@ describe("DataTable onRowClick", () => {
     const row = screen.getByRole("rowheader", { name: "beta.pdf" }).closest("tr")!;
     expect(row).not.toHaveAttribute("tabindex");
     expect(row).not.toHaveAttribute("data-clickable");
+    expect(screen.queryByRole("button", { name: "beta.pdf" })).toBeNull();
   });
 });
