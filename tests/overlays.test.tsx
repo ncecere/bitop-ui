@@ -224,6 +224,10 @@ describe("Toast", () => {
     expect(alert).toHaveAttribute("role", "alert");
     expect(alert).not.toHaveAttribute("aria-modal");
     expect(screen.getByRole("region", { name: "Notifications" })).toContainElement(alert);
+    // The Dismiss buttons are visible and tabbable, so assistive technology sees them too.
+    for (const close of screen.getAllByRole("button", { name: "Dismiss notification" })) {
+      expect(close).not.toHaveAttribute("aria-hidden", "true");
+    }
     expect(await axe(container.ownerDocument.body)).toHaveNoViolations();
     act(() => toast.close());
   });
