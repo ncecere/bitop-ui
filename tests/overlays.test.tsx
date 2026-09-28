@@ -205,6 +205,58 @@ describe("Toast", () => {
     act(() => toast.close());
   });
 
+  it("exposes toasts as status messages (danger as an alert), not dialogs", async () => {
+    const { container } = render(<Toaster />);
+    act(() => {
+      toast.success("Source created", "Policies is ready.");
+      toast.error("Upload failed", "Try again.");
+    });
+    await screen.findByText("Source created");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.queryByRole("alertdialog", { hidden: true })).toBeNull();
+    const status = screen.getByRole("status", { name: "Source created" });
+    expect(status).toHaveAccessibleDescription("Policies is ready.");
+    expect(status).not.toHaveAttribute("aria-modal");
+    expect(status).toHaveAttribute("aria-atomic", "true");
+    // The danger toast is an alert (Base UI hides it until the viewport has focus and
+    // announces it through its own assertive region instead, so it's announced once).
+    const alert = screen.getByText("Upload failed", { selector: "[data-tone] *" }).closest<HTMLElement>("[data-tone]")!;
+    expect(alert).toHaveAttribute("role", "alert");
+    expect(alert).not.toHaveAttribute("aria-modal");
+    expect(screen.getByRole("region", { name: "Notifications" })).toContainElement(alert);
+    expect(await axe(container.ownerDocument.body)).toHaveNoViolations();
+    act(() => toast.close());
+  });
+
+  it("keeps keyboard access: F6 reaches the toasts, Tab moves through them, Escape closes one", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <Button>Save</Button>
+        <Toaster />
+      </>,
+    );
+    const save = screen.getByRole("button", { name: "Save" });
+    save.focus();
+    const undo = vi.fn();
+    act(() => {
+      toast.add({ title: "Row deleted", tone: "success", timeout: 0, action: { label: "Undo", onClick: undo } });
+    });
+    const status = await screen.findByRole("status", { name: "Row deleted" });
+    await user.keyboard("{F6}");
+    expect(screen.getByRole("region", { name: "Notifications" })).toHaveFocus();
+    await user.tab();
+    expect(status).toHaveFocus();
+    await user.tab();
+    expect(within(status).getByRole("button", { name: "Undo" })).toHaveFocus();
+    await user.keyboard("{Enter}");
+    expect(undo).toHaveBeenCalledTimes(1);
+    status.focus();
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("status", { name: "Row deleted" })).toBeNull());
+    act(() => toast.close());
+  });
+
   it("can sit over the sidebar footer (bottom-left)", async () => {
     render(<Toaster position="bottom-left" />);
     act(() => {

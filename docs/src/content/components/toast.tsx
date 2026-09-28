@@ -63,7 +63,8 @@ const doc: ComponentDoc = {
   ],
   a11y: [
     'Toasts live in a "Notifications" region announced politely; danger toasts are announced assertively.',
-    "Timers pause while the pointer or focus is inside a toast; F6 moves focus to the region.",
+    'Each toast is a status message (role="status", named by its title and described by its description); danger toasts are role="alert". They are not dialogs.',
+    "Timers pause while the pointer or focus is inside a toast; F6 moves focus to the region, Tab moves through the toasts and their buttons, and Escape closes the focused toast.",
     "Don't put the only copy of important information in a toast.",
   ],
 };
