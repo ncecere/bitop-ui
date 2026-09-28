@@ -25,7 +25,7 @@ const doc: ComponentDoc = {
     {
       component: "Avatar",
       rows: [
-        { name: "name", type: "string", required: true, description: "Used for the initials and the accessible name." },
+        { name: "name", type: "string", required: true, description: "Used for the initials (first letter or digit of the first and last words; punctuation and symbols are skipped) and the accessible name." },
         { name: "src", type: "string", description: "Image URL; initials show until it loads." },
         { name: "size", type: '"xs" | "sm" | "md" | "lg" | "xl"', default: '"md"', description: "Diameter (1.25 to 3.5rem)." },
         { name: "shape", type: '"circle" | "square"', default: '"circle"', description: "Square for workspaces." },

@@ -67,6 +67,23 @@ describe("Avatar", () => {
     expect(initials("Cher")).toBe("C");
     expect(initials("   ")).toBe("?");
   });
+
+  it("builds initials from letters and digits only, skipping punctuation and symbols", async () => {
+    expect(initials("Go docs (signed-in)")).toBe("GS");
+    expect(initials("(Beta) team")).toBe("BT");
+    expect(initials("R&D \u2014 Lab")).toBe("RL");
+    expect(initials("\"Ops\" / 24x7")).toBe("O2");
+    expect(initials("@ada #lovelace")).toBe("AL");
+    expect(initials("\u{1F680} launch crew")).toBe("LC");
+    expect(initials("\u00e9mile zola")).toBe("\u00c9Z");
+    expect(initials("e\u0301mile")).toBe("E\u0301");
+    expect(initials("\u0141ukasz \u017b\u00f3\u0142w")).toBe("\u0141\u017b");
+    expect(initials("\u5f20\u4f1f")).toBe("\u5f20");
+    expect(initials("\u2014 ( ) &")).toBe("?");
+    const { container } = render(<Avatar name="Go docs (signed-in)" />);
+    expect(screen.getByRole("img", { name: "Go docs (signed-in)" })).toHaveTextContent("GS");
+    expect(await axe(container)).toHaveNoViolations();
+  });
 });
 
 describe("Badge", () => {
