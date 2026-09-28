@@ -301,3 +301,12 @@ describe("6. DataTable saved columns and SSR", () => {
     container.remove();
   });
 });
+
+describe("7. DataTable footer with no rows", () => {
+  it("shows no 'Rows 0–0 of 0' under an empty table, and the summary once there are rows", () => {
+    const { rerender } = render(<DataTable caption="Documents" columns={columns} data={[]} getRowId={(d) => d.id} pageSize={10} />);
+    expect(screen.queryByText(/Rows \d/)).toBeNull();
+    rerender(<DataTable caption="Documents" columns={columns} data={docs} getRowId={(d) => d.id} pageSize={10} />);
+    expect(screen.getByText(`Rows 1–${docs.length} of ${docs.length}`)).toBeInTheDocument();
+  });
+});
