@@ -87,6 +87,7 @@ const doc: ComponentDoc = {
   ],
   a11y: [
     "Tabs use the tablist/tab/tabpanel pattern: arrow keys move between tabs, and panels are labelled by their tab.",
+    "A tab list wider than its container (a phone) scrolls sideways instead of squeezing the tabs: icons keep their size, the edge where tabs are hidden fades out, and arrow keys scroll the focused tab into view.",
     'NavTabs are a <nav> of links with aria-current="page"; don\'t use the tab roles for navigation.',
   ],
 };

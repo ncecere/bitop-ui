@@ -153,7 +153,9 @@ describe("Table and Alert", () => {
           </Tr>
         </Table>,
       );
-      const wrap = container.firstElementChild as HTMLElement;
+      // The scroll box is the table's parent, inside a frame that also holds the edge shadows.
+      const wrap = container.querySelector("table")!.parentElement as HTMLElement;
+      expect(wrap.parentElement).toBe(container.firstElementChild);
       expect(wrap).not.toHaveAttribute("tabindex");
       expect(screen.queryByRole("region")).toBeNull();
       // Simulate a table wider than its wrapper (e.g. on a phone).
@@ -163,6 +165,8 @@ describe("Table and Alert", () => {
       const region = screen.getByRole("region", { name: "Wide table" });
       expect(region).toBe(wrap);
       expect(region).toHaveAttribute("tabindex", "0");
+      // The hidden end shows a decorative shadow.
+      expect(wrap.parentElement!.querySelector('[aria-hidden="true"][data-side="end"]')).not.toBeNull();
     } finally {
       globalThis.ResizeObserver = original;
     }

@@ -86,7 +86,8 @@ const doc: ComponentDoc = {
   ],
   a11y: [
     'The group is role="group" and must be named; each item is a button with aria-pressed.',
-    "Only one item is in the tab order; arrow keys (in the group's orientation) move between items and Space/Enter toggle.",
+    "Only one item is in the tab order: the pressed one (the first pressed one with multiple), also after the value changes from outside. Arrow keys (in the group's orientation) move between items and Space/Enter toggle.",
+    "A joined group wider than its container scrolls sideways; the edge where items are hidden fades out, and the focus ring moves inside the item so it isn't clipped.",
     "Pressed items are marked with a tint and an inset ring, not colour alone.",
   ],
 };
