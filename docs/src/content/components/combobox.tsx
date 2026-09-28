@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Combobox, type ComboboxOption } from "@/registry/bitop/ui/combobox/combobox";
 import { Field } from "@/registry/bitop/ui/field/field";
 import { Stack } from "@/registry/bitop/ui/layout/layout";
@@ -74,6 +74,49 @@ export function Multiple() {
   );
 }
 
+const catalogue: ComboboxOption[] = [
+  { value: "doc-1", label: "Transcript requests", hint: "transcripts.pdf" },
+  { value: "doc-2", label: "Parking permits", hint: "parking.md" },
+  { value: "doc-3", label: "Academic calendar", hint: "calendar.html" },
+  { value: "doc-4", label: "Records privacy", hint: "privacy.html" },
+];
+
+/** Stands in for a search endpoint that also matches file names. */
+function useDocumentSearch(query: string) {
+  const [results, setResults] = useState<ComboboxOption[]>(catalogue);
+  useEffect(() => {
+    const q = query.trim().toLowerCase();
+    const id = setTimeout(() => setResults(catalogue.filter((d) => `${d.label} ${d.hint}`.toLowerCase().includes(q))), 150);
+    return () => clearTimeout(id);
+  }, [query]);
+  return results;
+}
+
+export function ServerFiltered() {
+  const [query, setQuery] = useState("");
+  const [picked, setPicked] = useState<string | null>(null);
+  const results = useDocumentSearch(query);
+  return (
+    <Field label="Document" description="Search by title or file name, for example parking.md.">
+      <Combobox items={results} filter={null} onInputValueChange={setQuery} value={picked} onValueChange={setPicked} emptyText="No matching documents." />
+    </Field>
+  );
+}
+
+export function FreeText() {
+  const groups: ComboboxOption[] = [
+    { value: "registrar-staff", label: "registrar-staff", hint: "12 people" },
+    { value: "advising-staff", label: "advising-staff", hint: "8 people" },
+    { value: "it-admins", label: "it-admins", hint: "3 people" },
+  ];
+  const [group, setGroup] = useState("");
+  return (
+    <Field label="Directory group" description="Pick a group seen at sign-in, or type any group name.">
+      <Combobox freeText items={groups} value={group} onValueChange={setGroup} placeholder="registrar-staff" clearable />
+    </Field>
+  );
+}
+
 const doc: ComponentDoc = {
   slug: "combobox",
   title: "Combobox",
@@ -86,6 +129,8 @@ const doc: ComponentDoc = {
     ["Single", Single, { title: "Single selection with a clear button", wide: true }],
     ["Grouped", Grouped, { title: "Groups, disabled options and an empty state", wide: true }],
     ["Multiple", Multiple, { title: "Multiple selection with chips", wide: true }],
+    ["ServerFiltered", ServerFiltered, { title: "Items filtered by the server (filter={null})", wide: true }],
+    ["FreeText", FreeText, { title: "Free text with suggestions (freeText)", wide: true }],
   ]),
   props: [
     {
@@ -94,6 +139,17 @@ const doc: ComponentDoc = {
       rows: [
         { name: "items", type: "{ value, label, icon?, hint?, group?, disabled? }[]", required: true, description: "Options. Options sharing a `group` are listed under a heading." },
         { name: "multiple", type: "boolean", default: "false", description: "Select several values; they show as removable chips." },
+        {
+          name: "filter",
+          type: "((option, query) => boolean) | null",
+          description: "How options match the typed text (default: the label contains it). `null` shows `items` unfiltered, for results the server already filtered.",
+        },
+        {
+          name: "freeText",
+          type: "boolean",
+          default: "false",
+          description: "Accept any text, with `items` as suggestions: `value` / `onValueChange` are the text, and a picked suggestion fills in its `value`. Not with `multiple`.",
+        },
         { name: "value / defaultValue", type: "V | null (V[] when multiple)", description: "Controlled or uncontrolled selection." },
         { name: "onValueChange", type: "(value, option) => void", description: "Called with the new value(s) and the matching option(s)." },
         { name: "placeholder", type: "string", description: "Shown in the empty input." },
@@ -117,6 +173,7 @@ const doc: ComponentDoc = {
     "↑/↓ move through options, Enter selects, Escape closes; typing filters. The empty message is a polite live region.",
     "In multiple mode the chips form a named toolbar: ← from the start of the input moves onto them and Backspace/Delete removes the focused chip. Each chip also has a named remove button.",
     "The clear and open buttons are icon-only and have accessible names; selection is shown with a check icon, not colour alone.",
+    "With freeText the input is still a combobox (Base UI Autocomplete) with a listbox of suggestions; the text is the value, so leaving the field keeps what was typed.",
   ],
 };
 

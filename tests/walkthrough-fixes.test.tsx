@@ -10,7 +10,9 @@ import { CalendarDays, Settings } from "lucide-react";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
+import { Combobox, type ComboboxOption } from "@/registry/bitop/ui/combobox/combobox";
 import { DateRangePresets, type DateRangeSelection } from "@/registry/bitop/ui/date-picker/date-picker";
+import { Field } from "@/registry/bitop/ui/field/field";
 import { Meter } from "@/registry/bitop/ui/meter/meter";
 import { Table, Td, Tr } from "@/registry/bitop/ui/table/table";
 import { Tab, Tabs, TabsList, TabsPanel } from "@/registry/bitop/ui/tabs/tabs";
@@ -239,3 +241,85 @@ describe("DateRangePresets: Custom range", () => {
   });
 });
 
+// Popups are portalled outside the test's landmarks.
+const noLandmarkRule = { rules: { region: { enabled: false } } };
+
+describe("Combobox modes", () => {
+  const docs: ComboboxOption[] = [
+    { value: "d1", label: "Parking", hint: "parking.md" },
+    { value: "d2", label: "Transcript requests", hint: "scanned.pdf" },
+  ];
+
+  it("filter={null} shows the server's results even when the label doesn't contain the text", async () => {
+    function Demo() {
+      const [q, setQ] = useState("");
+      const items = docs.filter((d) => `${d.label} ${d.hint}`.toLowerCase().includes(q.toLowerCase()));
+      return (
+        <Field label="Expected documents">
+          <Combobox items={items} filter={null} onInputValueChange={setQ} emptyText="No matching documents." />
+        </Field>
+      );
+    }
+    const { baseElement } = render(<Demo />);
+    await userEvent.type(screen.getByRole("combobox", { name: "Expected documents" }), "parking.md");
+    const listbox = await screen.findByRole("listbox");
+    expect(within(listbox).getByRole("option", { name: /Parking/ })).toBeInTheDocument();
+    expect(screen.queryByText("No matching documents.")).toBeNull();
+    expect(await axe(baseElement, noLandmarkRule)).toHaveNoViolations();
+  });
+
+  it("without filter={null}, items are still filtered by label", async () => {
+    render(<Combobox aria-label="Documents" items={docs} emptyText="No matching documents." />);
+    await userEvent.type(screen.getByRole("combobox", { name: "Documents" }), "parking.md");
+    expect(await screen.findByText("No matching documents.")).toBeInTheDocument();
+  });
+
+  it("a filter function can match more than the label", async () => {
+    render(<Combobox aria-label="Documents" items={docs} filter={(o, q) => `${o.label} ${o.hint}`.toLowerCase().includes(q.toLowerCase())} />);
+    await userEvent.type(screen.getByRole("combobox", { name: "Documents" }), "scanned");
+    expect(await screen.findByRole("option", { name: /Transcript requests/ })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: /Parking/ })).toBeNull();
+  });
+
+  it("freeText keeps any typed text as the value and offers suggestions", async () => {
+    const groups: ComboboxOption[] = [
+      { value: "registrar-staff", label: "registrar-staff" },
+      { value: "advising-staff", label: "advising-staff" },
+    ];
+    const onValueChange = vi.fn();
+    function Demo() {
+      const [text, setText] = useState("");
+      return (
+        <>
+          <Field label="IdP group">
+            <Combobox
+              freeText
+              items={groups}
+              value={text}
+              onValueChange={(t) => {
+                onValueChange(t);
+                setText(t);
+              }}
+            />
+          </Field>
+          <output>{text}</output>
+        </>
+      );
+    }
+    const { baseElement } = render(<Demo />);
+    const input = screen.getByRole("combobox", { name: "IdP group" });
+    await userEvent.type(input, "new-group");
+    await userEvent.tab();
+    expect(input).toHaveValue("new-group");
+    expect(onValueChange).toHaveBeenLastCalledWith("new-group");
+
+    await userEvent.clear(input);
+    await userEvent.type(input, "advis");
+    const option = await screen.findByRole("option", { name: "advising-staff" });
+    expect(screen.queryByRole("option", { name: "registrar-staff" })).toBeNull();
+    expect(await axe(baseElement, noLandmarkRule)).toHaveNoViolations();
+    await userEvent.click(option);
+    expect(input).toHaveValue("advising-staff");
+    expect(screen.getByRole("status")).toHaveTextContent("advising-staff");
+  });
+});
