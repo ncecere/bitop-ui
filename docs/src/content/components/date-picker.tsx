@@ -144,7 +144,7 @@ const doc: ComponentDoc = {
       note: "A joined ToggleGroup of presets plus Custom (which shows a range DatePicker). Presets: dateRangePresets (Today, Last 7/30/90 days) or lastDaysPreset(n, label?, id?).",
       rows: [
         { name: "aria-label", type: "string", required: true, description: "Names the group (the Custom picker is named “{label}: custom”)." },
-        { name: "value / defaultValue / onValueChange", type: "{ preset: string; range: DateRange | null } | null", description: 'preset is a preset id or "custom"; null = no range. Pressing Custom first gives { preset: "custom", range: null }; if the parent stores that as null, Custom stays pressed with its picker until a range is picked.' },
+        { name: "value / defaultValue / onValueChange", type: "{ preset: string; range: DateRange | null } | null", description: 'preset is a preset id or "custom"; null = no range. Pressing Custom first gives { preset: "custom", range: null }; if the parent stores that as null, Custom stays pressed with its picker until a range is picked. A custom range is reported only when both ends are picked, so it always serializes to "from/to".' },
         { name: "presets", type: "DateRangePreset[]", default: "dateRangePresets", description: "{ id, label, range(today) }." },
         { name: "allowCustom / customLabel", type: "boolean / string", default: 'true / "Custom"', description: "Offer a custom range." },
         { name: "clearable", type: "boolean", default: "true", description: "Unpressing the current preset clears the value." },
@@ -166,7 +166,7 @@ const doc: ComponentDoc = {
     'The trigger exposes aria-haspopup and aria-expanded; the popup is a dialog named "Choose date" (or "Choose dates").',
     "Opening moves focus to the selected day, or today. The calendar keeps its full keyboard model (see Calendar).",
     "Picking a date (or finishing a range) and Escape close the popup, and focus returns to the trigger.",
-    "Popup presets are buttons in a named group; the one matching the current range has aria-pressed=\"true\". DateRangePresets is a named toggle group (arrow keys move between presets).",
+    "Popup presets are buttons in a named group; the one matching the current range has aria-pressed=\"true\". DateRangePresets is a named toggle group (arrow keys move between presets; Tab lands on the pressed one). Its Custom range is reported only once both ends are picked: the first pick (click or Enter) sets the start and keeps the calendar open, the second sets the end.",
   ],
 };
 

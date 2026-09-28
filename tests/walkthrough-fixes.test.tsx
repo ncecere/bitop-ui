@@ -4,12 +4,13 @@
  * hidden "x", the custom date range and two Combobox modes. Each test failed
  * before its fix.
  */
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CalendarDays, Settings } from "lucide-react";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
+import { DateRangePresets, type DateRangeSelection } from "@/registry/bitop/ui/date-picker/date-picker";
 import { Meter } from "@/registry/bitop/ui/meter/meter";
 import { Table, Td, Tr } from "@/registry/bitop/ui/table/table";
 import { Tab, Tabs, TabsList, TabsPanel } from "@/registry/bitop/ui/tabs/tabs";
@@ -170,6 +171,71 @@ describe("Meter", () => {
     expect(meter.textContent).toBe("QA Team: share of this month's budget used51%");
     expect(within(meter).queryByText("x")).toBeNull();
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("DateRangePresets: Custom range", () => {
+  const TODAY = new Date(2026, 8, 28);
+
+  function Demo({ onChange }: { onChange: (v: DateRangeSelection | null) => void }) {
+    const [value, setValue] = useState<DateRangeSelection | null>({ preset: "custom", range: { from: new Date(2026, 8, 20), to: new Date(2026, 8, 20) } });
+    return (
+      <DateRangePresets
+        aria-label="Costs date range"
+        today={TODAY}
+        value={value}
+        onValueChange={(v) => {
+          onChange(v);
+          setValue(v);
+        }}
+        pickerProps={{ numberOfMonths: 1, today: TODAY, max: TODAY }}
+      />
+    );
+  }
+
+  it("the first click sets the start and keeps the calendar open; the second sets the end", async () => {
+    const onChange = vi.fn();
+    render(<Demo onChange={onChange} />);
+    await userEvent.click(screen.getByRole("button", { name: /Costs date range: custom/ }));
+    const grid = await screen.findByRole("grid", { name: "September 2026" });
+    await userEvent.click(within(grid).getByRole("button", { name: /September 1, 2026/ }));
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("grid", { name: "September 2026" })).toBeInTheDocument();
+    await userEvent.click(within(grid).getByRole("button", { name: /September 26, 2026/ }));
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const sel = onChange.mock.calls[0]![0] as DateRangeSelection;
+    expect(sel.preset).toBe("custom");
+    expect(sel.range?.from.getDate()).toBe(1);
+    expect(sel.range?.to?.getDate()).toBe(26);
+    expect(screen.getByRole("button", { name: /Costs date range: custom/ })).toHaveTextContent(/Sep 1, 2026.*Sep 26, 2026/);
+  });
+
+  it("works from the keyboard: Enter on the start day, arrows, Enter on the end day", async () => {
+    const onChange = vi.fn();
+    render(<Demo onChange={onChange} />);
+    await userEvent.click(screen.getByRole("button", { name: /Costs date range: custom/ }));
+    const grid = await screen.findByRole("grid", { name: "September 2026" });
+    within(grid).getByRole("button", { name: /September 10, 2026/ }).focus();
+    await userEvent.keyboard("{Enter}");
+    expect(onChange).not.toHaveBeenCalled();
+    await act(async () => {
+      await userEvent.keyboard("{ArrowRight}{ArrowRight}{ArrowRight}{ArrowRight}{ArrowRight}{Enter}");
+    });
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const sel = onChange.mock.calls[0]![0] as DateRangeSelection;
+    expect([sel.range?.from.getDate(), sel.range?.to?.getDate()]).toEqual([10, 15]);
+  });
+
+  it("closing the calendar after one pick keeps the previous range", async () => {
+    const onChange = vi.fn();
+    render(<Demo onChange={onChange} />);
+    const trigger = screen.getByRole("button", { name: /Costs date range: custom/ });
+    await userEvent.click(trigger);
+    const grid = await screen.findByRole("grid", { name: "September 2026" });
+    await userEvent.click(within(grid).getByRole("button", { name: /September 3, 2026/ }));
+    await userEvent.keyboard("{Escape}");
+    expect(onChange).not.toHaveBeenCalled();
+    expect(trigger).toHaveTextContent(/Sep 20, 2026.*Sep 20, 2026/);
   });
 });
 
