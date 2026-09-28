@@ -305,6 +305,38 @@ describe("CommandPalette", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
+  it("with a controlled query, keeps the typed text while the groups change on every keystroke (a search as you type)", async () => {
+    const user = userEvent.setup();
+    const seen: string[] = [];
+    function Searching() {
+      const [query, setQuery] = useState("");
+      seen.push(query);
+      // Results that depend on the text, as a server search would return them.
+      const found = query.length >= 2 ? [{ id: `r-${query}`, label: `Registrar ${query}`, onSelect: () => {} }] : [];
+      return (
+        <CommandPalette
+          open
+          onOpenChange={() => {}}
+          query={query}
+          onQueryChange={setQuery}
+          groups={[
+            { label: "Pages", items: [{ id: "home", label: "Home", onSelect: () => {} }] },
+            { label: "Found", items: found },
+          ]}
+        />
+      );
+    }
+    render(<Searching />);
+    const dialog = await screen.findByRole("dialog", { name: "Command palette" });
+    const input = within(dialog).getByRole("combobox", { name: "Command palette" });
+    await user.click(input);
+    await user.keyboard("reg");
+    expect(input).toHaveValue("reg");
+    expect(seen.at(-1)).toBe("reg");
+    expect(within(dialog).getByRole("option", { name: "Registrar reg" })).toBeInTheDocument();
+    expect(within(dialog).queryByRole("option", { name: "Home" })).toBeNull();
+  });
+
   it("merges className onto the dialog popup without dropping its own styles", async () => {
     render(<CommandPalette open onOpenChange={() => {}} groups={[]} className="scoped-palette" />);
     const dialog = await screen.findByRole("dialog", { name: "Command palette" });
