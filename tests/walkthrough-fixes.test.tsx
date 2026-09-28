@@ -10,6 +10,7 @@ import { CalendarDays, Settings } from "lucide-react";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
+import { Meter } from "@/registry/bitop/ui/meter/meter";
 import { Table, Td, Tr } from "@/registry/bitop/ui/table/table";
 import { Tab, Tabs, TabsList, TabsPanel } from "@/registry/bitop/ui/tabs/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/registry/bitop/ui/toggle-group/toggle-group";
@@ -158,6 +159,17 @@ describe("ToggleGroup tab stop", () => {
     await userEvent.click(today);
     expect(today).toHaveFocus();
     expect(today).toHaveAttribute("aria-pressed", "true");
+  });
+});
+
+describe("Meter", () => {
+  it("has no stray text inside role=meter (Base UI's hidden 'x')", async () => {
+    const { container } = render(<Meter label="QA Team: share of this month's budget used" value={51} max={100} valueText="51%" />);
+    const meter = screen.getByRole("meter", { name: "QA Team: share of this month's budget used" });
+    expect(meter).toHaveAttribute("aria-valuetext", "51%");
+    expect(meter.textContent).toBe("QA Team: share of this month's budget used51%");
+    expect(within(meter).queryByText("x")).toBeNull();
+    expect(await axe(container)).toHaveNoViolations();
   });
 });
 

@@ -79,7 +79,7 @@ const doc: ComponentDoc = {
     },
   ],
   a11y: [
-    'role="meter" (Base UI Meter) with aria-valuemin/max/now, named by the visible label.',
+    'role="meter" (Base UI Meter) with aria-valuemin/max/now, named by the visible label. Base UI\'s hidden "x" placeholder text is left out, so nothing stray is read inside the meter.',
     "aria-valuetext carries the real numbers and the status (“1,020 of 1,000, over limit”), even though the bar stops at full.",
     "Tones are never colour-only: the status word and an icon appear at warning and above.",
     "The limit marker is decorative; its meaning is written under the bar and linked with aria-describedby.",
