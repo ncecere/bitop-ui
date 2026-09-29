@@ -31,7 +31,15 @@ export type Command = {
   onSelect: () => void;
 };
 
-export type CommandGroup = { label: string; items: Command[] };
+export type CommandGroup = {
+  label: string;
+  items: Command[];
+  /**
+   * Keep the items in the given order while typing (results a server search
+   * already ranked). The group still moves up when it holds the best match.
+   */
+  keepOrder?: boolean;
+};
 
 export type CommandPaletteProps = {
   open: boolean;
@@ -107,7 +115,8 @@ export function commandRank(item: Pick<Command, "label" | "keywords">, query: st
 
 /**
  * The groups with the best matches first: items sorted by commandRank, and
- * groups by their best matching item (ties keep their order). An exact name
+ * groups by their best matching item (ties keep their order). A group with
+ * `keepOrder` keeps its items' order. An exact name
  * comes first, so Enter runs it rather than a page that only lists the word
  * among its keywords.
  */
@@ -116,8 +125,8 @@ export function rankCommandGroups(groups: CommandGroup[], query: string): Comman
   const ranked = groups.map((g, i) => {
     const items = g.items
       .map((item, j) => ({ item, j, rank: commandMatches(item, query) ? commandRank(item, query) : 5 }))
-      .sort((a, b) => a.rank - b.rank || a.j - b.j);
-    return { group: { ...g, items: items.map((x) => x.item) }, i, best: items[0]?.rank ?? 5 };
+      .sort((a, b) => (g.keepOrder ? a.j - b.j : a.rank - b.rank || a.j - b.j));
+    return { group: { ...g, items: items.map((x) => x.item) }, i, best: Math.min(5, ...items.map((x) => x.rank)) };
   });
   return ranked.sort((a, b) => a.best - b.best || a.i - b.i).map((x) => x.group);
 }

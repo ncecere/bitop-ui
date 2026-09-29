@@ -307,14 +307,17 @@ function SidebarDrawer({ open, onOpenChange, label, contentId, children }: Sideb
     followed.current = true;
     onOpenChange(false);
   };
-  // After following a link, focus goes to the new page's content, not back to the toggle (whose
-  // page is gone); Escape, the backdrop and the close button return it to the toggle.
+  // After following a link, focus goes to the new page's content itself (the main landmark, not its first
+  // control, which Base UI would pick for an element that isn't a tab stop), not back to the toggle, whose
+  // page is gone. Escape, the backdrop and the close button return it to the toggle. Base UI may ask more
+  // than once while closing, so the flag is only reset when the drawer opens again.
   const finalFocus = () => {
-    const toContent = followed.current;
-    followed.current = false;
-    const content = toContent && contentId ? document.getElementById(contentId) : null;
-    return content ?? true;
+    const content = followed.current && contentId ? document.getElementById(contentId) : null;
+    if (!content) return true;
+    queueMicrotask(() => content.focus({ preventScroll: true }));
+    return false;
   };
+  if (open && followed.current) followed.current = false;
   return (
     <BaseDialog.Root open={open} onOpenChange={(o) => onOpenChange(o)}>
       <BaseDialog.Portal>

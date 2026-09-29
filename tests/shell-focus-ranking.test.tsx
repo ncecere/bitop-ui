@@ -39,6 +39,8 @@ describe("AppShell drawer focus", () => {
         >
           <Main>
             <h1>Page</h1>
+            {/* The main landmark gets focus, not its first control. */}
+            <button type="button">First control</button>
           </Main>
         </AppShell>,
       );
@@ -116,6 +118,9 @@ describe("command ranking", () => {
     ];
     expect(rankCommandGroups(groups, "spend").map((g) => g.label)).toEqual(["Team", "Admin"]);
     expect(rankCommandGroups(groups, "")).toBe(groups);
+    // A group a server search ranked keeps its order.
+    const found: CommandGroup = { label: "Found", keepOrder: true, items: [{ id: "q", label: "Question about spend", onSelect: noop }, { id: "s", label: "Spend", onSelect: noop }] };
+    expect(rankCommandGroups([found], "spend")[0]!.items.map((i) => i.id)).toEqual(["q", "s"]);
   });
 
   it("highlights the exact name, so Enter runs it", async () => {

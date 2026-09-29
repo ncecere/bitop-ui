@@ -54,7 +54,7 @@ const doc: ComponentDoc = {
       rows: [
         { name: "open", type: "boolean", required: true, description: "Controlled open state." },
         { name: "onOpenChange", type: "(open: boolean) => void", required: true, description: "Called on open/close." },
-        { name: "groups", type: "{ label, items: Command[] }[]", required: true, description: "Command groups; empty groups are hidden." },
+        { name: "groups", type: "{ label, items: Command[], keepOrder? }[]", required: true, description: "Command groups; empty groups are hidden. While typing, the best matches come first; keepOrder keeps a group's own order (results a server search ranked)." },
         { name: "placeholder", type: "string", default: '"Search pages and actions…"', description: "Input placeholder." },
         { name: "label", type: "string", default: '"Command palette"', description: "Accessible name of the dialog and input." },
         { name: "emptyText", type: "ReactNode", default: '"No results found."', description: "Shown when nothing matches." },
