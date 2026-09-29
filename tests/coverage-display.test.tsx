@@ -3,6 +3,7 @@
  * that were previously only rendered by the docs-page axe sweep.
  */
 import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { createRef, type ComponentProps } from "react";
 import { axe } from "vitest-axe";
 import { Avatar, initials } from "@/registry/bitop/ui/avatar/avatar";
@@ -177,6 +178,33 @@ describe("Breadcrumbs", () => {
     expect(screen.queryByRole("link", { name: "Sources" })).toBeNull();
     expect(screen.getByText("Sources")).toHaveAttribute("aria-current", "page");
     expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("a collapsed item is a named menu button listing the hidden crumbs as links", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <Breadcrumbs
+        items={[
+          { label: "Acme", href: "/" },
+          { label: "Show 2 hidden levels", collapsed: [{ label: "Projects", href: "/p" }, { label: "Web", render: <RouterLink href="/p/web" /> }] },
+          { label: "Releases" },
+        ]}
+      />,
+    );
+    const more = screen.getByRole("button", { name: "Show 2 hidden levels" });
+    expect(more).toHaveAttribute("title", "Projects › Web");
+    expect(more).toHaveTextContent("…");
+    expect(screen.queryByRole("link", { name: "Projects" })).toBeNull();
+    expect(await axe(container)).toHaveNoViolations();
+    await user.click(more);
+    const menu = await screen.findByRole("menu");
+    const items = within(menu).getAllByRole("menuitem");
+    expect(items.map((i) => i.textContent)).toEqual(["Projects", "Web"]);
+    expect(items[0]).toHaveAttribute("href", "/p");
+    expect(items[1]).toHaveAttribute("data-router");
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+    expect(more).toHaveFocus();
   });
 
   it("accepts a custom landmark label", () => {

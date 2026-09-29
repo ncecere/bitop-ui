@@ -375,13 +375,14 @@
       "name": "breadcrumbs",
       "type": "registry:ui",
       "title": "Breadcrumbs",
-      "description": "Breadcrumb trail with a current page and optional icons.",
+      "description": "Breadcrumb trail with a current page, optional icons and a collapsed item whose menu lists the hidden crumbs.",
       "dependencies": [
         "@base-ui/react@^1.8.0",
         "lucide-react@^1.48.0"
       ],
       "registryDependencies": [
-        "@bitop/core"
+        "@bitop/core",
+        "@bitop/menu"
       ],
       "files": [
         {
