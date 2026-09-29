@@ -26,6 +26,8 @@ function Shell({ current = "a" }: { current?: string }) {
               <SidebarSection label="Pages">
                 <SidebarItem href="#a" label="Alpha" current={current === "a"} />
                 <SidebarItem href="#b" label="Beta" current={current === "b"} />
+                {/* A router link: it cancels the browser's navigation to do its own. */}
+                <SidebarItem render={<a href="#c" onClick={(e) => e.preventDefault()} />} label="Gamma" />
               </SidebarSection>
             </SidebarNav>
           </SidebarContent>
@@ -61,6 +63,10 @@ describe("AppShell on a narrow window", () => {
       expect(await axe(document.body)).toHaveNoViolations();
 
       await user.click(within(drawer).getByRole("link", { name: "Beta" }));
+      await waitFor(() => expect(screen.queryByRole("dialog", { name: "Navigation" })).toBeNull());
+
+      await user.click(screen.getByRole("button", { name: "Open navigation" }));
+      await user.click(within(await screen.findByRole("dialog", { name: "Navigation" })).getByRole("link", { name: "Gamma" }));
       await waitFor(() => expect(screen.queryByRole("dialog", { name: "Navigation" })).toBeNull());
 
       await user.click(screen.getByRole("button", { name: "Open navigation" }));
