@@ -54,6 +54,21 @@ export function ThreeSeries() {
   );
 }
 
+export function FixedScale() {
+  const scores = [72, 75, 74, 81, 79, 86].map((v, i) => ({ label: `Run ${i + 1}`, values: { recall: v } }));
+  return (
+    <LineChart
+      size="sm"
+      points
+      domain={{ min: 0, max: 100 }}
+      data={scores}
+      series={[{ key: "recall", label: "Recall" }]}
+      formatValue={(v) => `${Math.round(v)}%`}
+      summary="Recall over 6 runs, from 72% to 86%, on a 0 to 100% scale."
+    />
+  );
+}
+
 const doc: ComponentDoc = {
   slug: "line-chart",
   title: "Line chart",
@@ -65,11 +80,16 @@ const doc: ComponentDoc = {
     ["AnswersPerDay", AnswersPerDay, { title: "Two series with a data table", wide: true }],
     ["Area", Area, { title: "Area, one series, small", wide: true }],
     ["ThreeSeries", ThreeSeries, { title: "Three series with points", description: "Series differ by colour and by line pattern (solid, dashed, dotted).", wide: true }],
+    [
+      "FixedScale",
+      FixedScale,
+      { title: "A fixed 0–100% scale", description: "domain keeps a percentage on the same scale whatever the values, so a small change doesn't look like a cliff.", wide: true },
+    ],
   ]),
   props: [
     {
       component: "LineChart",
-      note: "Same data shape, tones, legend and data table as BarChart (see Chart). The scale runs from 0 to the largest finite value; negative values draw at 0, and NaN / ±Infinity leave a gap in the line.",
+      note: "Same data shape, tones, legend and data table as BarChart (see Chart). The scale runs from 0 to the largest finite value unless domain fixes it; negative values draw at 0, and NaN / ±Infinity leave a gap in the line.",
       rows: [
         { name: "data", type: "{ label: string; values: Record<K, number> }[]", required: true, description: "Points in order (e.g. days)." },
         { name: "series", type: "{ key: K; label; tone?; pattern? }[]", required: true, description: "Lines to draw; pattern defaults to solid, dashed, dotted by position." },
@@ -77,6 +97,12 @@ const doc: ComponentDoc = {
         { name: "variant", type: '"line" | "area"', default: '"line"', description: "Strokes only, or strokes over a soft fill." },
         { name: "size", type: '"sm" | "md" | "lg"', default: '"md"', description: "Plot height (6, 10 or 14rem), as in BarChart." },
         { name: "points", type: "boolean", default: "only with one point", description: "Mark every point with a dot." },
+        {
+          name: "domain",
+          type: "{ min?: number; max?: number }",
+          default: "0 to the largest value",
+          description: "Fixes the scale, e.g. { min: 0, max: 100 } for a percentage. The top line shows max; a min other than 0 is labelled at the bottom. Values outside draw at the edge.",
+        },
         { name: "formatValue", type: "(n) => string", description: "Peak label, hover titles and table values." },
         { name: "legend / axis", type: "boolean", default: "true", description: "Legend; first/last labels and peak value." },
         { name: "dataTable", type: "{ caption; labelHeader?; defaultOpen? }", description: "Adds a “Show data” disclosure with the values in a table." },

@@ -44,6 +44,32 @@ describe("charts", () => {
     expect(container.querySelectorAll("[style]").length).toBeGreaterThan(0);
   });
 
+  it("LineChart domain fixes the scale: the top shows max, values outside draw at the edge, a non-zero min is labelled", () => {
+    const pct = [
+      { label: "Run 1", values: { answers: 50 } },
+      { label: "Run 2", values: { answers: 120 } },
+    ];
+    const one = [{ key: "answers" as const, label: "Recall" }];
+    const { container, rerender } = render(<LineChart data={pct} series={one} summary="s" domain={{ min: 0, max: 100 }} formatValue={(v) => `${v}%`} points />);
+    expect(within(screen.getByRole("img")).getByText("100%")).toBeInTheDocument();
+    // 50 of 0–100 is half way up; 120 is clamped to the top.
+    expect(container.querySelector("path")!.getAttribute("d")).toBe("M0.00,50.00 L1000.00,0.00");
+    expect(within(screen.getByRole("img")).queryByText("0%")).toBeNull();
+    rerender(<LineChart data={pct} series={one} summary="s" domain={{ min: 40, max: 140 }} formatValue={(v) => `${v}%`} />);
+    expect(container.querySelector("path")!.getAttribute("d")).toBe("M0.00,90.00 L1000.00,20.00");
+    expect(within(screen.getByRole("img")).getByText("40%")).toBeInTheDocument();
+  });
+
+  it("BarChart domain fixes the top of the scale", () => {
+    const one = [{ key: "answers" as const, label: "Recall" }];
+    const { container } = render(
+      <BarChart data={[{ label: "a", values: { answers: 25 } }, { label: "b", values: { answers: 150 } }]} series={one} summary="s" domain={{ max: 100 }} formatValue={(v) => `${v}%`} />,
+    );
+    const bars = [...container.querySelectorAll<HTMLElement>("[data-tone]")].filter((e) => e.style.getPropertyValue("--bar-size"));
+    expect(bars.map((b) => b.style.getPropertyValue("--bar-size"))).toEqual(["25%", "100%"]);
+    expect(within(screen.getByRole("img")).getByText("100%")).toBeInTheDocument();
+  });
+
   it("series tones and patterns follow position unless set", () => {
     expect(seriesTone({}, 1)).toBe("info");
     expect(seriesTone({ tone: "danger" }, 0)).toBe("danger");

@@ -66,6 +66,7 @@ const doc: ComponentDoc = {
         { name: "formatValue", type: "(value: number) => string", description: "Formats the peak label and hover titles." },
         { name: "legend", type: "boolean", default: "true", description: "Show the legend." },
         { name: "axis", type: "boolean", default: "true", description: "Show the first and last labels and the peak value." },
+        { name: "domain", type: "{ max?: number }", description: "Fixes the top of the scale (e.g. 100 for a percentage); values above it draw full height, stacks are cut there." },
         { name: "dataTable", type: "{ caption; labelHeader?; defaultOpen? }", description: "Adds a “Show data” disclosure with the values in a table (ChartData from chart)." },
       ],
       note: "Series colours come from the --color-chart-* tokens and the legend from chart, shared with LineChart and Sparkline.",
