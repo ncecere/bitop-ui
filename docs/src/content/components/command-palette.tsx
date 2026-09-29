@@ -64,7 +64,13 @@ const doc: ComponentDoc = {
           description: "Where focus goes on close (default: the opener). Return the new page's heading from a function when a command navigates.",
         },
         { name: "className", type: "string", description: "Class for the dialog popup, merged with the built-in styles (e.g. to scope token overrides)." },
+        {
+          name: "query / onQueryChange",
+          type: "string / (query: string) => void",
+          description: "The typed text, controlled (e.g. for a server search as you type). Reset it to \"\" in onOpenChange when the palette closes.",
+        },
       ],
+      note: "Filtering (commandMatches, exported): every typed word must appear in the label or keywords, case-insensitively, anywhere in a word, in the singular or the plural (“members” finds “Add member”, “policies” finds “Policy”).",
     },
     {
       component: "Command",
@@ -72,7 +78,7 @@ const doc: ComponentDoc = {
         { name: "id", type: "string", required: true, description: "Stable key." },
         { name: "label", type: "string", required: true, description: "Visible text; matched by the filter." },
         { name: "onSelect", type: "() => void", required: true, description: "Runs after the palette closes." },
-        { name: "keywords", type: "string[]", description: "Extra search terms." },
+        { name: "keywords", type: "string[]", description: "Extra search terms (synonyms, e.g. “spend”, “budget” for a Usage page)." },
         { name: "icon / hint / shortcut", type: "ReactNode / ReactNode / string[]", description: "Decorative extras." },
       ],
     },
