@@ -163,7 +163,7 @@ const doc: ComponentDoc = {
       {
         title: "Collapsible sections and two-line items",
         description:
-          "A long sidebar keeps the current page's section and the top section open and the others collapsed to their headers; remember the choice. The current item scrolls into view. Items with the same label get a description.",
+          "A long sidebar keeps the current page's section and the top section open and the others collapsed to their headers; remember the choice. The current item stays in view. Items with the same label get a description.",
       },
     ],
   ]),
@@ -255,7 +255,9 @@ const doc: ComponentDoc = {
     "The sidebar is an <aside> landmark named by label (default “Sidebar”); inside it, the navigation is a named <nav>, sections are labelled lists and the current page has aria-current=\"page\".",
     "The sidebar content scrolls on its own (a ScrollArea that becomes a focusable, named region only when it overflows), so the account menu in the footer is always reachable.",
     "The collapse toggle has aria-expanded and aria-controls; collapsed labels stay in the accessibility tree and show as tooltips.",
-    "On a narrow window (below 600px) the same toggle (“Open navigation”) opens the sidebar as a modal dialog: focus moves into it and returns to the toggle; Escape, the backdrop, its close button or following a link close it.",
+    "On a narrow window (below 600px) the same toggle (“Open navigation”) opens the sidebar as a modal dialog: focus moves into it and returns to the toggle; Escape, the backdrop, its close button or following a link close it. After a link, focus moves to the main content instead, since the page the toggle belonged to is gone.",
+    "The current item is kept in view by scrolling the sidebar itself (not scrollIntoView, which in Chrome moves the sequential focus starting point), so the first Tab after a page load still reaches the skip link. It stays in view when items load late or the rail collapses, until the person scrolls it away.",
+    "An item with a text label and description is named by one text (“Report, Finance”), so browsers don't insert a space before the comma between the two lines.",
     "A collapsible section's heading is a button with aria-expanded and aria-controls; its list is hidden (not just invisible) while closed.",
     "The workspace switcher and user menu announce their purpose (“Current workspace: …”, “Account: …”).",
   ],

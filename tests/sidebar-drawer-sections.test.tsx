@@ -158,19 +158,31 @@ describe("SidebarItem description and the current item", () => {
     expect(screen.getByRole("link", { name: /^Report\W+Sales$/ })).toBeInTheDocument();
   });
 
-  it("scrolls the current page's item into view, and the next one when it changes", async () => {
-    const scrolled: string[] = [];
-    const original = Element.prototype.scrollIntoView;
-    Element.prototype.scrollIntoView = function (this: Element) {
-      scrolled.push(this.textContent ?? "");
+  it("scrolls the current page's item into view, and the next one when it changes, without scrollIntoView", async () => {
+    // The viewport shows 0 to 100 px; each item is 32 px tall, Alpha at 150 and Beta at 250 (before scrolling).
+    const tops: Record<string, number> = { Alpha: 150, Beta: 250 };
+    let scrollTop = 0;
+    const rect = (top: number, height: number) => ({ top, bottom: top + height, left: 0, right: 100, width: 100, height, x: 0, y: top, toJSON: () => ({}) });
+    const originalRect = Element.prototype.getBoundingClientRect;
+    const originalScroll = Element.prototype.scrollIntoView;
+    const intoView = vi.fn();
+    Element.prototype.scrollIntoView = intoView;
+    Element.prototype.getBoundingClientRect = function (this: Element) {
+      if (this instanceof HTMLElement && this.style.overflow === "scroll") return rect(0, 100);
+      const top = tops[this.textContent ?? ""];
+      return top === undefined ? rect(0, 0) : rect(top - scrollTop, 32);
     };
     try {
-      const { rerender } = render(<Shell current="a" />);
-      expect(scrolled).toEqual(["Alpha"]);
+      const { rerender, container } = render(<Shell current="a" />);
+      const viewport = [...container.querySelectorAll<HTMLElement>("*")].find((el) => el.style.overflow === "scroll")!;
+      Object.defineProperty(viewport, "scrollTop", { get: () => scrollTop, set: (v: number) => (scrollTop = v), configurable: true });
       rerender(<Shell current="b" />);
-      await waitFor(() => expect(scrolled).toEqual(["Alpha", "Beta"]));
+      // Beta's bottom (282) lines up with the viewport's bottom (100).
+      await waitFor(() => expect(scrollTop).toBe(182));
+      expect(intoView).not.toHaveBeenCalled();
     } finally {
-      Element.prototype.scrollIntoView = original;
+      Element.prototype.getBoundingClientRect = originalRect;
+      Element.prototype.scrollIntoView = originalScroll;
     }
   });
 });

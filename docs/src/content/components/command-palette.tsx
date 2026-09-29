@@ -87,6 +87,7 @@ const doc: ComponentDoc = {
   a11y: [
     "A modal dialog containing a combobox and listbox (Base UI Autocomplete): arrow keys move, Enter runs, Escape closes.",
     "Focus moves to the input on open and returns to the trigger on close.",
+    "While typing, the best matches come first and the first one is highlighted: an exact name, then names starting with the text, then names containing each typed word, then keywords. Enter runs the command that was named, not a page that lists the word among its keywords.",
     "Keyboard hints in the footer are also available to screen readers as the input's description.",
   ],
 };
