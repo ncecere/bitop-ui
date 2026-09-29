@@ -24,3 +24,17 @@
   grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   gap: var(--space-4);
 }
+
+.frameShort {
+  display: flex;
+  width: 16rem;
+  height: 22rem;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-3);
+}
+
+.frameShort .sidebar {
+  position: relative;
+  height: auto;
+}

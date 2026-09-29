@@ -22,6 +22,7 @@ import { MenuGroup, MenuHeader, MenuItem, MenuSeparator } from "@/registry/bitop
 import { PageHeader } from "@/registry/bitop/ui/page-header/page-header";
 import { StatCard } from "@/registry/bitop/ui/stat-card/stat-card";
 import { toast } from "@/registry/bitop/ui/toast/toast";
+import { useState } from "react";
 import { type ComponentDoc, examples } from "../types";
 import styles from "./app-shell.module.css";
 import raw from "./app-shell.tsx?raw";
@@ -106,6 +107,35 @@ export function Dashboard() {
   );
 }
 
+export function CollapsibleSections() {
+  const [open, setOpen] = useState<Record<string, boolean>>({ Settings: true });
+  const section = (label: string) => ({ collapsible: true, open: open[label] ?? false, onOpenChange: (o: boolean) => setOpen((s) => ({ ...s, [label]: o })) });
+  return (
+    <div className={styles.frameShort}>
+      <Sidebar label="Sidebar with collapsible sections (example)" className={styles.sidebar}>
+        <SidebarContent>
+          <SidebarNav aria-label="Admin (example)">
+            <SidebarSection>
+              <SidebarItem href="#dashboard" icon={<Home aria-hidden />} label="Overview" />
+            </SidebarSection>
+            <SidebarSection label="People" {...section("People")}>
+              <SidebarItem href="#dashboard" icon={<Users aria-hidden />} label="Users" />
+            </SidebarSection>
+            <SidebarSection label="Settings" {...section("Settings")}>
+              <SidebarItem href="#dashboard" icon={<Settings aria-hidden />} label="General" current />
+              <SidebarItem href="#dashboard" icon={<KeyRound aria-hidden />} label="API tokens" />
+            </SidebarSection>
+            <SidebarSection label="Recent">
+              <SidebarItem href="#dashboard" icon={<FileText aria-hidden />} label="Quarterly report" description="Finance · yesterday" />
+              <SidebarItem href="#dashboard" icon={<FileText aria-hidden />} label="Quarterly report" description="Sales · last week" />
+            </SidebarSection>
+          </SidebarNav>
+        </SidebarContent>
+      </Sidebar>
+    </div>
+  );
+}
+
 const doc: ComponentDoc = {
   slug: "app-shell",
   title: "App shell",
@@ -127,6 +157,15 @@ const doc: ComponentDoc = {
         wide: true,
       },
     ],
+    [
+      "CollapsibleSections",
+      CollapsibleSections,
+      {
+        title: "Collapsible sections and two-line items",
+        description:
+          "A long sidebar keeps the current page's section and the top section open and the others collapsed to their headers; remember the choice. The current item scrolls into view. Items with the same label get a description.",
+      },
+    ],
   ]),
   props: [
     {
@@ -135,6 +174,12 @@ const doc: ComponentDoc = {
         { name: "sidebar / topbar", type: "ReactNode", description: "Usually <Sidebar> and <TopBar>." },
         { name: "collapsed / defaultCollapsed / onCollapsedChange", type: "boolean / boolean / (c) => void", description: "Sidebar state." },
         { name: "skipTo", type: "string | null", default: '"main"', description: "Skip-link target id; null omits the link." },
+        {
+          name: "drawerQuery / drawerLabel",
+          type: "string | null / string",
+          default: 'SIDEBAR_DRAWER_QUERY (600px) / "Navigation"',
+          description: "Below this width there is no rail: the sidebar is a modal drawer opened from the toggle. null keeps the rail on every width.",
+        },
       ],
     },
     {
@@ -154,6 +199,15 @@ const doc: ComponentDoc = {
         { name: "current", type: "boolean", description: 'aria-current="page" for plain links.' },
         { name: "trailing", type: "ReactNode", description: "Count or badge." },
         { name: "dot", type: "boolean", description: 'Decorative "new" dot (say it in the label if it matters).' },
+        { name: "description", type: "ReactNode", description: "A muted second line, e.g. to tell items with the same label apart." },
+      ],
+    },
+    {
+      component: "SidebarSection",
+      rows: [
+        { name: "label", type: "ReactNode", description: "Small uppercase heading of the list." },
+        { name: "collapsible", type: "boolean", description: "The label becomes a button that shows or hides the items (all items show on the icon rail)." },
+        { name: "open / defaultOpen / onOpenChange", type: "boolean / boolean / (open) => void", default: "– / true / –", description: "Open state of a collapsible section." },
       ],
     },
     {
@@ -201,6 +255,8 @@ const doc: ComponentDoc = {
     "The sidebar is an <aside> landmark named by label (default “Sidebar”); inside it, the navigation is a named <nav>, sections are labelled lists and the current page has aria-current=\"page\".",
     "The sidebar content scrolls on its own (a ScrollArea that becomes a focusable, named region only when it overflows), so the account menu in the footer is always reachable.",
     "The collapse toggle has aria-expanded and aria-controls; collapsed labels stay in the accessibility tree and show as tooltips.",
+    "On a narrow window (below 600px) the same toggle (“Open navigation”) opens the sidebar as a modal dialog: focus moves into it and returns to the toggle; Escape, the backdrop, its close button or following a link close it.",
+    "A collapsible section's heading is a button with aria-expanded and aria-controls; its list is hidden (not just invisible) while closed.",
     "The workspace switcher and user menu announce their purpose (“Current workspace: …”, “Account: …”).",
   ],
 };
