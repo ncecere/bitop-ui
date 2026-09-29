@@ -529,6 +529,11 @@ const doc: ComponentDoc = {
         { name: "filterable", type: "boolean", default: "true with an accessor", description: "Include in the text filter." },
         { name: "numeric / muted / rowHeader / hideHeader / width", type: "boolean / … / string", description: 'Alignment, secondary text, <th scope="row"> cells, hidden header text, width.' },
         { name: "hideable / defaultHidden / label", type: "boolean / boolean / string", default: "true (false for rowHeader)", description: "Columns menu: can be hidden, starts hidden, name in the menu." },
+        {
+          name: "defaultHiddenNarrow",
+          type: "boolean",
+          description: "Starts hidden on a narrow window (below 600px, NARROW_QUERY) so a phone shows the columns that matter; the Columns menu still offers it.",
+        },
       ],
     },
   ],
