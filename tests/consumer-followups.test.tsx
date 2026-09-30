@@ -7,8 +7,11 @@
  */
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { afterEach, vi } from "vitest";
 import { axe } from "vitest-axe";
+import { DataTable, type DataTableColumn } from "@/registry/bitop/ui/data-table/data-table";
 import { LineChart } from "@/registry/bitop/ui/line-chart/line-chart";
+import { NARROW_QUERY } from "@/registry/bitop/lib/bitop-utils";
 import { TooltipText } from "@/registry/bitop/ui/tooltip/tooltip";
 
 describe("TooltipText", () => {
@@ -79,5 +82,60 @@ describe("LineChart ticks", () => {
     expect(within(screen.getByRole("img")).getByText("70%").style.getPropertyValue("--y")).toBe("50.00%");
     rerender(<LineChart data={runs} series={series} summary="s" domain={{ min: 40, max: 100 }} ticks={[40, 70]} formatValue={pct} axis={false} />);
     expect(within(screen.getByRole("img")).queryByText("70%")).toBeNull();
+  });
+});
+
+describe("DataTable on small tables", () => {
+  type Run = { id: string; name: string; score: number; when: string };
+  const rows: Run[] = [
+    { id: "1", name: "Retrieval", score: 82, when: "Sep 28" },
+    { id: "2", name: "Full answer", score: 64, when: "Sep 29" },
+  ];
+  const columns: DataTableColumn<Run>[] = [
+    { id: "name", header: "Run", accessor: "name", rowHeader: true },
+    { id: "score", header: "Score", accessor: "score", numeric: true },
+    { id: "when", header: "Started", accessor: "when" },
+  ];
+  const columnsButton = () => screen.queryByRole("button", { name: "Columns" });
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it("columnsMenuMin leaves the Columns menu out until enough columns can be hidden", () => {
+    const { rerender } = render(<DataTable caption="Runs" columns={columns} data={rows} getRowId={(r) => r.id} columnsMenu columnsMenuMin={3} />);
+    // Score and Started can be hidden (the row header can't): 2 < 3.
+    expect(columnsButton()).toBeNull();
+    expect(screen.getAllByRole("columnheader")).toHaveLength(3);
+    rerender(<DataTable caption="Runs" columns={columns} data={rows} getRowId={(r) => r.id} columnsMenu columnsMenuMin={2} />);
+    expect(columnsButton()).toBeInTheDocument();
+    // Without columnsMenuMin the menu is always there.
+    rerender(<DataTable caption="Runs" columns={columns} data={rows} getRowId={(r) => r.id} columnsMenu />);
+    expect(columnsButton()).toBeInTheDocument();
+  });
+
+  it("shows the menu anyway once a column is hidden, so it can be shown again", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, "matchMedia").mockImplementation(
+      (query: string) => ({ matches: query === NARROW_QUERY, media: query, addEventListener() {}, removeEventListener() {} }) as unknown as MediaQueryList,
+    );
+    const narrow = columns.map((c) => (c.id === "when" ? { ...c, defaultHiddenNarrow: true } : c));
+    render(<DataTable caption="Runs" columns={narrow} data={rows} getRowId={(r) => r.id} columnsMenu columnsMenuMin={5} />);
+    expect(screen.queryByRole("columnheader", { name: "Started" })).toBeNull();
+    await user.click(columnsButton()!);
+    await user.click(await screen.findByRole("menuitemcheckbox", { name: "Started" }));
+    expect(screen.getByRole("columnheader", { name: "Started" })).toBeInTheDocument();
+    // The menu stays (it isn't pulled from under the pointer), so the column can be hidden again.
+    expect(columnsButton()).toBeInTheDocument();
+    expect(screen.getByRole("menuitemcheckbox", { name: "Started" })).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("showFilterLabel shows the search box's label; by default it is for assistive technology only", async () => {
+    const { container, rerender } = render(<DataTable caption="Runs" columns={columns} data={rows} filterable filterLabel="Search runs" />);
+    const label = () => screen.getByText("Search runs").closest("div")!;
+    expect(screen.getByRole("searchbox", { name: "Search runs" })).toBeInTheDocument();
+    expect(label()).toHaveClass("sr-only");
+    rerender(<DataTable caption="Runs" columns={columns} data={rows} filterable filterLabel="Search runs" showFilterLabel />);
+    expect(label()).not.toHaveClass("sr-only");
+    expect(screen.getByRole("searchbox", { name: "Search runs" })).toBeInTheDocument();
+    expect(await axe(container)).toHaveNoViolations();
   });
 });

@@ -393,6 +393,33 @@ export function RowActions() {
   );
 }
 
+export function SmallTable() {
+  type Run = { id: string; kind: string; score: string; started: string };
+  const runs: Run[] = [
+    { id: "r1", kind: "Retrieval", score: "82%", started: "Sep 28" },
+    { id: "r2", kind: "Full answer", score: "64%", started: "Sep 27" },
+  ];
+  const columns: DataTableColumn<Run>[] = [
+    { id: "kind", header: "Run", accessor: "kind", rowHeader: true },
+    { id: "score", header: "Score", accessor: "score" },
+    { id: "started", header: "Started", accessor: "started", defaultHiddenNarrow: true },
+  ];
+  return (
+    <DataTable
+      framed
+      caption="Runs"
+      columns={columns}
+      data={runs}
+      getRowId={(r) => r.id}
+      filterable
+      filterLabel="Search runs"
+      showFilterLabel
+      columnsMenu
+      columnsMenuMin={4}
+    />
+  );
+}
+
 const doc: ComponentDoc = {
   slug: "data-table",
   title: "Data table",
@@ -409,6 +436,16 @@ const doc: ComponentDoc = {
         title: "Facets, columns menu and bulk actions",
         description:
           "Faceted filters with counts, chips and Clear all, synced to the URL; a Columns menu persisted in localStorage (ID starts hidden); a bulk bar while rows are selected; a “…” row menu; compact density and a sticky header.",
+        wide: true,
+      },
+    ],
+    [
+      "SmallTable",
+      SmallTable,
+      {
+        title: "A small table",
+        description:
+          "columnsMenuMin leaves the Columns menu out of a table with few columns (it comes back on a phone, where Started starts hidden); showFilterLabel shows the search box's label.",
         wide: true,
       },
     ],
@@ -462,7 +499,8 @@ const doc: ComponentDoc = {
         { name: "selectable, selectedIds / defaultSelectedIds / onSelectionChange", type: "boolean, string[]", description: "Checkbox column with a select-all header." },
         { name: "rowLabel", type: "(row) => string", description: 'Names each row checkbox ("Select INV-001").' },
         { name: "filterable, filter / defaultFilter / onFilterChange", type: "boolean, string", description: "Case-insensitive text filter over filterable columns." },
-        { name: "filterLabel / filterPlaceholder", type: "string", default: '"Filter rows"', description: "Filter input label (visually hidden) and placeholder." },
+        { name: "filterLabel / filterPlaceholder", type: "string", default: '"Filter rows"', description: "Filter input label (visually hidden unless showFilterLabel) and placeholder." },
+        { name: "showFilterLabel", type: "boolean", default: "false", description: "Show the filter's label above it, like a facet's label." },
         { name: "pageSize, page / defaultPage / onPageChange", type: "number", description: "Paginate with the Paginator from pagination." },
         { name: "manual / rowCount", type: "boolean / number", description: "Server-side mode: render data as given; rowCount drives the page count." },
         { name: "empty / noResults", type: "ReactNode", description: "No rows at all / the filter matched nothing." },
@@ -499,6 +537,12 @@ const doc: ComponentDoc = {
         { name: "hiddenColumns / defaultHiddenColumns / onHiddenColumnsChange", type: "string[]", description: "Hidden column ids, controlled or not (default: columns with defaultHidden)." },
         { name: "columnsStorageKey", type: "string", description: "Persist hidden columns in localStorage (uncontrolled only). Read after mount, so server and first client render match." },
         { name: "columnsMenuLabel", type: "string", default: '"Columns"', description: "Text of the menu button." },
+        {
+          name: "columnsMenuMin",
+          type: "number",
+          default: "0",
+          description: "Show the Columns menu only when at least this many columns can be hidden, or once one is hidden (a defaultHiddenNarrow column on a phone), so small tables go without it.",
+        },
         {
           name: "facets, facetValues / defaultFacetValues / onFacetValuesChange",
           type: "Facet<T>[], FilterValues",
