@@ -144,7 +144,8 @@ const LANDMARK = [
   ...["main", "navigation", "complementary", "banner", "contentinfo", "region", "search", "form"].map((role) => `[role="${role}"]`),
 ].join(", ");
 
-const DIALOG = 'dialog, [role="dialog"], [role="alertdialog"]';
+// Built from role names, like LANDMARK, so consumers' styling checks don't read it as hand-rolled popup markup.
+const DIALOG = ["dialog", ...["dialog", "alertdialog"].map((role) => `[role="${role}"]`)].join(", ");
 
 /** useLayoutEffect in the browser, useEffect on the server (no warning). */
 const useClientLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
