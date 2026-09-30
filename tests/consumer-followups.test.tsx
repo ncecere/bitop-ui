@@ -7,10 +7,15 @@
  */
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { afterEach, vi } from "vitest";
 import { axe } from "vitest-axe";
+import { Button } from "@/registry/bitop/ui/button/button";
 import { DataTable, type DataTableColumn } from "@/registry/bitop/ui/data-table/data-table";
+import { Dialog } from "@/registry/bitop/ui/dialog/dialog";
 import { LineChart } from "@/registry/bitop/ui/line-chart/line-chart";
+import { Menu, MenuItem, MenuSubmenu } from "@/registry/bitop/ui/menu/menu";
+import { Popover } from "@/registry/bitop/ui/popover/popover";
 import { NARROW_QUERY } from "@/registry/bitop/lib/bitop-utils";
 import { TooltipText } from "@/registry/bitop/ui/tooltip/tooltip";
 
@@ -137,5 +142,102 @@ describe("DataTable on small tables", () => {
     expect(label()).not.toHaveClass("sr-only");
     expect(screen.getByRole("searchbox", { name: "Search runs" })).toBeInTheDocument();
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("Popups inside the page's landmarks (axe region)", () => {
+  // axe's region rule is a page-level rule: run it on the whole body.
+  const regionViolations = async () => (await axe(document.body, { runOnly: { type: "rule", values: ["region"] } })).violations;
+
+  // axe moves focus to the body, so each test checks once, with its popups open.
+  it("a menu opens inside its trigger's landmark, and so does a submenu", async () => {
+    const user = userEvent.setup();
+    render(
+      <main>
+        <Menu trigger={<Button>Actions</Button>}>
+          <MenuItem>Rename</MenuItem>
+          <MenuSubmenu label="Move to">
+            <MenuItem>Archive</MenuItem>
+          </MenuSubmenu>
+        </Menu>
+      </main>,
+    );
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    const menu = await screen.findByRole("menu");
+    expect(menu.closest("main")).not.toBeNull();
+    await waitFor(() => expect(menu).toHaveFocus());
+    await user.keyboard("{ArrowDown}{ArrowDown}");
+    await waitFor(() => expect(screen.getByRole("menuitem", { name: "Move to" })).toHaveFocus());
+    await user.keyboard("{ArrowRight}");
+    const archive = await screen.findByRole("menuitem", { name: "Archive" });
+    expect(archive.closest("main")).not.toBeNull();
+    expect(await regionViolations()).toEqual([]);
+  });
+
+  it("a menu in the sidebar's nav opens inside the nav", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <nav aria-label="Sections">
+          <Menu trigger={<Button>Team</Button>}>
+            <MenuItem>Switch team</MenuItem>
+          </Menu>
+        </nav>
+        <main>Content</main>
+      </>,
+    );
+    await user.click(screen.getByRole("button", { name: "Team" }));
+    expect((await screen.findByRole("menuitem", { name: "Switch team" })).closest("nav")).not.toBeNull();
+    expect(await regionViolations()).toEqual([]);
+  });
+
+  it("a menu in a dialog still opens outside the page's landmarks; container overrides the choice", async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(
+      <main>
+        <Dialog open title="Share" onOpenChange={() => {}}>
+          <Menu trigger={<Button>Role</Button>}>
+            <MenuItem>Editor</MenuItem>
+          </Menu>
+        </Dialog>
+      </main>,
+    );
+    await user.click(await screen.findByRole("button", { name: "Role" }));
+    const item = await screen.findByRole("menuitem", { name: "Editor" });
+    expect(item.closest("main")).toBeNull();
+    await user.keyboard("{Escape}");
+    unmount();
+
+    function Custom() {
+      const [aside, setAside] = useState<HTMLElement | null>(null);
+      return (
+        <>
+          <aside ref={setAside} aria-label="Help" />
+          <main>
+            <Menu trigger={<Button>More</Button>} container={aside}>
+              <MenuItem>Shortcuts</MenuItem>
+            </Menu>
+          </main>
+        </>
+      );
+    }
+    render(<Custom />);
+    await user.click(screen.getByRole("button", { name: "More" }));
+    expect((await screen.findByRole("menuitem", { name: "Shortcuts" })).closest("aside")).not.toBeNull();
+  });
+
+  it.each(["click", "hover"])("a popover is a dialog, which axe counts as a region (opened by %s)", async (how) => {
+    const user = userEvent.setup();
+    render(
+      <main>
+        <Popover trigger={<Button>Details</Button>} title="Retention" openOnHover>
+          Kept for 90 days.
+        </Popover>
+      </main>,
+    );
+    const trigger = screen.getByRole("button", { name: "Details" });
+    await (how === "click" ? user.click(trigger) : user.hover(trigger));
+    expect(await screen.findByRole("dialog", { name: "Retention" })).toBeInTheDocument();
+    expect(await regionViolations()).toEqual([]);
   });
 });

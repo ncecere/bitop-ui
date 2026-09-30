@@ -92,6 +92,12 @@ const doc: ComponentDoc = {
         { name: "sideOffset", type: "number", default: "6", description: "Gap from the trigger in px." },
         { name: "width", type: '"auto" | "trigger"', default: '"auto"', description: "Match the trigger width." },
         { name: "open / defaultOpen / onOpenChange", type: "boolean / boolean / (open) => void", description: "Controlled or uncontrolled state." },
+        {
+          name: "container",
+          type: "HTMLElement | null",
+          default: "the trigger's landmark",
+          description: "Where the popup is portalled. By default, the outermost landmark around the trigger (main, nav, aside…); outside any landmark, or in a dialog, <body>. null means <body>.",
+        },
       ],
     },
     {
@@ -136,6 +142,7 @@ const doc: ComponentDoc = {
     "Checkbox and radio items are menuitemcheckbox / menuitemradio with aria-checked, so state isn't conveyed by the mark alone.",
     "Submenu triggers open with ArrowRight, Enter or Space (and on hover); ArrowLeft closes them.",
     "Shortcut hints are visual only; wire real shortcuts separately.",
+    "The popup is portalled into the landmark its trigger is in (useLandmarkContainer in bitop-utils), so it is part of the page's landmarks (WAI landmark guidance; axe's region rule) rather than stray content at the end of <body>. It is positioned fixed there, so a landmark that scrolls or clips doesn't clip it.",
   ],
 };
 
