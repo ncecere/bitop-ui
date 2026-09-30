@@ -5,9 +5,10 @@
  * inside the page's landmarks (axe `region`), and a citation card's "go to
  * source" action.
  */
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
+import { LineChart } from "@/registry/bitop/ui/line-chart/line-chart";
 import { TooltipText } from "@/registry/bitop/ui/tooltip/tooltip";
 
 describe("TooltipText", () => {
@@ -44,5 +45,39 @@ describe("TooltipText", () => {
     act(() => text.blur());
     await user.hover(text);
     await waitFor(() => expect(shown()).toBe(true));
+  });
+});
+
+describe("LineChart ticks", () => {
+  const runs = [
+    { label: "Run 1", values: { score: 62 } },
+    { label: "Run 2", values: { score: 81 } },
+  ];
+  const series = [{ key: "score" as const, label: "Recall@5" }];
+  const pct = (v: number) => `${v}%`;
+
+  it("labels the ticks on the scale, each at its height; the top keeps its own label", async () => {
+    const { container } = render(
+      <LineChart data={runs} series={series} summary="Recall@5 over 2 runs, from 62% to 81%." domain={{ min: 0, max: 100 }} ticks={[0, 50, 100, 150]} formatValue={pct} />,
+    );
+    const img = screen.getByRole("img", { name: "Recall@5 over 2 runs, from 62% to 81%." });
+    // 100% once (the peak line), 50% half way, 0% at the bottom; 150 is off the scale.
+    expect(within(img).getAllByText("100%")).toHaveLength(1);
+    const half = within(img).getByText("50%");
+    expect(half.style.getPropertyValue("--y")).toBe("50.00%");
+    expect(half).not.toHaveAttribute("data-floor");
+    const zero = within(img).getByText("0%");
+    expect(zero.style.getPropertyValue("--y")).toBe("100.00%");
+    expect(zero).toHaveAttribute("data-floor");
+    expect(within(img).queryByText("150%")).toBeNull();
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("a tick at a non-zero minimum replaces the minimum's own label; without axis nothing is labelled", () => {
+    const { rerender } = render(<LineChart data={runs} series={series} summary="s" domain={{ min: 40, max: 100 }} ticks={[40, 70]} formatValue={pct} />);
+    expect(within(screen.getByRole("img")).getAllByText("40%")).toHaveLength(1);
+    expect(within(screen.getByRole("img")).getByText("70%").style.getPropertyValue("--y")).toBe("50.00%");
+    rerender(<LineChart data={runs} series={series} summary="s" domain={{ min: 40, max: 100 }} ticks={[40, 70]} formatValue={pct} axis={false} />);
+    expect(within(screen.getByRole("img")).queryByText("70%")).toBeNull();
   });
 });

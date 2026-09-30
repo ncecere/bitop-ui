@@ -61,6 +61,7 @@ export function FixedScale() {
       size="sm"
       points
       domain={{ min: 0, max: 100 }}
+      ticks={[0, 50]}
       data={scores}
       series={[{ key: "recall", label: "Recall" }]}
       formatValue={(v) => `${Math.round(v)}%`}
@@ -83,7 +84,11 @@ const doc: ComponentDoc = {
     [
       "FixedScale",
       FixedScale,
-      { title: "A fixed 0–100% scale", description: "domain keeps a percentage on the same scale whatever the values, so a small change doesn't look like a cliff.", wide: true },
+      {
+        title: "A fixed 0–100% scale with ticks",
+        description: "domain keeps a percentage on the same scale whatever the values, so a small change doesn't look like a cliff; ticks labels 0% and 50% (the top shows 100%).",
+        wide: true,
+      },
     ],
   ]),
   props: [
@@ -103,7 +108,13 @@ const doc: ComponentDoc = {
           default: "0 to the largest value",
           description: "Fixes the scale, e.g. { min: 0, max: 100 } for a percentage. The top line shows max; a min other than 0 is labelled at the bottom. Values outside draw at the edge.",
         },
-        { name: "formatValue", type: "(n) => string", description: "Peak label, hover titles and table values." },
+        {
+          name: "ticks",
+          type: "number[]",
+          default: "[]",
+          description: "Values labelled on the scale, each on a faint line, e.g. [0, 50] with a 0–100 domain. Ticks off the scale are left out; the top is always labelled.",
+        },
+        { name: "formatValue", type: "(n) => string", description: "Peak and tick labels, hover titles and table values." },
         { name: "legend / axis", type: "boolean", default: "true", description: "Legend; first/last labels and peak value." },
         { name: "dataTable", type: "{ caption; labelHeader?; defaultOpen? }", description: "Adds a “Show data” disclosure with the values in a table." },
       ],
