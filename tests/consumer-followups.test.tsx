@@ -13,6 +13,7 @@ import { axe } from "vitest-axe";
 import { Button } from "@/registry/bitop/ui/button/button";
 import { DataTable, type DataTableColumn } from "@/registry/bitop/ui/data-table/data-table";
 import { Dialog } from "@/registry/bitop/ui/dialog/dialog";
+import { InlineCitation } from "@/registry/bitop/ui/inline-citation/inline-citation";
 import { LineChart } from "@/registry/bitop/ui/line-chart/line-chart";
 import { Menu, MenuItem, MenuSubmenu } from "@/registry/bitop/ui/menu/menu";
 import { Popover } from "@/registry/bitop/ui/popover/popover";
@@ -239,5 +240,59 @@ describe("Popups inside the page's landmarks (axe region)", () => {
     await (how === "click" ? user.click(trigger) : user.hover(trigger));
     expect(await screen.findByRole("dialog", { name: "Retention" })).toBeInTheDocument();
     expect(await regionViolations()).toEqual([]);
+  });
+});
+
+describe("InlineCitation sourceAction", () => {
+  const sources = [
+    { title: "Leave policy", href: "https://hr.example.com/leave", quote: "Staff accrue 2 days a month." },
+    { title: "Benefits FAQ", description: "Answers about benefits." },
+  ];
+
+  it("ends the card with a button that closes it and goes to the current source, which gets the focus", async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    render(
+      <main>
+        <p>
+          Claim{" "}
+          <InlineCitation
+            index={[1, 2]}
+            sources={sources}
+            sourceAction={{
+              label: (i) => `Show source ${i + 1} below`,
+              onSelect: (i, source) => {
+                onSelect(i, source.title);
+                document.getElementById(`source-${i}`)!.focus();
+              },
+            }}
+          />
+        </p>
+        <ol>
+          <li id="source-0" tabIndex={-1}>Leave policy</li>
+          <li id="source-1" tabIndex={-1}>Benefits FAQ</li>
+        </ol>
+      </main>,
+    );
+    const chip = screen.getByRole("button", { name: /^Sources 1, 2/ });
+    await user.click(chip);
+    let card = await screen.findByRole("dialog", { name: /Leave policy/ });
+    // After the passage.
+    const first = within(card).getByRole("button", { name: "Show source 1 below" });
+    expect(within(card).getByText("Staff accrue 2 days a month.").compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(await axe(card)).toHaveNoViolations();
+    await user.click(within(card).getByRole("button", { name: "Next source" }));
+    await user.click(within(card).getByRole("button", { name: "Show source 2 below" }));
+    expect(onSelect).toHaveBeenCalledWith(1, "Benefits FAQ");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(document.getElementById("source-1")).toHaveFocus();
+
+    // Escape still returns focus to the chip.
+    await user.click(chip);
+    card = await screen.findByRole("dialog", { name: /Leave policy/ });
+    await waitFor(() => expect(card.contains(document.activeElement)).toBe(true));
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(chip).toHaveFocus();
   });
 });

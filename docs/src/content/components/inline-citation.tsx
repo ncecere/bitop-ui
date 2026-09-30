@@ -32,6 +32,28 @@ export function Verified() {
   );
 }
 
+export function GoToSource() {
+  return (
+    <div className={styles.stack}>
+      <p>
+        Eligible employees get 16 weeks of paid leave
+        <InlineCitation
+          index={1}
+          sources={[demoSources[0]!]}
+          sourceAction={{
+            label: () => "Show source 1 below",
+            onSelect: () => document.getElementById("doc-source-1")?.focus(),
+          }}
+        />
+        .
+      </p>
+      <p id="doc-source-1" tabIndex={-1}>
+        Source 1: {demoSources[0]!.title}
+      </p>
+    </div>
+  );
+}
+
 const doc: ComponentDoc = {
   slug: "inline-citation",
   title: "Inline citation",
@@ -42,6 +64,11 @@ const doc: ComponentDoc = {
   examples: examples(raw, [
     ["InText", InText, { title: "Single and multiple sources", wide: true }],
     ["Verified", Verified, { title: "Checked claims: verified, unsupported, contradicted", wide: true }],
+    [
+      "GoToSource",
+      GoToSource,
+      { title: "A way to the full source", description: "sourceAction ends the card with a button that closes it and moves to the source listed under the answer.", wide: true },
+    ],
   ]),
   props: [
     {
@@ -52,6 +79,11 @@ const doc: ComponentDoc = {
         { name: "label", type: "ReactNode", description: "Override the chip text (keep it in the accessible name)." },
         { name: "side", type: '"top" | "bottom"', default: '"top"', description: "Preferred side of the card." },
         { name: "onActivate", type: "() => void", description: "Runs on click / Enter / Space instead of opening the card (hover still previews it), e.g. to focus the matching Source below the answer." },
+        {
+          name: "sourceAction",
+          type: "{ label: (index, source) => ReactNode; onSelect: (index, source) => void }",
+          description: "A link-style button at the end of the card (“Show source 2 below”): it closes the card and calls onSelect with the current source's position in sources. Focus isn't returned to the chip, so onSelect can move it.",
+        },
         { name: "verification", type: '"verified" | "unsupported" | "contradicted"', description: "The claim was checked against its source: a small check (verified) or a warning (unsupported, contradicted) in the chip." },
         { name: "verificationLabel", type: "string", description: "Explains the verification in the card and the chip's accessible name (defaults per status, e.g. “Not supported by this source”)." },
       ],
@@ -61,6 +93,7 @@ const doc: ComponentDoc = {
     "Built on Base UI Popover with openOnHover: it opens on hover and on click, Enter or Space.",
     "Opening it by keyboard or click moves focus into the card, so the source link and previous/next buttons are reachable with Tab; Esc closes it and returns focus to the chip.",
     "The chip is named after the source (“Source 1: Parental leave policy (2025)”), so screen-reader users hear what's cited without opening the card.",
+    "The sourceAction button closes the card without sending focus back to the chip, so onSelect can focus the source it leads to; Esc still returns focus to the chip.",
     "The page position “2 of 3” is announced politely when paging, and stays in range if the sources list shrinks while the card is open.",
     "A verification is never shown by colour or icon alone: its text is added to the chip's accessible name (“Source 2: Leave FAQ. Not supported by this source”) and heads the card, which is the icon's tooltip.",
   ],
