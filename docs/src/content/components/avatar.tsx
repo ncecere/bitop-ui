@@ -13,6 +13,17 @@ export function Sizes() {
   );
 }
 
+export function Initials() {
+  return (
+    <>
+      <Avatar name="IT Help Desk" shape="square" />
+      <Avatar name="Go docs (signed-in)" shape="square" />
+      <Avatar name="Ludwig van Beethoven" />
+      <Avatar name="Cher" />
+    </>
+  );
+}
+
 const doc: ComponentDoc = {
   slug: "avatar",
   title: "Avatar",
@@ -20,12 +31,28 @@ const doc: ComponentDoc = {
   description: "An image avatar that falls back to initials. Square avatars suit workspaces and teams.",
   imports: `import { Avatar } from "@/components/ui/avatar/avatar";`,
   baseUi: { name: "Avatar", href: "https://base-ui.com/react/components/avatar" },
-  examples: examples(raw, [["Sizes", Sizes, { title: "Sizes and shapes" }]]),
+  examples: examples(raw, [
+    ["Sizes", Sizes, { title: "Sizes and shapes" }],
+    [
+      "Initials",
+      Initials,
+      {
+        title: "Initials",
+        description: "The first letters of the first two words: IH, GD (punctuation is skipped), LB (a lowercase particle such as van or de is passed over) and C.",
+      },
+    ],
+  ]),
   props: [
     {
       component: "Avatar",
       rows: [
-        { name: "name", type: "string", required: true, description: "Used for the initials (first letter or digit of the first and last words; punctuation and symbols are skipped) and the accessible name." },
+        {
+          name: "name",
+          type: "string",
+          required: true,
+          description:
+            "Used for the initials and the accessible name. Initials are the first letter or digit of the first two words (\"IT Help Desk\" → IH); punctuation and symbols are skipped, and lowercase particles (van, de, of…) are passed over for the second.",
+        },
         { name: "src", type: "string", description: "Image URL; initials show until it loads." },
         { name: "size", type: '"xs" | "sm" | "md" | "lg" | "xl"', default: '"md"', description: "Diameter (1.25 to 3.5rem)." },
         { name: "shape", type: '"circle" | "square"', default: '"circle"', description: "Square for workspaces." },

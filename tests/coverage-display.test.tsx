@@ -62,15 +62,35 @@ describe("Avatar", () => {
     expect(Number(a.getAttribute("data-hue"))).toBeLessThanOrEqual(6);
   });
 
-  it("computes initials", () => {
+  it("computes initials from the first two words", async () => {
     expect(initials("Ada Lovelace")).toBe("AL");
-    expect(initials("  ada   king  lovelace ")).toBe("AL");
+    expect(initials("  ada   king  lovelace ")).toBe("AK");
+    expect(initials("IT Help Desk")).toBe("IH");
+    expect(initials("Office of the Registrar")).toBe("OR");
     expect(initials("Cher")).toBe("C");
+    expect(initials("cher")).toBe("C");
+    expect(initials("42")).toBe("4");
     expect(initials("   ")).toBe("?");
+    const { container } = render(<Avatar name="IT Help Desk" shape="square" />);
+    expect(screen.getByRole("img", { name: "IT Help Desk" })).toHaveTextContent("IH");
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("skips lowercase name particles for the second initial, but not capitalised ones", () => {
+    expect(initials("Ludwig van Beethoven")).toBe("LB");
+    expect(initials("Charles de Gaulle")).toBe("CG");
+    expect(initials("Leonardo da Vinci")).toBe("LV");
+    expect(initials("Ursula von der Leyen")).toBe("UL");
+    expect(initials("Van Morrison")).toBe("VM");
+    expect(initials("De La Soul")).toBe("DL");
+    // Only particles after the first word: the next word counts.
+    expect(initials("Maria de")).toBe("MD");
+    // The first word is always the first initial.
+    expect(initials("de la Cruz")).toBe("DC");
   });
 
   it("builds initials from letters and digits only, skipping punctuation and symbols", async () => {
-    expect(initials("Go docs (signed-in)")).toBe("GS");
+    expect(initials("Go docs (signed-in)")).toBe("GD");
     expect(initials("(Beta) team")).toBe("BT");
     expect(initials("R&D \u2014 Lab")).toBe("RL");
     expect(initials("\"Ops\" / 24x7")).toBe("O2");
@@ -81,8 +101,9 @@ describe("Avatar", () => {
     expect(initials("\u0141ukasz \u017b\u00f3\u0142w")).toBe("\u0141\u017b");
     expect(initials("\u5f20\u4f1f")).toBe("\u5f20");
     expect(initials("\u2014 ( ) &")).toBe("?");
+    expect(initials("(signed-in) Go docs")).toBe("SG");
     const { container } = render(<Avatar name="Go docs (signed-in)" />);
-    expect(screen.getByRole("img", { name: "Go docs (signed-in)" })).toHaveTextContent("GS");
+    expect(screen.getByRole("img", { name: "Go docs (signed-in)" })).toHaveTextContent("GD");
     expect(await axe(container)).toHaveNoViolations();
   });
 });
