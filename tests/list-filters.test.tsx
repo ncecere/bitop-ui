@@ -129,8 +129,8 @@ describe("FilterBar", () => {
     await userEvent.click(within(status).getByRole("button", { name: "Ready, 2" }));
 
     const chips = within(bar).getByRole("list", { name: "Active filters" });
+    // A single-choice toggle has no chip: its pressed item shows the choice.
     expect(within(chips).getAllByRole("button").map((b) => b.getAttribute("aria-label") ?? b.textContent)).toEqual([
-      "Remove filter Status: Ready",
       "Remove filter Kind: PDF",
       "Remove filter Kind: HTML",
       "Clear all",
@@ -140,6 +140,21 @@ describe("FilterBar", () => {
     await userEvent.click(within(chips).getByRole("button", { name: "Clear all" }));
     expect(within(bar).queryByRole("list", { name: "Active filters" })).not.toBeInTheDocument();
     expect(document.activeElement).not.toBe(document.body);
+    // Clear all cleared the toggle too.
+    expect(within(status).getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("a facet's chip option overrides the default either way", () => {
+    const withChips: Facet<Doc>[] = facets.map((f) => (f.id === "status" ? { ...f, chip: true } : f.id === "kind" ? { ...f, chip: false } : f));
+    render(<FilterBar facets={withChips} defaultValue={{ status: ["ready"], kind: ["PDF"] }} />);
+    const chips = screen.getByRole("list", { name: "Active filters" });
+    expect(within(chips).getAllByRole("button").map((b) => b.getAttribute("aria-label") ?? b.textContent)).toEqual(["Remove filter Status: Ready", "Clear all"]);
+  });
+
+  it("with only a single-choice toggle active there are no chips and no Clear all", () => {
+    render(<FilterBar facets={facets} defaultValue={{ status: ["failed"] }} />);
+    expect(screen.queryByRole("list", { name: "Active filters" })).toBeNull();
+    expect(within(screen.getByRole("group", { name: "Status" })).getByRole("button", { name: "Failed" })).toHaveAttribute("aria-pressed", "true");
   });
 });
 

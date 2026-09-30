@@ -72,7 +72,11 @@ const doc: ComponentDoc = {
     [
       "AuditLogFilters",
       AuditLogFilters,
-      { title: "Audit log filters, kept in the URL", description: "DataTable takes the same facets (see Data table); this is the standalone bar for other lists.", wide: true },
+      {
+        title: "Audit log filters, kept in the URL",
+        description: "DataTable takes the same facets (see Data table); this is the standalone bar for other lists. Channel, a single-choice toggle, has no chip: its pressed item shows the choice.",
+        wide: true,
+      },
     ],
   ]),
   props: [
@@ -83,7 +87,7 @@ const doc: ComponentDoc = {
         { name: "value / defaultValue / onValueChange", type: "FilterValues", description: "{ [facetId]: string[] | { preset, range } }; missing or empty = no filter." },
         { name: "counts", type: "{ [facetId]: { [option]: number } }", description: "Shown in toggles (“Failed 3”) and as combobox hints. facetCounts() computes them in memory." },
         { name: "start / end", type: "ReactNode", description: "Content before / after the facets (e.g. search, Export)." },
-        { name: "chips", type: "boolean", default: "true", description: "Active-filter chips and Clear all." },
+        { name: "chips", type: "boolean", default: "true", description: "Active-filter chips and Clear all (per facet, see chip below)." },
         { name: "size", type: '"sm" | "md"', default: '"sm"', description: "Control size." },
         { name: "labels", type: "Partial<FilterBarLabels>", description: "Translate the group name, chip text and Clear all." },
       ],
@@ -96,6 +100,12 @@ const doc: ComponentDoc = {
         { name: 'type: "select"', type: "options, multiple?, placeholder?, accessor?", description: "A Combobox for long lists (people, agents); options may have a group." },
         { name: 'type: "date-range"', type: "presets?, allowCustom?, pickerProps?, accessor?", description: "DateRangePresets: Today / 7 / 30 / 90 days / Custom. Custom opens a range picker; it filters once a range is picked. Ranges cover whole local days." },
         { name: "accessor", type: "(row) => value(s) or date", description: "Used by filterRows and facetCounts (and DataTable's in-memory filtering)." },
+        {
+          name: "chip",
+          type: "boolean",
+          default: "true, except single-choice toggles",
+          description: "A chip while the facet is active. A single-choice toggle has none by default: its pressed item already shows the choice (“All” clears it).",
+        },
       ],
     },
     {
