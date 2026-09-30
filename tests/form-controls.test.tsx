@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Bold, Italic, Search } from "lucide-react";
 import { useState } from "react";
@@ -115,6 +115,66 @@ describe("Combobox", () => {
     await user.click(screen.getByRole("button", { name: "Remove Ana Silva" }));
     expect(onValueChange).toHaveBeenLastCalledWith(["chen"], [people[2]]);
     expect(screen.queryByText("Ana Silva")).toBeNull();
+  });
+
+  it("Enter picks the highlighted option and never submits the surrounding form, open list or closed", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn((e: { preventDefault: () => void }) => e.preventDefault());
+    const onValueChange = vi.fn();
+    render(
+      <form onSubmit={onSubmit}>
+        <Field label="Reviewers">
+          <Combobox multiple items={people} onValueChange={onValueChange} />
+        </Field>
+        <button type="submit">Save</button>
+      </form>,
+    );
+    const input = screen.getByRole("combobox", { name: "Reviewers" });
+    await user.type(input, "chen");
+    await screen.findByRole("option", { name: "Chen Wei" });
+    await user.keyboard("{ArrowDown}{Enter}");
+    expect(onValueChange).toHaveBeenLastCalledWith(["chen"], [people[2]]);
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("listbox")).toBeNull());
+    await user.keyboard("{Enter}");
+    expect(onSubmit).not.toHaveBeenCalled();
+    // The form's own submit button still submits.
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it("a single combobox keeps Enter too, unless submitOnEnter; freeText submits by default", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn((e: { preventDefault: () => void }) => e.preventDefault());
+    const { rerender } = render(
+      <form onSubmit={onSubmit}>
+        <Combobox aria-label="Region" items={regions} defaultValue="lhr" />
+        <button type="submit">Save</button>
+      </form>,
+    );
+    act(() => screen.getByRole("combobox", { name: "Region" }).focus());
+    await user.keyboard("{Enter}");
+    expect(onSubmit).not.toHaveBeenCalled();
+
+    rerender(
+      <form onSubmit={onSubmit}>
+        <Combobox aria-label="Region" items={regions} defaultValue="lhr" submitOnEnter />
+        <button type="submit">Save</button>
+      </form>,
+    );
+    act(() => screen.getByRole("combobox", { name: "Region" }).focus());
+    await user.keyboard("{Enter}");
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <form onSubmit={onSubmit}>
+        <Combobox aria-label="Group" freeText items={[]} defaultValue="staff" />
+        <button type="submit">Save</button>
+      </form>,
+    );
+    act(() => screen.getByRole("combobox", { name: "Group" }).focus());
+    await user.keyboard("{Enter}");
+    expect(onSubmit).toHaveBeenCalledTimes(2);
   });
 });
 
