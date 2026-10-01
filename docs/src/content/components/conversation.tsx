@@ -135,7 +135,7 @@ const doc: ComponentDoc = {
     {
       component: "useStickToBottom / nextStickState",
       rows: [],
-      note: "The behaviour on its own for custom layouts: useStickToBottom({ threshold, enabled }) returns viewportRef, contentRef, atBottom and scrollToBottom(); nextStickState() is the pure reducer it uses.",
+      note: "The behaviour on its own for custom layouts: useStickToBottom({ threshold, enabled }) returns viewportRef, contentRef, atBottom, scrollToBottom() and scrollToElement(el, { offset }) (stop following and show an element from its start, such as an answer that arrived whole); nextStickState() is the pure reducer it uses.",
     },
   ],
   a11y: [
