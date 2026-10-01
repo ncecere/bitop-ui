@@ -163,7 +163,7 @@ const doc: ComponentDoc = {
         { name: "title", type: "ReactNode", required: true, description: "Heading; names the sheet." },
         { name: "description", type: "ReactNode", required: true, description: "Describes the sheet's purpose." },
         { name: "side", type: '"right" | "left" | "top" | "bottom"', default: '"right"', description: "Edge it slides in from." },
-        { name: "size", type: '"sm" | "md" | "lg" | "xl"', default: '"md"', description: "Width of left/right sheets (20–42rem)." },
+        { name: "size", type: '"sm" | "md" | "lg" | "xl" | "full"', default: '"md"', description: "Width of left/right sheets (20–42rem); full covers the whole screen from any side (a side panel's stand-in on a phone)." },
         { name: "trigger", type: "ReactElement", description: "Element that opens it, e.g. <Button />." },
         { name: "footer", type: "ReactNode", description: "Footer pinned to the bottom while the body scrolls (use SheetClose for Cancel; a margin-inline-end: auto item sits on the left)." },
         { name: "open / defaultOpen / onOpenChange", type: "boolean / boolean / (open) => void", description: "Controlled or uncontrolled state." },

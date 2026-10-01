@@ -2,8 +2,8 @@
  * Follow-ups from a consumer's release: a tooltip on plain text, labelled
  * ticks on a line chart's scale, a Columns menu only where it helps, a
  * visible search label, no chip for a single-choice toggle filter, menus
- * inside the page's landmarks (axe `region`), and a citation card's "go to
- * source" action.
+ * inside the page's landmarks (axe `region`), a citation card's "go to
+ * source" action, a selectable source card and a full-screen sheet.
  */
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -17,6 +17,8 @@ import { InlineCitation } from "@/registry/bitop/ui/inline-citation/inline-citat
 import { LineChart } from "@/registry/bitop/ui/line-chart/line-chart";
 import { Menu, MenuItem, MenuSubmenu } from "@/registry/bitop/ui/menu/menu";
 import { Popover } from "@/registry/bitop/ui/popover/popover";
+import { Sheet } from "@/registry/bitop/ui/sheet/sheet";
+import { Source, Sources, SourcesContent, SourcesTrigger } from "@/registry/bitop/ui/sources/sources";
 import { NARROW_QUERY } from "@/registry/bitop/lib/bitop-utils";
 import { TooltipText } from "@/registry/bitop/ui/tooltip/tooltip";
 
@@ -294,5 +296,55 @@ describe("InlineCitation sourceAction", () => {
     await user.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(chip).toHaveFocus();
+  });
+});
+
+describe("Source onSelect", () => {
+  it("makes the card a button, named and described, with its link beside it", async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    render(
+      <main>
+        <Sources defaultOpen>
+          <SourcesTrigger count={2} />
+          <SourcesContent>
+            <Source
+              index={1}
+              title="Leave policy"
+              href="https://hr.example.com/leave"
+              meta="Policies › Leave"
+              description="Staff accrue 2 days a month."
+              onSelect={onSelect}
+              selectLabel="Show source 1: Leave policy"
+              linkLabel="Open the page"
+            />
+            <Source index={2} title="Benefits FAQ" description="Answers about benefits." onSelect={() => {}} />
+          </SourcesContent>
+        </Sources>
+      </main>,
+    );
+    const card = screen.getByRole("button", { name: "Show source 1: Leave policy" });
+    expect(card).toHaveAccessibleDescription("Policies › Leave Staff accrue 2 days a month.");
+    const link = screen.getByRole("link", { name: "Open the page (opens in a new tab)" });
+    expect(link).toHaveAttribute("href", "https://hr.example.com/leave");
+    expect(card.contains(link)).toBe(false);
+    // Without selectLabel the content names it.
+    expect(screen.getByRole("button", { name: /Source 2: Benefits FAQ/ })).toBeInTheDocument();
+    await user.click(card);
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    expect(await axe(document.body)).toHaveNoViolations();
+  });
+});
+
+describe("Sheet size full", () => {
+  it("covers the screen from its side, with the close button", async () => {
+    render(
+      <Sheet open title="Source" description="The cited passage." size="full" side="bottom">
+        <p>Passage</p>
+      </Sheet>,
+    );
+    const dialog = await screen.findByRole("dialog", { name: "Source" });
+    expect(dialog).toHaveAttribute("data-size", "full");
+    expect(within(dialog).getByRole("button", { name: "Close" })).toBeInTheDocument();
   });
 });

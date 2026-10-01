@@ -50,12 +50,16 @@ const doc: ComponentDoc = {
         { name: "meta", type: "ReactNode", description: "Muted meta; defaults to the hostname." },
         { name: "icon", type: "ReactNode", description: "Decorative favicon or file icon." },
         { name: "index", type: "number", description: "Citation number, read as “Source 1:”." },
+        { name: "onSelect", type: "() => void", description: "Makes the card a button that opens the source in the app (e.g. a side panel); href becomes a separate link beside it." },
+        { name: "selectLabel", type: "string", description: "The button's accessible name with onSelect (meta and description describe it)." },
+        { name: "linkLabel", type: "string", default: '"Open the link"', description: "The separate link's name with onSelect and href; “(opens in a new tab)” is added." },
       ],
     },
   ],
   a11y: [
     "The trigger is a button with aria-expanded; the list is an ordered list named “Sources”.",
     "Each linked source is a single link whose name includes its number and title and says it opens in a new tab.",
+    "With onSelect the card is a button (named by selectLabel, described by its meta and description) and its href a separate icon link with its own name, so the two never nest.",
     "A Source with an id and tabIndex={-1} can receive focus from a citation chip (InlineCitation onActivate); it shows a focus ring while focused or while it has data-highlighted.",
   ],
 };
