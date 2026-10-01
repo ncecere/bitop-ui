@@ -97,6 +97,9 @@ export function useStickToBottom({ threshold = 64, enabled = true }: UseStickToB
   const [content, setContent] = useState<HTMLElement | null>(null);
   const state = useRef<StickState>(initialStickState);
   const intentUntil = useRef(0);
+  // After scrollToElement: until then, nothing re-pins (a scroll event from an earlier pin, still at the bottom, arrives
+  // while a smooth scroll is only starting). A pin (scrollToBottom, reaching the bottom by hand later) ends it.
+  const holdUntil = useRef(0);
   const [atBottom, setAtBottom] = useState(true);
 
   const measure = useCallback((el: HTMLElement): ScrollMetrics => ({ scrollTop: el.scrollTop, scrollHeight: el.scrollHeight, clientHeight: el.clientHeight }), []);
@@ -107,6 +110,7 @@ export function useStickToBottom({ threshold = 64, enabled = true }: UseStickToB
       if (behavior === "smooth" && !prefersReducedMotion() && typeof el.scrollTo === "function") el.scrollTo({ top, behavior });
       else el.scrollTop = top;
       state.current = { ...state.current, stuck: true };
+      holdUntil.current = 0;
     },
     [],
   );
@@ -114,6 +118,7 @@ export function useStickToBottom({ threshold = 64, enabled = true }: UseStickToB
   const sync = useCallback(
     (el: HTMLElement) => {
       state.current = nextStickState(state.current, measure(el), threshold, Date.now() < intentUntil.current);
+      if (Date.now() < holdUntil.current) state.current = { ...state.current, stuck: false };
       setAtBottom(state.current.atBottom);
     },
     [measure, threshold],
@@ -138,6 +143,7 @@ export function useStickToBottom({ threshold = 64, enabled = true }: UseStickToB
       if (!viewport) return;
       state.current = { ...state.current, stuck: false };
       intentUntil.current = Date.now() + 600;
+      holdUntil.current = Date.now() + 800;
       const top = Math.max(0, viewport.scrollTop + el.getBoundingClientRect().top - viewport.getBoundingClientRect().top - offset);
       if (behavior === "smooth" && !prefersReducedMotion() && typeof viewport.scrollTo === "function") viewport.scrollTo({ top, behavior });
       else viewport.scrollTop = top;
