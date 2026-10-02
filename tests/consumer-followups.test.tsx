@@ -17,6 +17,7 @@ import { InlineCitation } from "@/registry/bitop/ui/inline-citation/inline-citat
 import { LineChart } from "@/registry/bitop/ui/line-chart/line-chart";
 import { Menu, MenuItem, MenuSubmenu } from "@/registry/bitop/ui/menu/menu";
 import { Popover } from "@/registry/bitop/ui/popover/popover";
+import { Response } from "@/registry/bitop/ui/response/response";
 import { Sheet } from "@/registry/bitop/ui/sheet/sheet";
 import { Source, Sources, SourcesContent, SourcesTrigger } from "@/registry/bitop/ui/sources/sources";
 import { NARROW_QUERY } from "@/registry/bitop/lib/bitop-utils";
@@ -346,5 +347,56 @@ describe("Sheet size full", () => {
     const dialog = await screen.findByRole("dialog", { name: "Source" });
     expect(dialog).toHaveAttribute("data-size", "full");
     expect(within(dialog).getByRole("button", { name: "Close" })).toBeInTheDocument();
+  });
+});
+
+describe("Sheet for text to read", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("focuses its title, puts a full-screen sheet's named close button first, and lets the keyboard scroll a body with nothing focusable", async () => {
+    vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockReturnValue(1000);
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(300);
+    render(
+      <Sheet open title="Interlibrary loan" description="Source 2 of 3" size="full" side="bottom" initialFocus="title" closeLabel="Close the source" closeIcon={<span aria-hidden>←</span>}>
+        <p>A long passage.</p>
+      </Sheet>,
+    );
+    const dialog = await screen.findByRole("dialog", { name: "Interlibrary loan" });
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Interlibrary loan" })).toHaveFocus());
+    const close = within(dialog).getByRole("button", { name: "Close the source" });
+    expect(close.compareDocumentPosition(screen.getByRole("heading")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const body = await within(dialog).findByRole("region", { name: "Interlibrary loan" });
+    expect(body).toHaveAttribute("tabindex", "0");
+    expect(await axe(document.body)).toHaveNoViolations();
+  });
+
+  it("leaves a scrolling body with something focusable out of the tab order, and keeps × last otherwise", async () => {
+    vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockReturnValue(1000);
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(300);
+    render(
+      <Sheet open title="Filters" description="Narrow the list.">
+        <button type="button">Apply</button>
+      </Sheet>,
+    );
+    const dialog = await screen.findByRole("dialog", { name: "Filters" });
+    expect(within(dialog).queryByRole("region")).toBeNull();
+    const buttons = within(dialog).getAllByRole("button");
+    expect(buttons.at(-1)).toHaveAccessibleName("Close");
+  });
+});
+
+describe("Response for quoted text", () => {
+  it("renders every heading at one level and leaves out an empty table header", async () => {
+    const { container } = render(
+      <main>
+        <h2>Source</h2>
+        <Response headingLevel={3}>{"# Hours\n\n### Weekends\n\n|  |  |\n|---|---|\n| Mon | 9 to 5 |\n\n| Day |  |\n|---|---|\n| Sat | closed |"}</Response>
+      </main>,
+    );
+    expect(screen.getAllByRole("heading", { level: 3 }).map((h) => h.textContent)).toEqual(["Hours", "Weekends"]);
+    const tables = container.querySelectorAll("table");
+    expect(tables[0]!.querySelector("thead")).toBeNull();
+    expect(tables[1]!.querySelectorAll("th")).toHaveLength(1);
+    expect(await axe(container)).toHaveNoViolations();
   });
 });
