@@ -16,6 +16,7 @@ import {
   ConversationScrollButton,
   initialStickState,
   nextStickState,
+  useConversation,
 } from "@/registry/bitop/ui/conversation/conversation";
 import { InlineCitation } from "@/registry/bitop/ui/inline-citation/inline-citation";
 import {
@@ -148,6 +149,53 @@ describe("Conversation", () => {
       fireEvent.scroll(log);
     });
     expect(screen.queryByRole("button", { name: "Scroll to latest message" })).not.toBeInTheDocument();
+  });
+});
+
+describe("Conversation scrollToBottom smooth", () => {
+  it("follows a row added right after a smooth scroll to the bottom smoothly, and later growth at once", async () => {
+    const metrics = { scrollHeight: 1000, clientHeight: 400 };
+    function Down() {
+      const { scrollToBottom } = useConversation();
+      return (
+        <button type="button" onClick={() => scrollToBottom("smooth")}>
+          Down
+        </button>
+      );
+    }
+    function Chat({ rows }: { rows: number }) {
+      return (
+        <Conversation>
+          <ConversationContent>
+            {Array.from({ length: rows }, (_, i) => (
+              <p key={i}>Row {i}</p>
+            ))}
+          </ConversationContent>
+          <Down />
+        </Conversation>
+      );
+    }
+    const { rerender } = render(<Chat rows={1} />);
+    const log = screen.getByRole("log", { name: "Conversation" });
+    Object.defineProperty(log, "scrollHeight", { configurable: true, get: () => metrics.scrollHeight });
+    Object.defineProperty(log, "clientHeight", { configurable: true, get: () => metrics.clientHeight });
+    const scrollTo = vi.fn();
+    log.scrollTo = scrollTo as unknown as typeof log.scrollTo;
+    fireEvent.click(screen.getByRole("button", { name: "Down" }));
+    expect(scrollTo).toHaveBeenLastCalledWith({ top: 1000, behavior: "smooth" });
+    metrics.scrollHeight = 1110;
+    rerender(<Chat rows={2} />);
+    await waitFor(() => expect(scrollTo).toHaveBeenLastCalledWith({ top: 1110, behavior: "smooth" }));
+
+    // Later growth while stuck is followed at once, as before.
+    scrollTo.mockClear();
+    const now = Date.now();
+    const later = vi.spyOn(Date, "now").mockReturnValue(now + 5000);
+    metrics.scrollHeight = 1300;
+    rerender(<Chat rows={3} />);
+    await waitFor(() => expect(log.scrollTop).toBe(1300));
+    expect(scrollTo).not.toHaveBeenCalled();
+    later.mockRestore();
   });
 });
 

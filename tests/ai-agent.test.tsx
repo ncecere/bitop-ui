@@ -69,6 +69,27 @@ describe("Sources and Suggestions", () => {
     await user.click(screen.getByRole("button", { name: "Summarise this" }));
     expect(onSelect).toHaveBeenCalledWith("Summarise this");
   });
+
+  it("centres wrapped rows by default and lines them up from the start with align=start", async () => {
+    const long = "How long does an interlibrary loan item take to arrive at the branch I picked for pickup?";
+    const { container, rerender } = render(
+      <Suggestions>
+        <Suggestion suggestion={long} />
+      </Suggestions>,
+    );
+    const group = screen.getByRole("group", { name: "Suggestions" });
+    expect(group).toHaveAttribute("data-layout", "wrap");
+    expect(group).toHaveAttribute("data-align", "center");
+    rerender(
+      <Suggestions align="start" label="Suggested follow-up questions">
+        <Suggestion suggestion={long} />
+      </Suggestions>,
+    );
+    expect(screen.getByRole("group", { name: "Suggested follow-up questions" })).toHaveAttribute("data-align", "start");
+    // The whole text stays the chip's name (it wraps on screen instead of being cut off).
+    expect(screen.getByRole("button", { name: long })).toBeInTheDocument();
+    expect(await axe(container)).toHaveNoViolations();
+  });
 });
 
 describe("ChainOfThought and Plan", () => {

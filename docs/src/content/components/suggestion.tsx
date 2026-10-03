@@ -20,6 +20,20 @@ export function Wrap() {
   );
 }
 
+export function Start() {
+  const ideas = ["How long does an interlibrary loan item take to arrive at the branch I picked?", "Can I renew it?", "Where do I pick it up?"];
+  return (
+    <div className={styles.stack}>
+      <p className={styles.muted}>Under a left-aligned answer, rows start at the left; a long suggestion wraps inside its chip.</p>
+      <Suggestions align="start" label="Suggested follow-up questions">
+        {ideas.map((s) => (
+          <Suggestion key={s} suggestion={s} />
+        ))}
+      </Suggestions>
+    </div>
+  );
+}
+
 export function Scroll() {
   const ideas = ["What's new this week?", "Compare the Q2 and Q3 numbers", "Which tickets are overdue?", "Plan my next sprint", "Write release notes"];
   return (
@@ -41,10 +55,11 @@ const doc: ComponentDoc = {
   imports: `import { Suggestion, Suggestions } from "@/components/ui/suggestion/suggestion";`,
   examples: examples(raw, [
     ["Wrap", Wrap, { title: "Wrapping", wide: true }],
+    ["Start", Start, { title: "From the start, with long suggestions", wide: true }],
     ["Scroll", Scroll, { title: "Single scrolling row", wide: true }],
   ]),
   props: [
-    { component: "Suggestions", rows: [{ name: "layout", type: '"wrap" | "scroll"', default: '"wrap"', description: "Flow onto lines or scroll in one row." }, { name: "label", type: "string", default: '"Suggestions"', description: "Group name." }] },
+    { component: "Suggestions", rows: [{ name: "layout", type: '"wrap" | "scroll"', default: '"wrap"', description: "Flow onto lines or scroll in one row." }, { name: "align", type: '"center" | "start"', default: '"center"', description: "Where wrapped rows line up: centred, or from the start (under left-aligned text)." }, { name: "label", type: "string", default: '"Suggestions"', description: "Group name." }] },
     {
       component: "Suggestion",
       note: "A secondary Button; accepts button props.",
@@ -56,7 +71,7 @@ const doc: ComponentDoc = {
       ],
     },
   ],
-  a11y: ["The chips are real buttons in a group named “Suggestions”.", "In the scrolling row every chip is reachable with Tab, which scrolls it into view."],
+  a11y: ["The chips are real buttons in a group named “Suggestions”.", "In the wrapping layout a long suggestion wraps onto more lines inside its chip, so it never runs past the screen's edge (WCAG 1.4.10 reflow).", "In the scrolling row every chip is reachable with Tab, which scrolls it into view."],
 };
 
 export default doc;
