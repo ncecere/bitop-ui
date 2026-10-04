@@ -20,7 +20,7 @@
 .icon {
   display: inline-flex;
   flex: none;
-  color: var(--color-primary);
+  color: var(--color-primary-subtle-text);
 
   & svg {
     width: 1.25rem;

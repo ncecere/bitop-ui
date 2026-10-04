@@ -138,6 +138,39 @@ const pairs: [string, string, number][] = [
 
 const isHex = (v: string) => /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v);
 
+/** An rgba() tint composited over a hex colour, as a hex colour (a hex value is returned as is). */
+function over(tint: string, base: string) {
+  if (isHex(tint)) return tint;
+  const m = tint.match(/rgba\(\s*(\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\s*\)/);
+  if (!m) throw new Error(`can't composite ${tint}`);
+  const a = Number(m[4]);
+  const b = base.replace("#", "");
+  return (
+    "#" +
+    [1, 2, 3]
+      .map((i, k) => Math.round(Number(m[i]) * a + parseInt(b.slice(k * 2, k * 2 + 2), 16) * (1 - a)))
+      .map((v) => v.toString(16).padStart(2, "0"))
+      .join("")
+  );
+}
+
+/*
+ * Text and icons on rows that are hovered, highlighted or selected: [foreground, tint, the surface under it, minimum].
+ * Menus, selects, comboboxes and the command palette highlight items with surface-active on surface-raised; lists
+ * and tables with surface-hover; selected nav items and options with primary-subtle.
+ */
+const tinted: [string, string, string, number][] = [
+  ["--color-text-muted", "--color-surface-active", "--color-surface-raised", TEXT],
+  ["--color-text-subtle", "--color-surface-active", "--color-surface-raised", TEXT],
+  ["--color-text-subtle", "--color-surface-hover", "--color-surface", TEXT],
+  ["--color-text-muted", "--color-surface-hover", "--color-surface", TEXT],
+  ["--color-link", "--color-surface-hover", "--color-surface", TEXT],
+  ["--color-primary-subtle-text", "--color-primary-subtle", "--color-surface", TEXT],
+  ["--color-primary-subtle-text", "--color-primary-subtle", "--color-surface-raised", TEXT],
+  // Selected-option checks and current-page icons.
+  ["--color-primary-subtle-text", "--color-surface-active", "--color-surface-raised", UI],
+];
+
 describe.each([
   ["neutral", "light"],
   ["neutral", "dark"],
@@ -149,6 +182,9 @@ describe.each([
     // Translucent tints (e.g. dark primary-subtle) are composited and noted in the CSS.
     if (!isHex(a) || !isHex(b)) return;
     expect(ratio(a, b)).toBeGreaterThanOrEqual(min);
+  });
+  it.each(tinted)("%s on %s over %s ≥ %d:1", (fg, tint, base, min) => {
+    expect(ratio(token(fg), over(token(tint), token(base)))).toBeGreaterThanOrEqual(min);
   });
 });
 

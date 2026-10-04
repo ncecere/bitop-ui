@@ -107,7 +107,7 @@
   color: var(--color-text-muted);
 
   &[data-kind="folder"] {
-    color: var(--color-primary);
+    color: var(--color-primary-subtle-text);
   }
 
   & svg {
