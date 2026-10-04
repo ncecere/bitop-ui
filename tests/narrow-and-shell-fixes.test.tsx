@@ -35,14 +35,14 @@ describe("Breadcrumbs on one line", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
-  it("never caps a crumb's width while the trail fits: no percentage of the trail, the current page shrinking last", () => {
+  it("never caps a crumb's width while the trail fits: no percentage of the trail, the current page cut first to its floor", () => {
     const css = readFileSync(resolve(__dirname, "../registry/bitop/ui/breadcrumbs/breadcrumbs.module.css"), "utf8");
     const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
     // "max-width: min(16rem, 40%)" resolved against the trail itself cut "Admin" with a thousand pixels free.
     expect(rules).not.toMatch(/\.item[^{]*\{[^}]*max-width/);
-    expect(rules).toMatch(/\.item\s*\{[^}]*flex:\s*0 10000 auto/);
-    expect(rules).toMatch(/\.item:last-child\s*\{[^}]*flex-shrink:\s*1;/);
+    expect(rules).toMatch(/\.item:last-child\s*\{[^}]*flex-shrink:\s*10000;/);
     expect(rules).toMatch(/min-width:\s*min\(var\(--crumb-width, 0px\), 5\.5rem\)/);
+    expect(rules).toMatch(/min-width:\s*min\(var\(--crumb-width, 0px\), 12rem, 25vw\)/);
   });
 
   it("measures each crumb's full width as its floor, so a short crumb is never stretched", () => {
