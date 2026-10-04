@@ -47,6 +47,7 @@ const doc: ComponentDoc = {
         { name: "maxTags", type: "number", description: "Most tags allowed; the input is disabled and says so when reached." },
         { name: "maxTagLength", type: "number", default: "64", description: "Longer tags are cut to this length." },
         { name: "normalize", type: "(tag: string) => string", default: "trim + lower-case", description: 'Cleans a typed tag; return "" to drop it. Duplicates are ignored.' },
+        { name: "noun", type: "{ one: string; other: string }", default: '{ one: "tag", other: "tags" }', description: 'What the tags are: names the list ("Origins"), the Remove buttons ("Remove origin …"), the default placeholder ("Add origins…") and the announcements ("Added origin …").' },
         { name: "size", type: '"sm" | "md"', default: '"md"', description: "Control height." },
         { name: "disabled", type: "boolean", description: "Disables the input and hides the remove buttons." },
       ],

@@ -14,6 +14,9 @@ import { Button } from "@/registry/bitop/ui/button/button";
 import { DataTable } from "@/registry/bitop/ui/data-table/data-table";
 import { Popover } from "@/registry/bitop/ui/popover/popover";
 import { Table, Td, Tr } from "@/registry/bitop/ui/table/table";
+import { TagInput } from "@/registry/bitop/ui/tag-input/tag-input";
+import { Field } from "@/registry/bitop/ui/field/field";
+import { useState } from "react";
 import { Tab, Tabs, TabsList } from "@/registry/bitop/ui/tabs/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/registry/bitop/ui/toggle-group/toggle-group";
 
@@ -180,5 +183,26 @@ describe("Popover pointerFocus", () => {
     screen.getByRole("button", { name: "Notifications" }).focus();
     await user.keyboard("{Enter}");
     await waitFor(() => expect(screen.getByRole("link", { name: "First notification" })).toHaveFocus());
+  });
+});
+
+describe("TagInput noun", () => {
+  it("names the list, the Remove buttons and the announcements after what the tags are", async () => {
+    const user = userEvent.setup();
+    function Origins() {
+      const [v, setV] = useState(["https://a.example.edu"]);
+      return (
+        <Field label="Allowed origins">
+          <TagInput value={v} onValueChange={setV} noun={{ one: "origin", other: "origins" }} normalize={(t) => t.trim()} />
+        </Field>
+      );
+    }
+    const { container } = render(<Origins />);
+    expect(screen.getByRole("list", { name: "Origins" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove origin https://a.example.edu" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Allowed origins" })).toHaveAttribute("placeholder", "Add origins…");
+    await user.type(screen.getByRole("textbox", { name: "Allowed origins" }), "https://b.example.edu{Enter}");
+    expect(await screen.findByText("Added origin https://b.example.edu")).toBeInTheDocument();
+    expect(await axe(container)).toHaveNoViolations();
   });
 });
