@@ -18,6 +18,8 @@ import { Table, Td, Tr } from "@/registry/bitop/ui/table/table";
 import { TagInput } from "@/registry/bitop/ui/tag-input/tag-input";
 import { Field } from "@/registry/bitop/ui/field/field";
 import { useState } from "react";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { Tab, Tabs, TabsList } from "@/registry/bitop/ui/tabs/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/registry/bitop/ui/toggle-group/toggle-group";
 
@@ -31,6 +33,29 @@ describe("Breadcrumbs on one line", () => {
     expect(screen.getByText(long)).toHaveAttribute("aria-current", "page");
     expect(screen.getByText(long)).toHaveAttribute("title", long);
     expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("never caps a crumb's width while the trail fits: no percentage of the trail, the current page shrinking last", () => {
+    const css = readFileSync(resolve(__dirname, "../registry/bitop/ui/breadcrumbs/breadcrumbs.module.css"), "utf8");
+    const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    // "max-width: min(16rem, 40%)" resolved against the trail itself cut "Admin" with a thousand pixels free.
+    expect(rules).not.toMatch(/\.item[^{]*\{[^}]*max-width/);
+    expect(rules).toMatch(/\.item\s*\{[^}]*flex:\s*0 10000 auto/);
+    expect(rules).toMatch(/\.item:last-child\s*\{[^}]*flex-shrink:\s*1;/);
+    expect(rules).toMatch(/min-width:\s*min\(var\(--crumb-width, 0px\), 5\.5rem\)/);
+  });
+
+  it("measures each crumb's full width as its floor, so a short crumb is never stretched", () => {
+    const rect = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({ width: 60 } as DOMRect);
+    const scroll = vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockReturnValue(90);
+    const client = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(40);
+    render(<Breadcrumbs items={[{ label: "Office of the Registrar", href: "/" }, { label: "Agents" }]} />);
+    const first = screen.getByRole("link", { name: "Office of the Registrar" }).closest("li")!;
+    // 60 wide with its text cut to 40 of 90: 110 uncut.
+    expect(first.style.getPropertyValue("--crumb-width")).toBe("110px");
+    rect.mockRestore();
+    scroll.mockRestore();
+    client.mockRestore();
   });
 
   it("wraps on request", () => {
