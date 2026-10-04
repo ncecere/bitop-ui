@@ -119,7 +119,7 @@ const pairs: [string, string, number][] = [
   ["--color-text-muted", "--color-control-hover", TEXT],
   ["--color-focus-ring", "--color-surface-sunken", UI],
   // Charts (line, area, bar, sparkline series), meter fills and limit markers.
-  ...["primary", "info", "success", "warning", "danger", "neutral"].flatMap((tone): [string, string, number][] => [
+  ...["primary", "info", "success", "warning", "danger", "neutral", "accent"].flatMap((tone): [string, string, number][] => [
     [`--color-chart-${tone}`, "--color-surface", UI],
     [`--color-chart-${tone}`, "--color-bg", UI],
     // The paler variant: the back series of an overlapping bar chart and its legend swatch.

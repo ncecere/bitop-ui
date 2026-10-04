@@ -48,6 +48,22 @@ describe("Combobox", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
+  it("selects the chosen label when focused, so typing searches afresh instead of appending", async () => {
+    const user = userEvent.setup();
+    render(
+      <Field label="Region">
+        <Combobox items={regions} defaultValue="fra" />
+      </Field>,
+    );
+    const input = screen.getByRole("combobox", { name: "Region" }) as HTMLInputElement;
+    await waitFor(() => expect(input.value).not.toBe(""));
+    await user.click(input);
+    expect(input.selectionStart).toBe(0);
+    expect(input.selectionEnd).toBe(input.value.length);
+    await user.keyboard("dub");
+    expect(input.value).toBe("dub");
+  });
+
   it("filters, groups, shows an empty state and selects with the keyboard", async () => {
     const user = userEvent.setup();
     const onValueChange = vi.fn();

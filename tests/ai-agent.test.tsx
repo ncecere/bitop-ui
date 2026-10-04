@@ -193,6 +193,17 @@ describe("ModelSelector", () => {
     expect(onValueChange).toHaveBeenCalledWith("g", models[2]);
     await waitFor(() => expect(screen.getByRole("combobox", { name: "Model: Gamma" })).toBeInTheDocument());
   });
+
+  it("draws a warning capability in its tone, the others as outlines", async () => {
+    const user = userEvent.setup();
+    const list: ModelOption[] = [{ id: "f", name: "Flaky", provider: "Acme", capabilities: ["failing", "tools"] }];
+    render(<ModelSelector label="Model" models={list} capabilityTones={{ failing: "danger" }} capabilityLabels={{ failing: "Failing" }} />);
+    await user.click(screen.getByRole("combobox", { name: "Model: Select a model" }));
+    const failing = await screen.findByText("Failing");
+    expect(failing).toHaveAttribute("data-tone", "danger");
+    expect(failing).toHaveAttribute("data-variant", "soft");
+    expect(screen.getByText("Tools")).toHaveAttribute("data-variant", "outline");
+  });
 });
 
 describe("Attachments", () => {
