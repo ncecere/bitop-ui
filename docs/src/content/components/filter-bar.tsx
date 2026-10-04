@@ -88,6 +88,7 @@ const doc: ComponentDoc = {
         { name: "counts", type: "{ [facetId]: { [option]: number } }", description: "Shown in toggles (“Failed 3”) and as combobox hints. facetCounts() computes them in memory." },
         { name: "start / end", type: "ReactNode", description: "Content before / after the facets (e.g. search, Export)." },
         { name: "chips", type: "boolean", default: "true", description: "Active-filter chips and Clear all (per facet, see chip below)." },
+        { name: "search", type: "{ value, onClear, label? }", description: 'The text of a search box in start: a chip ("Search: wifi") while not empty, cleared by its chip and by Clear all. DataTable passes it.' },
         { name: "size", type: '"sm" | "md"', default: '"sm"', description: "Control size." },
         { name: "labels", type: "Partial<FilterBarLabels>", description: "Translate the group name, chip text and Clear all." },
       ],

@@ -13,6 +13,7 @@ import { Breadcrumbs } from "@/registry/bitop/ui/breadcrumbs/breadcrumbs";
 import { Button } from "@/registry/bitop/ui/button/button";
 import { DataTable } from "@/registry/bitop/ui/data-table/data-table";
 import { Popover } from "@/registry/bitop/ui/popover/popover";
+import { Dialog } from "@/registry/bitop/ui/dialog/dialog";
 import { Table, Td, Tr } from "@/registry/bitop/ui/table/table";
 import { TagInput } from "@/registry/bitop/ui/tag-input/tag-input";
 import { Field } from "@/registry/bitop/ui/field/field";
@@ -204,5 +205,38 @@ describe("TagInput noun", () => {
     await user.type(screen.getByRole("textbox", { name: "Allowed origins" }), "https://b.example.edu{Enter}");
     expect(await screen.findByText("Added origin https://b.example.edu")).toBeInTheDocument();
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("DataTable search in the filter bar's chips", () => {
+  it("shows the search as a chip, and Clear all clears it with the filters", async () => {
+    const user = userEvent.setup();
+    const rows = [
+      { id: "a", name: "Wi-Fi help", kind: "it" },
+      { id: "b", name: "Library hours", kind: "library" },
+    ];
+    render(
+      <DataTable
+        caption="Agents"
+        filterable
+        data={rows}
+        getRowId={(r) => r.id}
+        columns={[{ id: "name", header: "Name", accessor: (r) => r.name }]}
+        facets={[{ id: "kind", label: "Team", type: "select", accessor: (r) => r.kind, options: [{ value: "it", label: "IT" }, { value: "library", label: "Library" }] }]}
+        facetValues={{ kind: ["it"] }}
+        onFacetValuesChange={() => {}}
+      />,
+    );
+    await user.type(screen.getByRole("searchbox"), "wi");
+    expect(await screen.findByRole("button", { name: "Remove filter Search: wi" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Clear all" }));
+    await waitFor(() => expect(screen.getByRole("searchbox")).toHaveValue(""));
+  });
+});
+
+describe("Dialog", () => {
+  it("is aria-modal", async () => {
+    render(<Dialog open title="Rename conversation">Body</Dialog>);
+    expect(await screen.findByRole("dialog", { name: "Rename conversation" })).toHaveAttribute("aria-modal", "true");
   });
 });

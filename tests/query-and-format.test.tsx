@@ -283,6 +283,13 @@ describe("format", () => {
     expect(at("2025-10-01T12:00:00Z")).toBe("last year");
     expect(at("2021-09-26T12:00:00Z")).toBe("5 years ago");
     expect(formatRelativeTime("nope", { now })).toBe("");
+    // Calendar days from half a day to a week: late two days ago is "2 days ago", not "yesterday".
+    const sunday = new Date(2026, 9, 4, 10, 0);
+    expect(formatRelativeTime(new Date(2026, 9, 2, 22, 19), { now: sunday, locale: "en-US" })).toBe("2 days ago");
+    expect(formatRelativeTime(new Date(2026, 9, 2, 10, 41), { now: sunday, locale: "en-US" })).toBe("2 days ago");
+    expect(formatRelativeTime(new Date(2026, 9, 3, 8, 0), { now: sunday, locale: "en-US" })).toBe("yesterday");
+    expect(formatRelativeTime(new Date(2026, 9, 3, 23, 0), { now: sunday, locale: "en-US" })).toBe("11 hours ago");
+    expect(formatRelativeTime(new Date(2026, 9, 6, 9, 0), { now: sunday, locale: "en-US" })).toBe("in 2 days");
     expect(relativeTimeUnit(59.6)).toEqual([1, "minute"]);
     expect(relativeTimeUnit(-3599)).toEqual([-1, "hour"]);
   });

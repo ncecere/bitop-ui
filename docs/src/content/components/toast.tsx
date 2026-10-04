@@ -56,7 +56,7 @@ const doc: ComponentDoc = {
           name: "position",
           type: '"bottom-right" | "bottom-center" | "bottom-left"',
           default: '"bottom-right"',
-          description: "Where toasts appear. Use bottom-center when pages keep their actions at the bottom right (danger zones, sticky save bars), so toasts don't cover them. bottom-left sits over an AppShell sidebar's footer (sidebar-wide from 48rem), so toasts never cover page content.",
+          description: "Where toasts appear. Use bottom-center when pages keep their actions at the bottom right (danger zones, sticky save bars), so toasts don't cover them. bottom-left sits over an AppShell sidebar's footer (sidebar-wide from 48rem), so toasts never cover page content; while the sidebar is collapsed to its icon rail they take the bottom-right corner instead.",
         },
       ],
     },
