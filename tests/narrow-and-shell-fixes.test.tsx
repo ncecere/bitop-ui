@@ -1,0 +1,184 @@
+/*
+ * Regression tests for a consumer's pre-beta bug hunt: a long breadcrumb
+ * trail, tables on a phone and at 1024px (stacked settings tables, pinned row
+ * actions, empty states), segmented controls and pill tabs that wrap instead
+ * of hiding choices, a card's actions on a narrow screen, and a popover opened
+ * with the mouse. Each test failed before its fix.
+ */
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { axe } from "vitest-axe";
+import { Breadcrumbs } from "@/registry/bitop/ui/breadcrumbs/breadcrumbs";
+import { Button } from "@/registry/bitop/ui/button/button";
+import { DataTable } from "@/registry/bitop/ui/data-table/data-table";
+import { Popover } from "@/registry/bitop/ui/popover/popover";
+import { Table, Td, Tr } from "@/registry/bitop/ui/table/table";
+import { Tab, Tabs, TabsList } from "@/registry/bitop/ui/tabs/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/registry/bitop/ui/toggle-group/toggle-group";
+
+describe("Breadcrumbs on one line", () => {
+  it("keeps one line by default and gives every text crumb its full text as a title", async () => {
+    const long = "A shared source with a very long name that would never fit in the top bar of a window";
+    const { container } = render(<Breadcrumbs items={[{ label: "Admin", href: "/admin" }, { label: "Shared sources", href: "/s" }, { label: long }]} />);
+    const nav = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(nav).not.toHaveAttribute("data-wrap");
+    expect(screen.getByRole("link", { name: "Shared sources" })).toHaveAttribute("title", "Shared sources");
+    expect(screen.getByText(long)).toHaveAttribute("aria-current", "page");
+    expect(screen.getByText(long)).toHaveAttribute("title", long);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("wraps on request", () => {
+    render(<Breadcrumbs wrap items={[{ label: "Home", href: "/" }, { label: "Page" }]} />);
+    expect(screen.getByRole("navigation")).toHaveAttribute("data-wrap");
+  });
+});
+
+describe("Table: stacked rows, pinned actions and the empty state", () => {
+  it("a stacked table names each cell after its column (not the first one or a hidden header)", async () => {
+    const { container } = render(
+      <Table caption="Limits" stack columns={["Limit", "Default", "Ceiling", ""]}>
+        <Tr>
+          <Td>Crawled pages per day</Td>
+          <Td>5,000</Td>
+          <Td>10,000</Td>
+          <Td>…</Td>
+        </Tr>
+      </Table>,
+    );
+    const table = screen.getByRole("table", { name: "Limits" });
+    expect(table).toHaveAttribute("data-stack");
+    const cells = within(table).getAllByRole("cell");
+    await waitFor(() => expect(cells[1]).toHaveAttribute("data-label", "Default"));
+    expect(cells[2]).toHaveAttribute("data-label", "Ceiling");
+    expect(cells[0]).not.toHaveAttribute("data-label");
+    expect(cells[3]).not.toHaveAttribute("data-label");
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("labels rows added later", async () => {
+    const { rerender } = render(<Table caption="Settings" stack columns={["Event", "Email"]} />);
+    rerender(
+      <Table caption="Settings" stack columns={["Event", "Email"]}>
+        <Tr>
+          <Td>Invited</Td>
+          <Td>On</Td>
+        </Tr>
+      </Table>,
+    );
+    await waitFor(() => expect(screen.getByRole("cell", { name: "On" })).toHaveAttribute("data-label", "Email"));
+  });
+
+  it("a stickyEnd column pins its header and cells, and replaces the end edge shadow", () => {
+    render(
+      <Table caption="Models" columns={["Name", { label: "Actions", hideLabel: true, stickyEnd: true }]}>
+        <Tr>
+          <Td>chat</Td>
+          <Td stickyEnd>…</Td>
+        </Tr>
+      </Table>,
+    );
+    const table = screen.getByRole("table", { name: "Models" });
+    expect(within(table).getAllByRole("columnheader")[1]).toHaveAttribute("data-sticky-end");
+    expect(within(table).getByRole("cell", { name: "…" })).toHaveAttribute("data-sticky-end");
+    expect(table.closest("[data-sticky-end]")).not.toBeNull();
+  });
+
+  it("DataTable pins its row actions column", () => {
+    render(
+      <DataTable
+        caption="Teams"
+        data={[{ id: "a", name: "Library" }]}
+        getRowId={(r) => r.id}
+        columns={[{ id: "name", header: "Name", accessor: (r) => r.name }]}
+        rowActions={(r) => <Button size="sm">Open {r.name}</Button>}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Open Library" }).closest("td")).toHaveAttribute("data-sticky-end");
+  });
+
+  it("wraps the empty content in a box centred on the visible width", () => {
+    render(<Table caption="Empty" columns={["A", "B"]} empty={<p>Nothing yet.</p>} />);
+    const p = screen.getByText("Nothing yet.");
+    expect(p.parentElement?.tagName).toBe("DIV");
+    expect(p.parentElement?.parentElement?.tagName).toBe("TD");
+  });
+});
+
+describe("Segmented controls and pill tabs that don't fit", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("a joined group wraps by default and spaces its items once they sit on two lines", async () => {
+    // jsdom has no layout: the third item sits on a second line.
+    vi.spyOn(HTMLElement.prototype, "offsetTop", "get").mockImplementation(function (this: HTMLElement) {
+      return this.textContent === "Disabled by platform" ? 40 : 0;
+    });
+    vi.spyOn(HTMLElement.prototype, "offsetParent", "get").mockImplementation(() => document.body);
+    const { container } = render(
+      <ToggleGroup aria-label="Status" joined variant="outline" defaultValue={["any"]}>
+        <ToggleGroupItem value="any">Any</ToggleGroupItem>
+        <ToggleGroupItem value="team">Disabled by team</ToggleGroupItem>
+        <ToggleGroupItem value="platform">Disabled by platform</ToggleGroupItem>
+      </ToggleGroup>,
+    );
+    const group = screen.getByRole("group", { name: "Status" });
+    expect(group).toHaveAttribute("data-overflow-mode", "wrap");
+    await waitFor(() => expect(group).toHaveAttribute("data-wrapped"));
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("scrolls on request, and a group that isn't joined has no overflow mode", () => {
+    render(
+      <>
+        <ToggleGroup aria-label="Range" joined overflow="scroll">
+          <ToggleGroupItem value="7d">7 days</ToggleGroupItem>
+        </ToggleGroup>
+        <ToggleGroup aria-label="Format">
+          <ToggleGroupItem value="b">Bold</ToggleGroupItem>
+        </ToggleGroup>
+      </>,
+    );
+    expect(screen.getByRole("group", { name: "Range" })).toHaveAttribute("data-overflow-mode", "scroll");
+    expect(screen.getByRole("group", { name: "Format" })).not.toHaveAttribute("data-overflow-mode");
+  });
+
+  it("pill tabs wrap and underline tabs scroll by default", () => {
+    render(
+      <>
+        <Tabs defaultValue="a">
+          <TabsList aria-label="Pills" variant="pills">
+            <Tab value="a">A</Tab>
+          </TabsList>
+        </Tabs>
+        <Tabs defaultValue="a">
+          <TabsList aria-label="Underline">
+            <Tab value="a">A</Tab>
+          </TabsList>
+        </Tabs>
+      </>,
+    );
+    expect(screen.getByRole("tablist", { name: "Pills" })).toHaveAttribute("data-overflow-mode", "wrap");
+    expect(screen.getByRole("tablist", { name: "Underline" })).toHaveAttribute("data-overflow-mode", "scroll");
+  });
+});
+
+describe("Popover pointerFocus", () => {
+  it('"popup": a mouse opens it with focus on the popup, the keyboard on its first control', async () => {
+    const user = userEvent.setup();
+    render(
+      <Popover trigger={<Button>Notifications</Button>} title="Notifications" pointerFocus="popup">
+        <a href="/n/1">First notification</a>
+      </Popover>,
+    );
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
+    const dialog = await screen.findByRole("dialog");
+    await waitFor(() => expect(dialog).toHaveFocus());
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+
+    screen.getByRole("button", { name: "Notifications" }).focus();
+    await user.keyboard("{Enter}");
+    await waitFor(() => expect(screen.getByRole("link", { name: "First notification" })).toHaveFocus());
+  });
+});

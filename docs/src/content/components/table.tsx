@@ -107,12 +107,13 @@ const doc: ComponentDoc = {
       note: "Also accepts native <table> props.",
       rows: [
         { name: "caption", type: "ReactNode", required: true, description: "Names the table (screen-reader only unless showCaption)." },
-        { name: "columns", type: "(string | { label, numeric?, hideLabel?, width?, sort? })[]", required: true, description: 'Headers; an empty string becomes a hidden "Actions" header. sort sets aria-sort on the sorted column (see Data table).' },
+        { name: "columns", type: "(string | { label, numeric?, hideLabel?, width?, sort?, stickyEnd? })[]", required: true, description: 'Headers; an empty string becomes a hidden "Actions" header. sort sets aria-sort on the sorted column (see Data table). stickyEnd pins the column (row actions) to the end edge while the table scrolls sideways; mark its cells <Td stickyEnd>.' },
         { name: "showCaption", type: "boolean", description: "Show the caption visually." },
         { name: "stickyHeader / maxHeight", type: "boolean / string", description: "Scroll the body under a fixed header." },
         { name: "density", type: '"comfortable" | "compact"', default: '"comfortable"', description: "Row height." },
-        { name: "empty", type: "ReactNode", description: "Shown in a full-width row instead of children." },
+        { name: "empty", type: "ReactNode", description: "Shown in a full-width row instead of children, centred on the visible width when the table is wider than its scroll box." },
         { name: "framed", type: "boolean", description: "Card-like ring and radius." },
+        { name: "stack", type: "boolean", description: "Below 600px, each row becomes a block: the first cell on its own line, the others under it with their column names (settings tables on a phone)." },
       ],
     },
     {
@@ -121,6 +122,7 @@ const doc: ComponentDoc = {
         { name: "numeric", type: "boolean", description: "Right-align with tabular figures." },
         { name: "muted", type: "boolean", description: "Secondary text colour." },
         { name: "nowrap", type: "boolean", description: "Keep on one line." },
+        { name: "stickyEnd", type: "boolean", description: "A cell of a stickyEnd column: pinned to the end edge." },
       ],
     },
     { component: "Tr", rows: [{ name: "selected", type: "boolean", description: "Selected row styling." }] },
@@ -130,6 +132,7 @@ const doc: ComponentDoc = {
     'Headers are <th scope="col">; an empty column label becomes a visually hidden "Actions".',
     "Whenever the table overflows (too wide for the screen, or taller than maxHeight) the scroll area becomes a focusable region named by the caption, so keyboard users can scroll it; a table that fits is not a tab stop.",
     "While columns are hidden to the side, a shadow on that edge shows the table scrolls (decorative, aria-hidden).",
+    "A stacked table keeps its header row for screen readers (visually hidden); the column names shown above values are generated from it.",
     "Row action buttons need specific names, e.g. “Actions for marketing-site”.",
   ],
 };

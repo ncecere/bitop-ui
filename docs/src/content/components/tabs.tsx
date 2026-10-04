@@ -66,7 +66,13 @@ const doc: ComponentDoc = {
   ]),
   props: [
     { component: "Tabs", note: "Base UI Tabs.Root props (value, defaultValue, onValueChange, orientation…).", rows: [] },
-    { component: "TabsList", rows: [{ name: "variant", type: '"underline" | "pills"', default: '"underline"', description: "Style. Give the list an aria-label." }] },
+    {
+      component: "TabsList",
+      rows: [
+        { name: "variant", type: '"underline" | "pills"', default: '"underline"', description: "Style. Give the list an aria-label." },
+        { name: "overflow", type: '"wrap" | "scroll"', default: 'pills "wrap", underline "scroll"', description: "Too many tabs for the width: wrap onto more lines, or scroll sideways with a fade at the hidden edge." },
+      ],
+    },
     {
       component: "Tab",
       rows: [

@@ -57,6 +57,7 @@ const doc: ComponentDoc = {
           description: "Hidden crumbs: the item shows “…” and opens a menu of these links. Its label names the button (e.g. “Show 3 hidden levels”).",
         },
         { name: "label", type: "string", default: '"Breadcrumb"', description: "Name of the navigation landmark." },
+        { name: "wrap", type: "boolean", default: "false", description: "Wrap onto more lines instead of keeping one line and cutting long crumbs with an ellipsis (their full text on hover)." },
       ],
     },
   ],

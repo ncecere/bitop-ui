@@ -33,6 +33,7 @@ const doc: ComponentDoc = {
         { name: "description", type: "ReactNode", description: "Describes the popup." },
         { name: "side / align", type: "Side / Align", default: '"bottom" / "center"', description: "Placement." },
         { name: "openOnHover", type: "boolean", description: "Also open on hover (still keyboard and touch accessible)." },
+        { name: "pointerFocus", type: '"first" | "popup"', default: '"first"', description: "Where focus goes when a mouse or pen opens it: the first control, or the popup itself so nothing in a list of links looks selected. The keyboard always focuses the first control." },
         { name: "open / defaultOpen / onOpenChange", type: "boolean / boolean / (open) => void", description: "Controlled or uncontrolled state." },
       ],
     },

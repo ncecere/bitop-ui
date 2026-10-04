@@ -76,6 +76,7 @@ const doc: ComponentDoc = {
         { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"', description: "Layout and arrow-key direction." },
         { name: "variant / size", type: '"ghost" | "outline" / "sm" | "md"', default: '"ghost" / "md"', description: "Applied to every item." },
         { name: "joined", type: "boolean", default: "false", description: "Render as one segmented control with shared borders." },
+        { name: "overflow", type: '"wrap" | "scroll"', default: '"wrap"', description: "A joined group too wide for its container: wrap onto more lines (items then stand apart) or scroll sideways with a fade." },
       ],
     },
     {
