@@ -141,7 +141,8 @@ describe("command palette close label", () => {
     await waitFor(() => expect(input).toHaveFocus());
     const close = within(dialog).getByRole("button", { name: /Close command palette/ });
     expect(close.textContent).toBe("Esc");
-    expect(close).toHaveAccessibleName("Close command palette (Esc)");
+    // axe 4.14 ignores parenthetical name text: Esc must be part of the primary name.
+    expect(close).toHaveAccessibleName("Esc — Close command palette");
     if (action === "click") await user.click(close);
     else await user.keyboard("{Escape}");
     expect(onOpenChange).toHaveBeenLastCalledWith(false);
