@@ -120,13 +120,13 @@ describe("FilterBar", () => {
     const { container } = render(<Demo />);
     const bar = screen.getByRole("group", { name: "Filters" });
     const status = within(bar).getByRole("group", { name: "Status" });
-    expect(within(status).getByRole("button", { name: "Failed, 1" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(status).getByRole("button", { name: "Failed 1" })).toHaveAttribute("aria-pressed", "true");
     expect(await axe(container)).toHaveNoViolations();
 
     // "All" clears the facet.
     await userEvent.click(within(status).getByRole("button", { name: "All" }));
     expect(within(status).getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
-    await userEvent.click(within(status).getByRole("button", { name: "Ready, 2" }));
+    await userEvent.click(within(status).getByRole("button", { name: "Ready 2" }));
 
     const chips = within(bar).getByRole("list", { name: "Active filters" });
     // A single-choice toggle has no chip: its pressed item shows the choice.
@@ -211,7 +211,7 @@ describe("DataTable extensions", () => {
       );
     }
     const { container } = render(<Demo />);
-    await userEvent.click(within(screen.getByRole("group", { name: "Status" })).getByRole("button", { name: "Failed, 1" }));
+    await userEvent.click(within(screen.getByRole("group", { name: "Status" })).getByRole("button", { name: "Failed 1" }));
     expect(onFacets).toHaveBeenLastCalledWith({ status: ["failed"] });
     const table = screen.getByRole("table", { name: "Documents" });
     expect(within(table).getAllByRole("rowheader").map((c) => c.textContent)).toEqual(["Transcripts"]);
@@ -232,7 +232,7 @@ describe("DataTable extensions", () => {
       />,
     );
     expect(screen.getByText("No rows match these filters.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Ready, 7" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Ready 7" })).toBeInTheDocument();
   });
 
   it("bulk action bar appears with a selection and clears it", async () => {

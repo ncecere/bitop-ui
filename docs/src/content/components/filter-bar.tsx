@@ -122,7 +122,7 @@ const doc: ComponentDoc = {
   ],
   a11y: [
     "The bar is a group named “Filters”. Each facet is labelled by its visible label (toggle groups via aria-labelledby).",
-    "Counts are read after the option with a pause (“Failed, 3”).",
+    "Toggle names come from the visible option and locale-formatted count, separated by a text space (“Failed 3”). Zero is shown and announced; unknown counts are omitted.",
     "Active filters are a list of buttons named “Remove filter Person: Alex Dev”. After removing one, focus moves to the next chip, then Clear all, then the first control, never to the page body.",
     "Announce the result count in the list or table (DataTable does this politely).",
   ],
