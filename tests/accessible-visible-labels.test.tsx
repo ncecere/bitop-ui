@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event";
 import { useRef, useState } from "react";
 import { CommandPalette } from "@/registry/bitop/ui/command-palette/command-palette";
 import { type Facet, FilterBar } from "@/registry/bitop/ui/filter-bar/filter-bar";
+import { Source, Sources, SourcesContent } from "@/registry/bitop/ui/sources/sources";
 import { NavTab, NavTabs, Tab, Tabs, TabsList } from "@/registry/bitop/ui/tabs/tabs";
 
 const counts = [undefined, 0, 1, 1234, 1234567];
@@ -149,5 +150,25 @@ describe("command palette close label", () => {
     expect(onSelect).not.toHaveBeenCalled();
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     await waitFor(() => expect(customFinalFocus ? screen.getByRole("heading", { name: "Destination" }) : opener).toHaveFocus());
+  });
+});
+
+describe("Source with onSelect", () => {
+  it("is named by what it shows, after the hidden action, so the name contains the visible text", () => {
+    render(
+      <Sources defaultOpen>
+        <SourcesContent>
+          <Source index={1} title="Leave policy" meta="Policies › Leave" description="Staff accrue 2 days a month." onSelect={() => {}} selectAction="Show" />
+        </SourcesContent>
+      </Sources>,
+    );
+    const card = screen.getByRole("button");
+    // The name is computed from the content (no aria-label to fall out of step with it), led by the hidden action.
+    expect(card).toHaveAccessibleName(/^Show Source 1: Leave policy/);
+    expect(card).not.toHaveAttribute("aria-label");
+    expect(card).not.toHaveAttribute("aria-describedby");
+    // Everything the card shows is in the name.
+    const name = card.textContent ?? "";
+    for (const shown of ["Leave policy", "Policies › Leave", "Staff accrue 2 days a month."]) expect(name).toContain(shown);
   });
 });

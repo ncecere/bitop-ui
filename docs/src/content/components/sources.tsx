@@ -51,7 +51,8 @@ const doc: ComponentDoc = {
         { name: "icon", type: "ReactNode", description: "Decorative favicon or file icon." },
         { name: "index", type: "number", description: "Citation number, read as “Source 1:”." },
         { name: "onSelect", type: "() => void", description: "Makes the card a button that opens the source in the app (e.g. a side panel); href becomes a separate link beside it." },
-        { name: "selectLabel", type: "string", description: "The button's accessible name with onSelect (meta and description describe it)." },
+        { name: "selectAction", type: "string", description: "A word read before the card's text with onSelect, not shown (“Show”: “Show Source 1: Leave policy …”). The button is named by what it shows, so its name contains its visible text." },
+        { name: "selectLabel", type: "string", description: "Replaces the button's whole accessible name with onSelect. It must contain the card's visible text, meta and description included (WCAG 2.5.3); prefer selectAction." },
         { name: "linkLabel", type: "string", default: '"Open the link"', description: "The separate link's name with onSelect and href; “(opens in a new tab)” is added." },
       ],
     },
@@ -59,7 +60,7 @@ const doc: ComponentDoc = {
   a11y: [
     "The trigger is a button with aria-expanded; the list is an ordered list named “Sources”.",
     "Each linked source is a single link whose name includes its number and title and says it opens in a new tab.",
-    "With onSelect the card is a button (named by selectLabel, described by its meta and description) and its href a separate icon link with its own name, so the two never nest.",
+    "With onSelect the card is a button (named by what it shows, after the optional selectAction, so its name contains its visible text; or by selectLabel) and its href a separate icon link with its own name, so the two never nest.",
     "A Source with an id and tabIndex={-1} can receive focus from a citation chip (InlineCitation onActivate); it shows a focus ring while focused or while it has data-highlighted.",
   ],
 };
