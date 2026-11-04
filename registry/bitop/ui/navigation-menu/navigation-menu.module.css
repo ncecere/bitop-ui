@@ -130,7 +130,7 @@
   box-sizing: border-box;
   width: var(--popup-width);
   height: var(--popup-height);
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-popover);
   background-color: var(--color-surface-raised);
   color: var(--color-text);
   box-shadow: var(--shadow-3);
