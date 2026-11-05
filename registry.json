@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "bitop",
-  "homepage": "https://github.com/OWNER/bitop-ui",
+  "homepage": "https://github.com/ncecere/bitop-ui",
   "items": [
     {
       "name": "core",
