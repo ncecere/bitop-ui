@@ -48,6 +48,28 @@ describe("Combobox", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
+  // A listbox must have an accessible name (WCAG 4.1.2): the list label, else the aria-label, else the placeholder.
+  it("names its open list of options", async () => {
+    const user = userEvent.setup();
+    render(
+      <Field label="Teams">
+        <Combobox items={regions} placeholder="Search regions…" listLabel="Regions to choose from" />
+      </Field>,
+    );
+    await user.click(screen.getByRole("combobox", { name: "Teams" }));
+    expect(await screen.findByRole("listbox", { name: "Regions to choose from" })).toBeInTheDocument();
+    // The open popup is portalled: check the whole page (a bare test page has no landmarks).
+    expect(await axe(document.body, { rules: { region: { enabled: false } } })).toHaveNoViolations();
+    await user.keyboard("{Escape}");
+  });
+
+  it("names its list after the placeholder when no list label is given", async () => {
+    const user = userEvent.setup();
+    render(<Combobox items={regions} placeholder="Search regions…" aria-label="Region" />);
+    await user.click(screen.getByRole("combobox", { name: "Region" }));
+    expect(await screen.findByRole("listbox", { name: "Region" })).toBeInTheDocument();
+  });
+
   it("selects the chosen label when focused, so typing searches afresh instead of appending", async () => {
     const user = userEvent.setup();
     render(
