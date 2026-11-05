@@ -23,7 +23,7 @@ function spaFallback(): Plugin {
 
 /**
  * SITE_URL (or VITE_SITE_URL) is the absolute URL the docs are served from,
- * e.g. https://OWNER.github.io/bitop-ui. It drives the install commands shown
+ * e.g. https://ncecere.github.io/bitop-ui. It drives the install commands shown
  * in the docs and the Vite base path (its pathname). Defaults to the local
  * `vite preview` URL.
  */

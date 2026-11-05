@@ -115,7 +115,7 @@ This is the strongest evidence: both apps rebuild these patterns themselves. The
 
 - [ ] ⭐ **F1. Versioning and changelog.** There are no tags, releases or CHANGELOG. Adopt Changesets or release-please to produce tags, the changelog, GitHub releases and the npm publish. **M**
 - [ ] **F2. Item metadata:** `meta.version`, `meta.changelog` and `meta.deprecated`/`replacedBy`, with CLI warnings for deprecated items, and item versions recorded in `bitop-lock.json` so they can be pinned. **M**
-- [ ] ⭐ **F3. Fix the placeholder `homepage`** (`https://github.com/OWNER/bitop-ui` in `registry.json`). **S**
+- [x] ⭐ **F3. Fix the placeholder `homepage`** (`https://github.com/OWNER/bitop-ui` in `registry.json`). **S**
 - [ ] **F4. Integrity:** per-file sha256 in the built item JSON, checked by the CLI. Signing can come later. **M**
 - [ ] **F5. Repository housekeeping:**
   - Renovate or Dependabot, grouping Base UI, React and Vite (versions are pinned exactly)

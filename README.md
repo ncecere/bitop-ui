@@ -24,7 +24,7 @@ Components for chat and agent UIs (docs: the **AI** section and the full **Chat 
 
 ## Using it in a project
 
-Full guide: the docs site's **Installation** page and the [CLI reference](./packages/cli/README.md). In short, for a Vite + React 19 + TypeScript app with Node 20 (20.19+) or 22.12+:
+Full guide: the docs site's **Installation** page (published at **https://ncecere.github.io/bitop-ui/**, with every component, theme and example) and the [CLI reference](./packages/cli/README.md). In short, for a Vite + React 19 + TypeScript app with Node 20 (20.19+) or 22.12+:
 
 1. Add an `@/*` path alias to `tsconfig.json`/`tsconfig.app.json` and to `vite.config.ts`.
 2. Add the CLI ([`@bitop-dev/cli`](https://www.npmjs.com/package/@bitop-dev/cli) on npm) as a dev dependency:
@@ -35,9 +35,9 @@ Full guide: the docs site's **Installation** page and the [CLI reference](./pack
 3. Point it at a registry. Choose **one** command; it writes `components.json`. If you already have a shadcn-style config, add `registries["@bitop"]` instead of replacing it.
 
    ```bash
-   npx @bitop-dev/cli init --registry ../bitop-ui # checkout: nothing to build or serve
-   # OR use a hosted registry:
-   npx @bitop-dev/cli init --registry "https://OWNER.github.io/bitop-ui/r/{name}.json"
+   npx @bitop-dev/cli init --registry "https://ncecere.github.io/bitop-ui/r/{name}.json" # the published registry
+   # OR a checkout, nothing to build or serve:
+   npx @bitop-dev/cli init --registry ../bitop-ui
    ```
 4. Install the core (tokens, base styles, font, helpers; pulls in the neutral theme) and components:
 
@@ -118,7 +118,7 @@ Alias resolution reads `tsconfig.json`, `tsconfig.app.json`, then `jsconfig.json
 
 The registry is static JSON, so any static host works. The docs build (`dist/`) contains the site and the registry at `dist/r/`.
 
-- **`SITE_URL`** (or `VITE_SITE_URL`) is the absolute URL the site is served from, e.g. `https://OWNER.github.io/bitop-ui`. It sets the Vite base path, the registry URL shown in the docs and, for `registry:build`, turns `@bitop/*` dependencies into absolute URLs. Bitop resolves both namespaced and URL-form (`…/r/<name>.json`) dependencies by item name through the configured registry source; it does **not** fetch those dependencies from external origins.
+- **`SITE_URL`** (or `VITE_SITE_URL`) is the absolute URL the site is served from, e.g. `https://ncecere.github.io/bitop-ui` (the published site). It sets the Vite base path, the registry URL shown in the docs and, for `registry:build`, turns `@bitop/*` dependencies into absolute URLs. Bitop resolves both namespaced and URL-form (`…/r/<name>.json`) dependencies by item name through the configured registry source; it does **not** fetch those dependencies from external origins.
 - **GitHub Pages**: `.github/workflows/ci.yml` builds with `SITE_URL` from the repository variable of that name (default: the Pages project URL) and has a `deploy` job that is skipped until you set the repository variable `DEPLOY_PAGES=true` and select "GitHub Actions" as the Pages source. `404.html` is a copy of `index.html` so client-side routes work on Pages.
 - Consumers compare with `npx @bitop-dev/cli diff <item>` and refresh with `npx @bitop-dev/cli update`. The lock file tracks file hashes, not pinned registry versions; `--overwrite` explicitly replaces local edits.
 

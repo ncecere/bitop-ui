@@ -10,7 +10,7 @@
  * their dependencies without any namespace configuration.
  *
  *   npm run registry:build                                   # namespaced deps
- *   SITE_URL=https://OWNER.github.io/bitop-ui npm run registry:build
+ *   SITE_URL=https://ncecere.github.io/bitop-ui npm run registry:build
  */
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
